@@ -186,3 +186,26 @@
 * Each inmate also receives an individual HARMONY score based on their behavior, psychological tests, and engagement with rehabilitation programs.
 * Inmates can use their personal score to purchase comfort items for their bunkers, such as potted plants, posters, self-help books, or small personal amenities, enhancing mental well-being.
 * Incentivizes humane treatment through access to advanced tools, enhancements, or privileges, promoting prisoner well-being alongside operational efficiency.
+
+# Story
+
+## Intro
+
+* A space transport shuttle is heading for a penal mining colony on a barren, uninhabitable planet. The quiet hum of the ship and steady rhythm offer a fleeting calm.
+* The planet’s survey designation is HCM-8724-XQ9P2, though most call it Scorchridge (or Furnace Hold). From orbit, it looks small and harsh. It sits uncomfortably close to its sun, which dominates the sky as the planet glows beneath it. The ship itself seems impossibly tiny in the vastness of space.  
+* The fully automated ship carries 4 human passengers and its robot crews.
+* Inmate IN-254-C917X-PRX, or in254, is one of the 4 prisoners. 
+* in254 has only about six months of work left before earning enough credits for a "ticket home."
+* Their thoughts drift to the life they’ll reclaim, wondering whether friends and loved ones will still recognize them, or if time away has changed everything.
+* As the ship enters sub-orbit, the AI even-toned voice systematically scans the colony:  
+  * "Output reports missing for 3 consecutive cycles.”  
+  * “Automated logistics interface unresponsive.”  
+  * “Neural-linked mining terminals inactive.”  
+  * “Life support is at sub-optimal level.”  
+  * “Conclusion: penal colony non-operational. Emergency protocol initiated.”  
+* The AI immediately runs a random selection sequence. It announces: IN-254-C917X-PRX has been chosen as temporary warden. Two robots approach, equipping in254 with a maintenance suit and advanced control backpack.  
+* Confused and alarmed, in254 struggles, but restraints hold firm. Neural link integration begins instantly, sending sharp, searing sensations through their mind as the suit and backpack synchronize.  
+* The AI orders the beaming sequence. 
+* Every step—from selection, to integration, to beam activation—unfolds in mere minutes: cold, mechanical, and leaving no time to react.
+* A brief, disorienting pressure washes over in254 as the world fractures into light.  
+* in254 is beamed directly to the colony’s control center, while the other three inmates are sent to the first three cells nearest the hub.
