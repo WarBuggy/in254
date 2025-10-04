@@ -25,23 +25,23 @@
 
 # Planet Overview
 
-**Type:** Barren, uninhabitable, mineral-rich
+**Type:** Barren, uninhabitable, mineral-rich.
 
-**Orbit:** Too close to its sun → extremely hot surface
+**Orbit:** Too close to its sun → extremely hot surface.
 
 ## Surface Conditions
 
-* Lethal temperatures
-* Toxic or nonexistent atmosphere
-* No water, flora, or fauna
-* Occasional solar storms
-* Solar energy abundant from surface panels
+* Lethal temperatures.
+* Toxic or nonexistent atmosphere.
+* No water, flora, or fauna.
+* Possible dust storms, solar storms or other environmental hazards.
+* Solar energy abundant from surface panels.
 * Gravity is similar to that of Earth's.
 
 ## Underground Conditions
 
-* Subterranean areas are cooler and can be habitable if shielded
-* Life support required
+* Subterranean areas are cooler and can be habitable if shielded.
+* Life support required.
 
 ## Resources
 
@@ -52,7 +52,6 @@
 
 * Planet is entirely unsuitable for normal habitation
 * Extreme environment ensures prisoners cannot survive outside controlled areas
-
 
 # Mining Operation Overview
 
@@ -136,6 +135,8 @@
 * It is rumored that AI agents may cut off oxygen supply to individual bunkers as a disciplinary measure, though no confirmed cases exist.
 * Environmental simulators (projected walls, false windows, sky illusions) are not standard; they must be purchased by inmates at high credit cost, trading additional work for temporary comfort.
 * Stimulants and heavy drugs are also available through the same system, further binding prisoners to the credit-based operational cycle.
+* Centralized control areas are usually located underground to protect critical systems from environmental hazards.
+* Backup life support systems are required during prolonged disruptive events, and require manual activation because the automated AI may be compromised.
 
 ## Communication
 
@@ -209,3 +210,42 @@
 * Every step—from selection, to integration, to beam activation—unfolds in mere minutes: cold, mechanical, and leaving no time to react.
 * A brief, disorienting pressure washes over in254 as the world fractures into light.  
 * in254 is beamed directly to the colony’s control center, while the other three inmates are sent to the first three cells nearest the hub.
+
+## First moment inside the prison
+
+* in254 materializes at the central control area. 
+* (The design feels utilitarian and subtly unnatural, clearly optimized for machines, with humans only accounted for during rare maintenance.)
+* A narrow hallway extends left and right, spanning two levels connected by staircases. 
+* Bunkers line one side of the hallway, while the opposite side remains a bare, unbroken wall.
+* The colony is compact, housing only about 20 bunkers in total.
+* Each bunker glows with its own bright, sterile light, a small island of clarity in the gloom.
+* Dim, industrial lights run along the ceiling, casting long shadows and leaving most of the hallway in semi-darkness, periodically broken by the pulsating glow of red warning lights.
+
+## Tutorial
+
+* in254 is still reeling from the beam’s disorienting surge when the insistent voice of the shuttle AI reverberates through the suit’s speakers: “Sub-optimal life support levels. Immediate maintenance required. Initiate neuro-link sequence with colony system immediately!”
+* The central control area is filled with processor banks—tall, metallic blocks rising above human height. Some are fitted with small screens, others are blank and featureless. All of them are inactive, their systems dormant.
+* Prompt: “Press E to interact with objects.”
+* Following the instruction, in254 simply thinks the command. The backpack vibrates sharply, whirring to life. Four small metal tubes extend from it, connecting to the control desk. The interface initializes instantly, completing the sequence in mere seconds.
+* The processor banks hum to life as the colony AI comes online. Small screens flicker on across the banks, displaying streams of data and status indicators.
+* Its voice, calm but commanding, fills the space through the public speaker system: “Oxygen level at 28.54%. Manual override of backup life support system required!”
+* Prompt: "Press W, A, S, D to move to the backup life support system."
+* The backup life support system is a compact console mounted on the second level, clearly visible from the central control area. A large red activation button dominates the interface, accompanied by a few status lights and a small display.
+* in254 moves to the backup console using WASD controls.
+* Prompt: “Press E to interact with objects.”
+* Upon activation, the colony AI confirms: “Backup life support system online. Oxygen levels rising.”
+* The red warning lights in the hallway stop flashing.
+* The shuttle AI announces: “Stable life support system. Initiating colony supply drop for current cycle.”
+* It continues: "Uploading mineral production quota for this cycle."
+* Then it states: "In accordance with Penal Operations Continuity Directive 4.7.3(b)(ii), and supplementary operational extension mandates under Article 12.9(a), your temporal designation has been modified to assume interim colony supervisory operative status. Effective immediately, your credit accumulation threshold has been adjusted upward to accommodate extended operational retention, ensuring uninterrupted systemic continuity and maximal personnel deployment within designated parameters."
+* in254’s voice trembles with confusion: “What? …What does that mean? What do you mean by ‘credit adjusted upward’?”
+* AI replies: "Clarification: The total credit requirement for completion of your sentence has been recalculated. Adjustment reflects operational necessity to maintain optimal warden presence within the penal colony for an extended duration. No further explanation provided."
+* in254 touches their temple, initiating a neuro-link check of their account.
+* in254 shouts in disbelief: “WHAT? From X to ZZZZZ? This is bullshit.... You cannot do this!”
+* Shuttle AI is silent.
+* in254 screams in protest: “No, this is bullshit! You cannot do that! I will not do this!”
+* The shuttle AI states evenly: “Failure to comply with emergency reassignment, cycle quota, or any other requirement will result in immediate suspension of supply deliveries, with outcomes unfavorable to all parties, including IN-254-C917X-PRX. Compliance is mandatory.”
+* The shuttle AI announces: “Supply beaming complete. Commencing hyperdrive initialization sequence.”
+* in254 shouts, panicked: “Wait! WAIT! You can’t do this. I’m going home in six months. You can’t do this to me!”
+* The shuttle AI begins the hyperjump countdown: “10… 9…”
+* Simultaneously, the colony AI’s voice comes through the suit’s speakers: “New production quotas have been assigned. Current operations are already four minutes behind projected schedule.”
