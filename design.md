@@ -94,10 +94,10 @@
 
 ## Sentencing & Credits
 
-* Inmates are not required to serve a set amount of time; instead, they must earn and save a specified amount of credits to secure their “ticket home.”
+* Inmates are not required to serve a set amount of time; instead, they must earn and save a specified amount of credits to secure their "ticket home."
 * Credits are earned solely through work; in a mining penal colony, this comes from ore extraction and product processing.
 * High productivity is the only form of behavior recognized by the AI, which it rewards with credits.
-* Credits can be saved until the required amount for release is reached, or spent on comforts and stimulants; spending credits increases the total work required to earn the “ticket home.”
+* Credits can be saved until the required amount for release is reached, or spent on comforts and stimulants; spending credits increases the total work required to earn the "ticket home."
 * The credit-based system allows the colony to maintain operational efficiency while providing prisoners with limited agency over their comfort and release timing.
 
 ## Production Quotas & Inmate Assignment
@@ -146,7 +146,7 @@
 
 ## Release & Ticket Home
 
-* Once an inmate has earned and saved the required amount of credits, they receive their “ticket home.”
+* Once an inmate has earned and saved the required amount of credits, they receive their "ticket home."
 * Release is fully automated and overseen by AI subsystems; the inmate is beamed out of the colony to the cargo shuttle upon its arrival, then transported to the nearest central space hub.
 * After release, all neural link access and work assignments are terminated.
 * Inmates retain any personal possessions and unspent credits. Items purchased for their bunker may be taken or left behind entirely at the inmate’s discretion.
@@ -199,11 +199,11 @@
 * in254 has only about six months of work left before earning enough credits for a "ticket home."
 * Their thoughts drift to the life they’ll reclaim, wondering whether friends and loved ones will still recognize them, or if time away has changed everything.
 * As the ship enters sub-orbit, the AI even-toned voice systematically scans the colony:  
-  * "Output reports missing for 3 consecutive cycles.”  
-  * “Automated logistics interface unresponsive.”  
-  * “Neural-linked mining terminals inactive.”  
-  * “Life support is at sub-optimal level.”  
-  * “Conclusion: penal colony non-operational. Emergency protocol initiated.”  
+  * "Output reports missing for 3 consecutive cycles."  
+  * "Automated logistics interface unresponsive."  
+  * "Neural-linked mining terminals inactive."  
+  * "Life support is at sub-optimal level."  
+  * "Conclusion: penal colony non-operational. Emergency protocol initiated."  
 * The AI immediately runs a random selection sequence. It announces: IN-254-C917X-PRX has been chosen as temporary warden. Two robots approach, equipping in254 with a maintenance suit and advanced control backpack.  
 * Confused and alarmed, in254 struggles, but restraints hold firm. Neural link integration begins instantly, sending sharp, searing sensations through their mind as the suit and backpack synchronize.  
 * The AI orders the beaming sequence. 
@@ -223,29 +223,39 @@
 
 ## Tutorial
 
-* in254 is still reeling from the beam’s disorienting surge when the insistent voice of the shuttle AI reverberates through the suit’s speakers: “Sub-optimal life support levels. Immediate maintenance required. Initiate neuro-link sequence with colony system immediately!”
+* in254 is still reeling from the beam’s disorienting surge when the insistent voice of the shuttle AI reverberates through the suit’s speakers: "Sub-optimal life support levels. Immediate maintenance required. Initiate neuro-link sequence with colony system immediately!"
 * The central control area is filled with processor banks—tall, metallic blocks rising above human height. Some are fitted with small screens, others are blank and featureless. All of them are inactive, their systems dormant.
-* Prompt: “Press E to interact with objects.”
+* Prompt: "Press E to interact with objects."
 * Following the instruction, in254 simply thinks the command. The backpack vibrates sharply, whirring to life. Four small metal tubes extend from it, connecting to the control desk. The interface initializes instantly, completing the sequence in mere seconds.
 * The processor banks hum to life as the colony AI comes online. Small screens flicker on across the banks, displaying streams of data and status indicators.
-* Its voice, calm but commanding, fills the space through the public speaker system: “Oxygen level at 28.54%. Manual override of backup life support system required!”
+* Its voice, calm but commanding, fills the space through the public speaker system: "Oxygen level at 28.54%. Manual override of backup life support system required!"
 * Prompt: "Press W, A, S, D to move to the backup life support system."
 * The backup life support system is a compact console mounted on the second level, clearly visible from the central control area. A large red activation button dominates the interface, accompanied by a few status lights and a small display.
 * in254 moves to the backup console using WASD controls.
-* Prompt: “Press E to interact with objects.”
-* Upon activation, the colony AI confirms: “Backup life support system online. Oxygen levels rising.”
+* Prompt: "Press E to interact with objects."
+* Upon activation, the colony AI confirms: "Backup life support system online. Oxygen levels rising."
 * The red warning lights in the hallway stop flashing.
-* The shuttle AI announces: “Stable life support system. Initiating colony supply drop for current cycle.”
+* The shuttle AI announces: "Stable life support system. Initiating colony supply drop for current cycle."
 * It continues: "Uploading mineral production quota for this cycle."
 * Then it states: "In accordance with Penal Operations Continuity Directive 4.7.3(b)(ii), and supplementary operational extension mandates under Article 12.9(a), your temporal designation has been modified to assume interim colony supervisory operative status. Effective immediately, your credit accumulation threshold has been adjusted upward to accommodate extended operational retention, ensuring uninterrupted systemic continuity and maximal personnel deployment within designated parameters."
-* in254’s voice trembles with confusion: “What? …What does that mean? What do you mean by ‘credit adjusted upward’?”
+* in254’s voice trembles with confusion: "What? …What does that mean? What do you mean by ‘credit adjusted upward’?"
 * AI replies: "Clarification: The total credit requirement for completion of your sentence has been recalculated. Adjustment reflects operational necessity to maintain optimal warden presence within the penal colony for an extended duration. No further explanation provided."
 * in254 touches their temple, initiating a neuro-link check of their account.
-* in254 shouts in disbelief: “WHAT? From X to ZZZZZ? This is bullshit.... You cannot do this!”
-* Shuttle AI is silent.
-* in254 screams in protest: “No, this is bullshit! You cannot do that! I will not do this!”
-* The shuttle AI states evenly: “Failure to comply with emergency reassignment, cycle quota, or any other requirement will result in immediate suspension of supply deliveries, with outcomes unfavorable to all parties, including IN-254-C917X-PRX. Compliance is mandatory.”
-* The shuttle AI announces: “Supply beaming complete. Commencing hyperdrive initialization sequence.”
-* in254 shouts, panicked: “Wait! WAIT! You can’t do this. I’m going home in six months. You can’t do this to me!”
-* The shuttle AI begins the hyperjump countdown: “10… 9…”
-* Simultaneously, the colony AI’s voice comes through the suit’s speakers: “New production quotas have been assigned. Current operations are already four minutes behind projected schedule.”
+* in254 shouts in disbelief: "WHAT? From X to ZZZZZ? This is bullshit.... You cannot do this!"
+* Shuttle AI: "No further explanation provided."
+* in254 screams in protest: "No, this is bullshit! You cannot do that! I will not do this!"
+* The shuttle AI states evenly: "Failure to comply with emergency reassignment, cycle quota, or any other requirement will result in immediate suspension of supply deliveries, with outcomes unfavorable to all parties, including IN-254-C917X-PRX. Compliance is mandatory."
+* The shuttle AI announces: "Supply beaming complete. Commencing hyperdrive initialization sequence."
+* in254 shouts, panicked: "Wait! WAIT! You can’t do this. I’m going home in six months. You can’t do this to me!"
+* The shuttle AI begins the hyperjump countdown: "10… 9…"
+* Simultaneously, the colony AI’s voice comes through the suit’s speakers: "New production quotas have been assigned. Current operations are already four minutes behind projected schedule."
+* Prompt: "Press C to access Control Panel."
+* With the shuttle gone, in254 has no choice but to bring up the colony control panel via the neuro-link.
+* Promt: "Press W/S to navigate menu options. Press A to go back. Press D to open a submenu. Press E to select."
+* The interface displays a range of management options, but nearly all of them are greyed out and disabled.
+* The only available function is under Task → Equally Divided.
+* Colony AI explains: "Current task allocation is restricted to Even Distribution. All inmate units will contribute credits at an identical fixed rate. Prioritization adjustments are unavailable while extraction capacity remains limited to Tier-1 mineral output."
+* Colony AI continues: "Navigate to the Life Support section to review system status. Inmate health and performance depend on stable oxygen levels and regular meal intake. Periodic checks are recommended to ensure continued efficiency."
+* Colony AI: "Be advised: reduced levels may degrade health and performance. Failure to meet cycle production quotas will result in suspension of supply deliveries."
+* (This hints player at the ability to reduce meal and oxygen input to save up PCHO or increase to improve mining output.)
+
