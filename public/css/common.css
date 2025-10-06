@@ -1,0 +1,46 @@
+html {
+  touch-action: manipulation;
+  outline: 0;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  font-family: 'Noto Sans', sans-serif;
+}
+
+html,
+body {
+  width: 100vw;
+  height: 100vh;
+  outline: 0;
+  padding: 0;
+  margin: 0;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  background-color: #222;
+  font-family: 'Noto Sans', sans-serif;
+  color: white;
+  overflow: hidden;
+}
+
+div.base_common_overlay_outer {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  place-items: center;
+  z-index: 9999;
+  background-color: rgba(100, 100, 100, 0.7);
+  color: #e0e0e0;
+  overflow: hidden;
+}

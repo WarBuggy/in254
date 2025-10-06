@@ -1,0 +1,11 @@
+<mod>
+    <name>sampleMod02</name>
+    <version>1.0.0</version>
+    <author>Buggy</author>
+    <hooks>
+        <hook>test2BadFileName.js</hook>
+        <hook>test2.js</hook>
+        <hook>settings.js</hook>
+        <hook>setting1.js</hook>
+    </hooks>
+</mod>

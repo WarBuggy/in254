@@ -1,0 +1,30 @@
+<mod>
+    <setting>
+    </setting>
+    <list>
+        <listEntry>
+            <modName>sampleMod02</modName>
+            <dirName>test2</dirName>
+        </listEntry>
+        <listEntry>
+            <modName>sampleMod01</modName>
+            <dirName>test1</dirName>
+        </listEntry>
+        <listEntry>
+            <modName>sampleMod03</modName>
+            <dirName>test3</dirName>
+        </listEntry>
+        <listEntry>
+            <modName>sampleMod04</modName>
+            <dirName>test4</dirName>
+        </listEntry>
+        <listEntry>
+            <modName>sampleMod05</modName>
+            <dirName>test5</dirName>
+        </listEntry>
+        <listEntry>
+            <modName>sampleMod06</modName>
+            <dirName>test6</dirName>
+        </listEntry>
+    </list>
+</mod>

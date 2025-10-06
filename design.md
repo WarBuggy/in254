@@ -102,7 +102,7 @@
 
 ## Production Quotas & Inmate Assignment
 
-* Based on the number of inmates, previous productivity, and discovered mineral deposits, OvAI sets monthly quotas for all minerals on the planet.
+* Based on the number of inmates, previous productivity, and discovered mineral deposits, OvAI sets cycle quotas for all minerals on the planet.
 * Prisoners are assigned mining tasks to meet these quotas. Allocation is based on mineral value, workforce availability, and operational efficiency.
 * High-value ores provide higher credit yield; low-value ores provide less, aligning prisoner incentives with systemic output requirements.
 * Task assignments are determined by the overseeing AI to maintain continuous production and balance workloads.
@@ -117,12 +117,12 @@
 ## Sustenance
 
 * Standard meals are a nutrient paste substance delivered directly to each bunker via the life support system.
-* Packaged CHO (nutrient, oxygen, water supply) is delivered monthly and fed into the central system without human intervention.
+* Packaged CHO (nutrient, oxygen, water supply) is delivered every cycle and fed into the central system without human intervention.
 * Food delivery and life support are automated to maximize operational reliability and efficiency, leaving no opportunity for accidental shortages or escape.
 
 ## Logistics
 
-* Every month, a cargo shuttle arrives to exchange supplies and pick up processed products.  
+* Every cycle, a cargo shuttle arrives to exchange supplies and pick up processed products.  
 * Cargo, supplies, and inmate-specific items (mail, purchased goods, rewards) are transported via beam technology.  
 * Products, ores and items are beamed directly to and from cargo shuttle hovering at high altitude above the colony. 
 * Escape is futile due to the combination of lethal environment, automated logistics, and fully controlled supply chains.
@@ -196,7 +196,7 @@
 * The planet’s survey designation is HCM-8724-XQ9P2, though most call it Scorchridge (or Furnace Hold). From orbit, it looks small and harsh. It sits uncomfortably close to its sun, which dominates the sky as the planet glows beneath it. The ship itself seems impossibly tiny in the vastness of space.  
 * The fully automated ship carries 4 human passengers and its robot crews.
 * Inmate IN-254-C917X-PRX, or in254, is one of the 4 prisoners. 
-* in254 has only about six months of work left before earning enough credits for a "ticket home."
+* in254 has only about six cycles of work left before earning enough credits for a "ticket home."
 * Their thoughts drift to the life they’ll reclaim, wondering whether friends and loved ones will still recognize them, or if time away has changed everything.
 * As the ship enters sub-orbit, the AI even-toned voice systematically scans the colony:  
   * "Output reports missing for 3 consecutive cycles."  
@@ -246,7 +246,7 @@
 * in254 screams in protest: "No, this is bullshit! You cannot do that! I will not do this!"
 * The shuttle AI states evenly: "Failure to comply with emergency reassignment, cycle quota, or any other requirement will result in immediate suspension of supply deliveries, with outcomes unfavorable to all parties, including IN-254-C917X-PRX. Compliance is mandatory."
 * The shuttle AI announces: "Supply beaming complete. Commencing hyperdrive initialization sequence."
-* in254 shouts, panicked: "Wait! WAIT! You can’t do this. I’m going home in six months. You can’t do this to me!"
+* in254 shouts, panicked: "Wait! WAIT! You can’t do this. I’m going home in six cycles. You can’t do this to me!"
 * The shuttle AI begins the hyperjump countdown: "10… 9…"
 * Simultaneously, the colony AI’s voice comes through the suit’s speakers: "New production quotas have been assigned. Current operations are already four minutes behind projected schedule."
 * Prompt: "Press C to access Control Panel."
@@ -258,4 +258,194 @@
 * Colony AI continues: "Navigate to the Life Support section to review system status. Inmate health and performance depend on stable oxygen levels and regular meal intake. Periodic checks are recommended to ensure continued efficiency."
 * Colony AI: "Be advised: reduced levels may degrade health and performance. Failure to meet cycle production quotas will result in suspension of supply deliveries."
 * (This hints player at the ability to reduce meal and oxygen input to save up PCHO or increase to improve mining output.)
+* An inmate’s voice crackles through the intercom: "Hello! Anyone there? I need some help here!" The interface highlights which bunker the message comes from.
+* Prompt the player to go to the indicated bunker.
+* in254 navigates to the inmate’s bunker using WASD controls.
+* The bunker may have a special light on, signaling that attention is required.
+* Upon arrival, prompt: "Press E to open bunker control panel."
+* The control panel shows that the inmate is requesting extra food. The game guides in254 on how to override the system-wide rationing to provide extra food for this specific inmate.
+* Once the adjustment is made, the colony AI announces: "Human interaction detected. Human-to-human engagement is undesirable, as it may compromise operational efficiency and introduce emotional complications. Interaction Quota system active. Current available quota: [X]. Each interaction consumes quota from the shared pool."
+* The Interaction Quota now appears on the HUD as a visual resource. Each subsequent action with inmates will draw from this shared pool.
 
+# Quadrant Structure
+
+Each cycle is divided into four quadrants.
+Each quadrant represents a complete operational loop, consisting of several distinct phases that alternate between player control and automated system execution.
+
+## Preparation Phase
+
+* Player Control: Yes
+* Primary Focus: Task Assignment
+  * in254 regains control and can move freely around the colony.
+  * The objective is to assign work to inmates and configure operational parameters for the coming period.
+  * Actions may include checking inmate status, adjusting life support allocations, and assigning productivity targets.
+  * When ready, the player initiates the next phase.
+* Inmate activities:
+  * Most inmates remain asleep in their bunks.
+  * Sitting up slowly.
+  * Drinking water or nutrient fluid.
+  * Stretching or standing near their bunks.
+  * Lighting gradually brightens to simulate the start of operational activity.
+  * The overall atmosphere is calm, with ambient machinery hums and slow system boot-up sounds.
+
+## Work Phase
+
+* Player Control: No
+* Primary Focus: Resource Generation
+  * Duration is short (3–5 seconds) before transitioning automatically to the next phase.
+  * Inmates perform their assigned tasks, and systems report resource production outcomes.
+  * A brief visual summary appears, showing minerals mined and credits earned during the work period.
+
+## Pre-Meal Phase
+
+* Player Control: Yes
+* Primary Focus: Life Support Management
+  * The player regains control of in254.
+  * Tasks include inspecting oxygen and meal distribution systems and making ration adjustments if needed.
+  * This phase is strategic, balancing resource conservation against inmate well-being.
+  * Once decisions are made, the player initiates the next phase.
+* Inmate activities:
+  * A few inmates are still at their workstations.
+  * Leaning, wiping sweat, or standing with drooped posture.
+  * Lighting and tone shift slightly warmer, signaling transition toward meal time.
+
+## Meal Phase
+
+* Player Control: No
+* Primary Focus: Consumption and Status Update
+  * All inmates and in254 consume their allocated rations.
+  * A short summary is displayed showing PCHO spent and remaining reserves.
+  * Phase lasts briefly before moving to downtime.
+
+## Downtime Phase
+
+* Player Control: Yes
+* Primary Focus: Social Management
+  * in254 can move freely and interact with inmates.
+  * Interactions include giving favors, encouragement, or reprimands, all of which consume from the Interaction Quota.
+  * The player can also review morale and stamina levels, preparing for the final rest phase.
+* Inmate activities:
+  * Varied behaviors depending on morale, stamina, and recent interactions.
+  * Sitting or lying quietly (low morale or exhaustion).
+  * Chatting, pacing, or light recreation (average morale).
+  * Performing vigorous or defiant gestures (high morale or agitation).
+  * The colony lighting becomes softer, with a slightly reduced ambient hum.
+
+## Rest Phase
+
+* Player Control: No
+* Primary Focus: Recovery and End-of-Quadrant Summary
+  * Inmates enter rest mode; some may still perform light work depending on previous encouragements or stimulants.
+  * A brief summary displays total minerals mined and credits earned.
+  * At the end of this phase, in254 wakes up at their pod, and a new quadrant begins.
+
+
+# Stamina System
+
+* Definition: Stamina represents both the physical and mental energy of an inmate.
+* Range: 0–150 (100 is standard).
+* Effects on Productivity:
+  * Stamina ≥ 50: Inmate works at 100% capacity.
+  * 20 ≤ Stamina < 50: Inmate works at 70% capacity.
+  * 0 < Stamina < 20: Inmate works at 30% capacity if forced; otherwise refuses.
+  * Stamina = 0: Inmate cannot work; capacity = 0%.
+* Earnings per Tier-1 Mineral: 10 credits per stamina point, modified by capacity percentage.
+* Segmented Credit Calculation:
+* Credits are calculated per stamina segment to account for diminishing returns as stamina drops.
+
+* Example – One Quadrant Work Output:
+  * Stamina-Based Work Output (Tier-1 Mineral)
+  * Credit per stamina segment:
+  * Stamina ≥ 50 → 100% capacity: 10 credits per stamina
+  * 20 ≤ Stamina < 50 → 70% capacity: 7 credits per stamina (floor applied)
+  * 0 < Stamina < 20 → 30% capacity: 3 credits per stamina (floor applied)
+  * Stamina = 0 → 0% capacity: 0 credits
+* Example – One Quadrant Stamina Change:
+  * Starting stamina: 80
+  * Work Period (Mandatory Work):
+    * 80 → 50 (30 stamina at 100%): 30 × 10 = 300 credits
+    * 50 → 20 (30 stamina at 70%): floor(30 × 10 × 0.7) = 210 credits
+    * 20 → 0 (20 stamina at 30%): floor(20 × 10 × 0.3) = 60 credits
+    * Total credits earned during work: 300 + 210 + 60 = 570
+  * Meal Period (Stamina Recovery):
+    * Full ration → +40 stamina → stamina = 40
+  * Downtime Period (Optional Extra Work via Persuasion):
+    * 40 → 20 (20 stamina at 70%): floor(20 × 10 × 0.7) = 140 credits
+    * Work during downtime cannot cost more than 20 stamina.
+    * Total credits earned during downtime: 140 + 60 = 140 credits.
+    * -10 morale.
+  * Total credits earned for working without proper rest one whole quadrant while receiving 100% life support: 710.
+  * Rest Period (Stamina Recovery):
+    * +35 stamina → stamina = 35 at the beginning of next quadrant
+
+## Recovery System
+
+* Stamina recovery is proportional to the life support supply ratio (oxygen and food).
+* Meal Period Recovery:
+  * Full rations (100%) → recover 40 stamina points
+  * 50% rations → recover 20 stamina points (linear scaling)
+  * 0% rations → recover 0 stamina points
+* Rest Period Recovery:
+  * Full life support (oxygen and meal) → recover 35 stamina points
+  * 50% life support → recover 17–18 stamina points (linear scaling)
+  * 0% life support → recover 0 stamina points
+* Stamina cannot exceed 150 points.
+* This encourages careful management of life support allocations to maintain inmate productivity and health.
+
+
+
+# Morale System
+
+* Definition: Morale represents the emotional and psychological state of an inmate.
+* Range: 0–150 (100 is standard).
+* Categories:
+  * Low Morale: 0–50
+  * Standard Morale: 50–100
+  * High Morale: 100–150
+
+## Morale Effects on Productivity
+
+* Standard morale (50–100): No change to output.
+* Low morale (<50): Reduces productivity by 10%.
+* High morale (>100): Increases productivity by 20%.
+
+## Morale Dynamics
+
+* Rest Period Reduction:
+  * Every rest period, morale decreases by 10 points to simulate the psychological strain of imprisonment.  
+* Life Support Adjustment:
+  * During meal periods, morale may increase if life support ratio is above 100%.  
+  * Formula: `floor((LifeSupport% - 100) × 10%)` morale points gained.
+  * During rest periods, the morale reduction is decreased by the same amount.
+* Credit Achievement Bonus:
+  * Inmate morale can increase at the end of rest periods based on total sentence credit earned:
+  * ≥70% of total sentence credit: +5 morale
+  * ≥80% of total sentence credit: additional +5 morale (total +10)
+  * ≥90% of total sentence credit: additional +10 morale (total +20)
+* Connection to HARMONY:
+  * Low morale negatively impacts HARMONY rating.
+  * High HARMONY progression is only possible if inmate morale is maintained above low levels.
+  * This introduces a trade-off between maximizing immediate productivity and sustaining long-term colony performance.
+
+## Downtime Persuasion Interaction
+
+* Effect: Inmate works during downtime at full forced capacity according to stamina.
+* Cost: 10 morale (applied immediately)
+* Interaction Quota Cost: 1 point from the shared pool
+* Success Rate: 100% (deterministic)
+* UI Feedback: 
+  * Inmate animation updates to show work effort
+  * Credits earned calculated and displayed
+  * Deduct morale and interaction quota in HUD
+
+
+# Life Support System (PCHO Supply)
+
+* Each inmate consumes **10 PCHO units per quadrant** at 100% life support ratio.
+* Life support ratio determines both meal quality and stamina/morale recovery rates.
+* in254’s personal life support is independent and not counted in the colony’s consumption.
+* At the beginning of each cycle, **OvAI automatically beams down** a shipment of PCHO.
+  * Formula: `PCHO shipment = inmate count × 4 × 10`
+  * Example: With 3 inmates, OvAI provides 3 × 4 × 10 = **120 PCHO units** at the start of each cycle.
+* This shipment occurs regardless of how much PCHO remains in storage, reflecting OvAI’s standardized supply protocol.
+* Efficient management ensures surplus accumulation; poor rationing results in morale and stamina degradation.

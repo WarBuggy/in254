@@ -1,0 +1,8 @@
+<mod>
+    <name>sampleMod03</name>
+    <version>1.0.0</version>
+    <author>Buggy</author>
+    <hooks>
+        <hook>data1.js</hook>
+    </hooks>
+</mod>

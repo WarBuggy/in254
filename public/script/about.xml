@@ -1,0 +1,36 @@
+<mod>
+  <name>Base</name>
+  <version>0.0.1</version>
+  <author>Buggy</author>
+  <hooks>
+    <!-- <hook>../css/index.css</hook> -->
+    <hook>../css/modDataTree.css</hook>
+    <hook>../script/shared/seededRandom.js</hook>
+    <hook>../script/shared/overlay.js</hook>
+    <hook>../script/shared/modDataTree.js</hook>
+    <hook>../script/shared/dataLoader.js</hook>
+    <hook>../script/shared/mainApp.js</hook>
+    <hook>../script/shared/eventEmitter.js</hook>
+    <hook>../script/game.js</hook>
+    <!-- <hook>../../../shared/script/region.js</hook> -->
+    <!-- <hook>../../../shared/script/templateMap.js</hook> -->
+    <!-- <hook>../../../shared/data/zoomLevelList.js</hook> -->
+    <!-- <hook>../../../shared/data/regionDeploymentZone.js</hook> -->
+    <!-- <hook>../../../shared/data/regionList.js</hook> -->
+    <!-- <hook>../../../shared/data/tileTextureList.js</hook> -->
+    <!-- <hook>../../../shared/data/featureList.js</hook> -->
+    <!-- <hook>../../../shared/data/templateMapList.js</hook> -->
+    <!-- <hook>setting.js</hook> -->
+    <!-- <hook>mapMainEditorMap.js</hook> -->
+    <!-- <hook>generatorMap.js</hook> -->
+    <!-- <hook>managerMap.js</hook> -->
+    <!-- <hook>mapMiniEditorMap.js</hook> -->
+    <!-- <hook>mapEditor.js</hook> -->
+    <hook>zzModTestPlayer.js</hook>
+    <hook>zzModTestFire.js</hook>
+    <hook>zzModTestJump.js</hook>
+    <hook>zzModTestPlayer2.js</hook>
+    <hook>zzzModTestModifyClassProperty.js</hook>
+    <hook></hook>
+  </hooks>
+</mod>
