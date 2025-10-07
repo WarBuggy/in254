@@ -14,5 +14,5 @@ window.addEventListener('load', async function () {
     //seed = 609478887;
     //await window.editorMap.managerMap.generateRandomMap({ seed, });
     //window.editorMap.managerMap.requestAnimationFrame({});
-    const sim = new GameClasses.Simulate();
+    window.sim = new GameClasses.Simulate();
 });
