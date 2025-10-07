@@ -21,8 +21,17 @@
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "fs": "^0.0.1-security",
-    "open": "^10.2.0",
     "path": "^0.12.7",
     "xml2js": "^0.6.2"
+  },
+  "pkg": {
+    "assets": [
+      "configServer.xml",
+      "mod/**/*",
+      "public/**/*"
+    ],
+    "targets": [
+      "node24-win-x64"
+    ]
   }
 }

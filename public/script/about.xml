@@ -12,6 +12,7 @@
     <hook>../script/shared/mainApp.js</hook>
     <hook>../script/shared/eventEmitter.js</hook>
     <hook>../script/game.js</hook>
+    <hook>../script/simulate.js</hook>
     <!-- <hook>../../../shared/script/region.js</hook> -->
     <!-- <hook>../../../shared/script/templateMap.js</hook> -->
     <!-- <hook>../../../shared/data/zoomLevelList.js</hook> -->

@@ -1,6 +1,0 @@
-<config>
-    <server>
-        <port>7798</port>
-        <publicDir>public/</publicDir>
-    </server>
-</config>

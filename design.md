@@ -267,6 +267,39 @@
 * Once the adjustment is made, the colony AI announces: "Human interaction detected. Human-to-human engagement is undesirable, as it may compromise operational efficiency and introduce emotional complications. Interaction Quota system active. Current available quota: [X]. Each interaction consumes quota from the shared pool."
 * The Interaction Quota now appears on the HUD as a visual resource. Each subsequent action with inmates will draw from this shared pool.
 
+
+# Stamina and Morale Design Principles
+
+## Stamina
+
+* **Range:** 0–150 per inmate.  
+* **Deduction:** Stamina is reduced whenever an inmate works.  
+* **Recovery:** Stamina can be restored during meal and rest periods. Higher PCHO rations result in greater recovery.  
+* **Tech Interaction:** OvAI technologies that maintain or restore stamina often do so at the cost of morale.  
+
+## Morale
+
+* **Range:** 0–150 per inmate.  
+* **Effect on Productivity:** Morale affects work output.  
+* **Natural Changes:**  
+  * Being imprisoned gradually reduces morale.  
+  * Progress toward completing sentence credit increases morale.  
+* **Recovery:** Morale can be partially recovered during meal and rest periods. Higher PCHO rations increase morale recovery.  
+* **Tech Interaction:** HARMONY-focused technologies improve morale.
+
+## Credit Calculation Using Stamina and Morale
+
+* **Stamina-to-Credit Conversion:**  
+  * Stamina > 50: 1 stamina → 10 × ore tier modification credits  
+  * 20 < Stamina ≤ 50: 1 stamina → 7 × ore tier modification credits  
+  * 0 < Stamina ≤ 20: 1 stamina → 3 × ore tier modification credits  
+
+* **Morale Modifiers:**  
+  * Standard morale (50–100): No adjustment  
+  * Low morale (<50): -1 × ore tier modification applied per stamina point spent  
+  * High morale (>100): +2 × ore tier modification applied per stamina point spent
+
+
 # Quadrant Structure
 
 Each cycle is divided into four quadrants.
@@ -345,6 +378,7 @@ Each quadrant represents a complete operational loop, consisting of several dist
 * Definition: Stamina represents both the physical and mental energy of an inmate.
 * Range: 0–150 (100 is standard).
 * Effects on Productivity:
+  * A maximum of 80 stamina can be deducted during work period.
   * Stamina ≥ 50: Inmate works at 100% capacity.
   * 20 ≤ Stamina < 50: Inmate works at 70% capacity.
   * 0 < Stamina < 20: Inmate works at 30% capacity if forced; otherwise refuses.
@@ -382,13 +416,9 @@ Each quadrant represents a complete operational loop, consisting of several dist
 
 * Stamina recovery is proportional to the life support supply ratio (oxygen and food).
 * Meal Period Recovery:
-  * Full rations (100%) → recover 40 stamina points
-  * 50% rations → recover 20 stamina points (linear scaling)
-  * 0% rations → recover 0 stamina points
+  * Inmate stamina = current stamina + (ration point * 4)
 * Rest Period Recovery:
-  * Full life support (oxygen and meal) → recover 35 stamina points
-  * 50% life support → recover 17–18 stamina points (linear scaling)
-  * 0% life support → recover 0 stamina points
+  * Inmate stamina = current stamina + floor(ration point * 3.5)
 * Stamina cannot exceed 150 points.
 * This encourages careful management of life support allocations to maintain inmate productivity and health.
 
@@ -414,9 +444,10 @@ Each quadrant represents a complete operational loop, consisting of several dist
 * Rest Period Reduction:
   * Every rest period, morale decreases by 10 points to simulate the psychological strain of imprisonment.  
 * Life Support Adjustment:
-  * During meal periods, morale may increase if life support ratio is above 100%.  
-  * Formula: `floor((LifeSupport% - 100) × 10%)` morale points gained.
-  * During rest periods, the morale reduction is decreased by the same amount.
+  * During meal periods, morale can be modified by life support ration
+    * Formula: inmate morale = current morale + (ration point - 10)
+  * During rest periods, morale can be modified by life support ration
+    * Formula: inmate morale = current morale + (ration point - 10)
 * Credit Achievement Bonus:
   * Inmate morale can increase at the end of rest periods based on total sentence credit earned:
   * ≥70% of total sentence credit: +5 morale

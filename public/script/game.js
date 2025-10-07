@@ -12,7 +12,7 @@ export class Game extends GameClasses.MainApp {
         // Camera / viewport = screen size
         this.camera = { x: 0, y: 0, width: window.innerWidth, height: window.innerHeight, };
         // Player
-        this.player = { x: 0, y: 0, width: 64, height: 64, speed: 16, level: 'top', };
+        this.player = { x: 0, y: 0, width: 256, height: 256, speed: 16, level: 'top', };
 
         this.levels = {
             top: { groundY: 1400 },
@@ -48,8 +48,12 @@ export class Game extends GameClasses.MainApp {
                 speed: 128,
             };
 
-            // Start game loop
-            requestAnimationFrame(() => this.loop());
+            this.loadPlayerSprites({
+                callback: () => {
+                    // Start game loop
+                    requestAnimationFrame(() => this.loop());
+                },
+            });
         };
 
         // Handle window resize
@@ -59,6 +63,31 @@ export class Game extends GameClasses.MainApp {
             this.canvas.width = window.innerWidth;
             this.canvas.height = window.innerHeight;
         });
+    }
+
+
+    /** Loads player running/idle animation frames into memory */
+    loadPlayerSprites(input) {
+        const { callback, } = input;
+        this.playerSprites = [];
+        this.loadedSprites = 0;
+        this.totalSprites = 7;
+
+        for (let i = 1; i <= this.totalSprites; i++) {
+            const img = new Image();
+            const fileNum = String(i).padStart(4, '0'); // ensures run_0001 etc.
+            img.src = `asset/in254/run_${fileNum}.png`;
+
+            img.onload = () => {
+                this.loadedSprites++;
+                if (this.loadedSprites === this.totalSprites) {
+                    console.log('All player sprites loaded.');
+                    if (typeof callback === 'function') callback();
+                }
+            };
+
+            this.playerSprites.push(img);
+        }
     }
 
     update() {
@@ -160,15 +189,6 @@ export class Game extends GameClasses.MainApp {
         ctx.lineTo(this.mapPixelWidth - this.mapLimits.right - this.camera.x, this.levels.bottom.groundY - this.camera.y);
         ctx.stroke();
 
-        // Draw player relative to camera
-        ctx.fillStyle = 'red';
-        ctx.fillRect(
-            this.player.x - this.camera.x,
-            this.player.y - this.camera.y,
-            this.player.width,
-            this.player.height
-        );
-
         // Optional: draw elevator
         ctx.fillStyle = 'orange';
         ctx.fillRect(
@@ -177,6 +197,70 @@ export class Game extends GameClasses.MainApp {
             this.elevator.width,
             this.levels.bottom.groundY - this.levels.top.groundY
         );
+
+        this.drawPlayer();
+    }
+
+    /** Draws the player sprite and handles animation */
+    drawPlayer() {
+        const ctx = this.ctx;
+
+        if (!this.playerSprites || this.playerSprites.length === 0) return;
+
+        if (!this.player.frameIndex) this.player.frameIndex = 0;
+        if (!this.player.lastFrameTime) this.player.lastFrameTime = 0;
+        if (!this.player.facing) this.player.facing = 'right';
+
+        const now = performance.now();
+        const frameDuration = 100; // ms per frame (10 FPS)
+
+        const movingLeft = this.keys['a'];
+        const movingRight = this.keys['d'];
+
+        // Update facing
+        if (movingLeft) this.player.facing = 'left';
+        else if (movingRight) this.player.facing = 'right';
+
+        // Pick current sprite
+        let currentSprite;
+
+        if (movingLeft || movingRight) {
+            if (now - this.player.lastFrameTime > frameDuration) {
+                this.player.frameIndex = (this.player.frameIndex + 1) % 7;
+                this.player.lastFrameTime = now;
+            }
+            currentSprite = this.playerSprites[this.player.frameIndex];
+        } else {
+            currentSprite = this.playerSprites[0];
+            this.player.frameIndex = 0;
+        }
+
+        const drawX = this.player.x - this.camera.x;
+        const drawY = this.player.y - this.camera.y;
+
+        ctx.save();
+
+        // Flip horizontally if facing right
+        if (this.player.facing === 'right') {
+            ctx.scale(-1, 1);
+            ctx.drawImage(
+                currentSprite,
+                -drawX - this.player.width, // flipped origin
+                drawY,
+                this.player.width,
+                this.player.height
+            );
+        } else {
+            ctx.drawImage(
+                currentSprite,
+                drawX,
+                drawY,
+                this.player.width,
+                this.player.height
+            );
+        }
+
+        ctx.restore();
     }
 
     loop() {
