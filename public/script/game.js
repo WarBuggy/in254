@@ -48,9 +48,8 @@ export class Game extends GameClasses.MainApp {
                 speed: 128,
             };
 
-            this.loadPlayerSprites({
+            this.loadPlayerAnimations({
                 callback: () => {
-                    // Start game loop
                     requestAnimationFrame(() => this.loop());
                 },
             });
@@ -66,29 +65,42 @@ export class Game extends GameClasses.MainApp {
     }
 
 
-    /** Loads player running/idle animation frames into memory */
-    loadPlayerSprites(input) {
-        const { callback, } = input;
-        this.playerSprites = [];
-        this.loadedSprites = 0;
-        this.totalSprites = 7;
+    /** Loads player idle and moving animation frames into memory */
+    loadPlayerAnimations(input) {
+        const { callback } = input;
 
-        for (let i = 1; i <= this.totalSprites; i++) {
+        this.playerSprites = {
+            idle: null,
+            move: [],
+        };
+
+        let totalToLoad = 1 + 7; // 1 idle + 7 move frames
+        let loaded = 0;
+
+        const checkAllLoaded = () => {
+            loaded++;
+            if (loaded === totalToLoad && typeof callback === 'function') {
+                console.log('All player sprites loaded.');
+                callback();
+            }
+        };
+
+        // --- Load idle sprite ---
+        const idleImg = new Image();
+        idleImg.src = 'asset/in254/idle.svg';
+        idleImg.onload = checkAllLoaded;
+        this.playerSprites.idle = idleImg;
+
+        // --- Load moving sprites ---
+        for (let i = 1; i <= 7; i++) {
             const img = new Image();
-            const fileNum = String(i).padStart(4, '0'); // ensures run_0001 etc.
-            img.src = `asset/in254/run_${fileNum}.png`;
-
-            img.onload = () => {
-                this.loadedSprites++;
-                if (this.loadedSprites === this.totalSprites) {
-                    console.log('All player sprites loaded.');
-                    if (typeof callback === 'function') callback();
-                }
-            };
-
-            this.playerSprites.push(img);
+            const fileNum = String(i).padStart(4, '0');
+            img.src = `asset/in254/move_${fileNum}.svg`;
+            img.onload = checkAllLoaded;
+            this.playerSprites.move.push(img);
         }
     }
+
 
     update() {
         // --- Elevator logic ---
@@ -204,9 +216,11 @@ export class Game extends GameClasses.MainApp {
     /** Draws the player sprite and handles animation */
     drawPlayer() {
         const ctx = this.ctx;
+        const sprites = this.playerSprites;
 
-        if (!this.playerSprites || this.playerSprites.length === 0) return;
+        if (!sprites || !sprites.idle || sprites.move.length === 0) return;
 
+        // Init defaults
         if (!this.player.frameIndex) this.player.frameIndex = 0;
         if (!this.player.lastFrameTime) this.player.lastFrameTime = 0;
         if (!this.player.facing) this.player.facing = 'right';
@@ -221,17 +235,17 @@ export class Game extends GameClasses.MainApp {
         if (movingLeft) this.player.facing = 'left';
         else if (movingRight) this.player.facing = 'right';
 
-        // Pick current sprite
+        // Determine current sprite set
         let currentSprite;
 
         if (movingLeft || movingRight) {
             if (now - this.player.lastFrameTime > frameDuration) {
-                this.player.frameIndex = (this.player.frameIndex + 1) % 7;
+                this.player.frameIndex = (this.player.frameIndex + 1) % sprites.move.length;
                 this.player.lastFrameTime = now;
             }
-            currentSprite = this.playerSprites[this.player.frameIndex];
+            currentSprite = sprites.move[this.player.frameIndex];
         } else {
-            currentSprite = this.playerSprites[0];
+            currentSprite = sprites.idle;
             this.player.frameIndex = 0;
         }
 
@@ -240,12 +254,12 @@ export class Game extends GameClasses.MainApp {
 
         ctx.save();
 
-        // Flip horizontally if facing right
-        if (this.player.facing === 'right') {
+        // Flip horizontally if facing left
+        if (this.player.facing === 'left') {
             ctx.scale(-1, 1);
             ctx.drawImage(
                 currentSprite,
-                -drawX - this.player.width, // flipped origin
+                -drawX - this.player.width,
                 drawY,
                 this.player.width,
                 this.player.height

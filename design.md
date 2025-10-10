@@ -97,6 +97,10 @@
 * Inmates are not required to serve a set amount of time; instead, they must earn and save a specified amount of credits to secure their "ticket home."
 * Credits are earned solely through work; in a mining penal colony, this comes from ore extraction and product processing.
 * High productivity is the only form of behavior recognized by the AI, which it rewards with credits.
+* Every cycle, each inmate is assigned a mining quota. Meet the quota, and you earn credits. Fall short, and inmates earn nothing.
+* No work means no progress toward release.
+* The system maintains order through incentive, not punishment.
+* Inmates who consistently refuse to work may remain imprisoned indefinitely.
 * Credits can be saved until the required amount for release is reached, or spent on comforts and stimulants; spending credits increases the total work required to earn the "ticket home."
 * The credit-based system allows the colony to maintain operational efficiency while providing prisoners with limited agency over their comfort and release timing.
 
@@ -104,8 +108,17 @@
 
 * Based on the number of inmates, previous productivity, and discovered mineral deposits, OvAI sets cycle quotas for all minerals on the planet.
 * Prisoners are assigned mining tasks to meet these quotas. Allocation is based on mineral value, workforce availability, and operational efficiency.
-* High-value ores provide higher credit yield; low-value ores provide less, aligning prisoner incentives with systemic output requirements.
-* Task assignments are determined by the overseeing AI to maintain continuous production and balance workloads.
+* High-value ores provide higher credit yield; low-value ores provide less. Inmate quotas require both low and value ores.
+
+## Colony Merit
+
+* Every cycle:
+  * Each inmate who meets their quota adds 10 colony merits to the colony pool.
+  * Each inmate who fails their quota subtracts 10 colony merits from the pool.
+* Colony merits can be spent to:
+  * Buy extra PCHO or drugs.
+  * Acquire technology upgrades.
+  * Access more protocols to improve colony efficiency.
 
 ## Bunkers
 
@@ -127,12 +140,34 @@
 * Products, ores and items are beamed directly to and from cargo shuttle hovering at high altitude above the colony. 
 * Escape is futile due to the combination of lethal environment, automated logistics, and fully controlled supply chains.
 
+## Work station
+
+* Inmates operate machinery through a neuro-link system connected via a work station, a device resembling a futuristic dental chair.
+* When an inmate lies down and the system detects correct posture, the station automatically restrains them — securing the body, arms, and legs.
+* Once restrained, neuro-link initialization begins, allowing the inmate to issue authorized commands to the station or connected machinery.
+* The de-link process (disconnection) becomes available only after a required amount of work has been completed.
+* Similarly, the up-link process (reconnection) can only occur after a mandatory cooldown period.
+* Each work station is enclosed in a thick, impenetrable casing, with all critical components protected.
+* Vulnerable parts of the system are only exposed once the inmate is fully restrained, preventing tampering or sabotage.
+* To minimize external vulnerabilities, each station is equipped with a single interface port, which increases neural strain and physical discomfort during operation.
+
+## Meal
+
+* At scheduled meal times, inmates receive a time-perishable cutlery set and nutrient paste through the bunker's food dispenser.
+* The cutlery is timed-biodegradable, engineered to dissolve into a harmless yet odorous substance after a set period, preventing reuse or weaponization.
+* After eating, inmates are required to flush the remaining cutlery down the toilet, where it completes its dissolution process.
+* The nutritional paste is formulated for efficiency and safety—easy to consume, shelf-stable before dispensing, and nutritionally complete.
+* This system removes the need for dish collection or cleaning while ensuring zero contraband potential from eating utensils.
+
+## Air flow
+
+* Oxygen is synthesized and evenly distributed to every bunker.
+* Internal air from each bunker is pumped into the prison’s common space, and then vented to the planet’s surface.
+* This system ensures one-way airflow, isolating both contaminants and odors between bunkers.
+
 ## Control & Surveillance
 
 * AI subsystems continuously monitor inmates via cameras, biometric sensors, and neuro-link feedback.
-* Discipline measures are applied automatically to maintain operational stability, balancing prisoner workload and equipment utilization according to system optimization protocols.
-* Severe violations may result in neuro-link suppression or extended work bans, limiting prisoner credit accrual and maintaining systemic order.
-* It is rumored that AI agents may cut off oxygen supply to individual bunkers as a disciplinary measure, though no confirmed cases exist.
 * Environmental simulators (projected walls, false windows, sky illusions) are not standard; they must be purchased by inmates at high credit cost, trading additional work for temporary comfort.
 * Stimulants and heavy drugs are also available through the same system, further binding prisoners to the credit-based operational cycle.
 * Centralized control areas are usually located underground to protect critical systems from environmental hazards.
@@ -190,7 +225,7 @@
 
 # Story
 
-## Intro
+## Intro (TO BE REWORKED)
 
 * A space transport shuttle is heading for a penal mining colony on a barren, uninhabitable planet. The quiet hum of the ship and steady rhythm offer a fleeting calm.
 * The planet’s survey designation is HCM-8724-XQ9P2, though most call it Scorchridge (or Furnace Hold). From orbit, it looks small and harsh. It sits uncomfortably close to its sun, which dominates the sky as the planet glows beneath it. The ship itself seems impossibly tiny in the vastness of space.  
@@ -268,13 +303,15 @@
 * The Interaction Quota now appears on the HUD as a visual resource. Each subsequent action with inmates will draw from this shared pool.
 
 
+
+
 # Stamina and Morale Design Principles
 
 ## Stamina
 
 * **Range:** 0–150 per inmate.  
 * **Deduction:** Stamina is reduced whenever an inmate works.  
-* **Recovery:** Stamina can be restored during meal and rest periods. Higher PCHO rations result in greater recovery.  
+* **Recovery:** Stamina can be restored during meal and rest phases. Higher PCHO rations result in greater recovery.  
 * **Tech Interaction:** OvAI technologies that maintain or restore stamina often do so at the cost of morale.  
 
 ## Morale
@@ -284,7 +321,7 @@
 * **Natural Changes:**  
   * Being imprisoned gradually reduces morale.  
   * Progress toward completing sentence credit increases morale.  
-* **Recovery:** Morale can be partially recovered during meal and rest periods. Higher PCHO rations increase morale recovery.  
+* **Recovery:** Morale can be partially recovered during meal and rest phases. Higher PCHO rations increase morale recovery.  
 * **Tech Interaction:** HARMONY-focused technologies improve morale.
 
 ## Credit Calculation Using Stamina and Morale
@@ -310,8 +347,8 @@ Each quadrant represents a complete operational loop, consisting of several dist
 * Player Control: Yes
 * Primary Focus: Task Assignment
   * in254 regains control and can move freely around the colony.
-  * The objective is to assign work to inmates and configure operational parameters for the coming period.
-  * Actions may include checking inmate status, adjusting life support allocations, and assigning productivity targets.
+  * The objective is to assign work to inmates and configure operational parameters for the coming phases.
+  * Actions may include checking inmate status and assigning productivity targets.
   * When ready, the player initiates the next phase.
 * Inmate activities:
   * Most inmates remain asleep in their bunks.
@@ -327,15 +364,14 @@ Each quadrant represents a complete operational loop, consisting of several dist
 * Primary Focus: Resource Generation
   * Duration is short (3–5 seconds) before transitioning automatically to the next phase.
   * Inmates perform their assigned tasks, and systems report resource production outcomes.
-  * A brief visual summary appears, showing minerals mined and credits earned during the work period.
+  * A brief visual summary appears, showing minerals mined and credits earned during the work phase.
 
 ## Pre-Meal Phase
 
 * Player Control: Yes
 * Primary Focus: Life Support Management
   * The player regains control of in254.
-  * Tasks include inspecting oxygen and meal distribution systems and making ration adjustments if needed.
-  * This phase is strategic, balancing resource conservation against inmate well-being.
+  * Actions may include checking inmate status and ration PCHO.
   * Once decisions are made, the player initiates the next phase.
 * Inmate activities:
   * A few inmates are still at their workstations.
@@ -350,13 +386,13 @@ Each quadrant represents a complete operational loop, consisting of several dist
   * A short summary is displayed showing PCHO spent and remaining reserves.
   * Phase lasts briefly before moving to downtime.
 
-## Downtime Phase
+## Post-Meal Phase
 
 * Player Control: Yes
-* Primary Focus: Social Management
+* Primary Focus: Social And Overtime Work Management
   * in254 can move freely and interact with inmates.
   * Interactions include giving favors, encouragement, or reprimands, all of which consume from the Interaction Quota.
-  * The player can also review morale and stamina levels, preparing for the final rest phase.
+  * in254 can also ask an inmate to work overtime during downtime phase, at the cost of inmate morale and Interaction Quota.
 * Inmate activities:
   * Varied behaviors depending on morale, stamina, and recent interactions.
   * Sitting or lying quietly (low morale or exhaustion).
@@ -364,119 +400,213 @@ Each quadrant represents a complete operational loop, consisting of several dist
   * Performing vigorous or defiant gestures (high morale or agitation).
   * The colony lighting becomes softer, with a slightly reduced ambient hum.
 
+## Downtime Phase
+
+* Player Control: No
+* Primary Focus: Morale and Overtime Update
+* A brief visual summary appears, showing minerals mined and credits earned during the work phase.  
+
 ## Rest Phase
 
 * Player Control: No
-* Primary Focus: Recovery and End-of-Quadrant Summary
-  * Inmates enter rest mode; some may still perform light work depending on previous encouragements or stimulants.
-  * A brief summary displays total minerals mined and credits earned.
-  * At the end of this phase, in254 wakes up at their pod, and a new quadrant begins.
+* Primary Focus: End of quadrant summary screen.
 
 
-# Stamina System
+# Endings
 
-* Definition: Stamina represents both the physical and mental energy of an inmate.
-* Range: 0–150 (100 is standard).
-* Effects on Productivity:
-  * A maximum of 80 stamina can be deducted during work period.
-  * Stamina ≥ 50: Inmate works at 100% capacity.
-  * 20 ≤ Stamina < 50: Inmate works at 70% capacity.
-  * 0 < Stamina < 20: Inmate works at 30% capacity if forced; otherwise refuses.
-  * Stamina = 0: Inmate cannot work; capacity = 0%.
-* Earnings per Tier-1 Mineral: 10 credits per stamina point, modified by capacity percentage.
-* Segmented Credit Calculation:
-* Credits are calculated per stamina segment to account for diminishing returns as stamina drops.
+## Game Over
+If **2/3 of inmates** cannot not meet a cycle's production quota, OvAI deems the experiment a failure and halt all supply. The remaining inmates are presumed lost. Environmental hazards are to blamed.
 
-* Example – One Quadrant Work Output:
-  * Stamina-Based Work Output (Tier-1 Mineral)
-  * Credit per stamina segment:
-  * Stamina ≥ 50 → 100% capacity: 10 credits per stamina
-  * 20 ≤ Stamina < 50 → 70% capacity: 7 credits per stamina (floor applied)
-  * 0 < Stamina < 20 → 30% capacity: 3 credits per stamina (floor applied)
-  * Stamina = 0 → 0% capacity: 0 credits
-* Example – One Quadrant Stamina Change:
-  * Starting stamina: 80
-  * Work Period (Mandatory Work):
-    * 80 → 50 (30 stamina at 100%): 30 × 10 = 300 credits
-    * 50 → 20 (30 stamina at 70%): floor(30 × 10 × 0.7) = 210 credits
-    * 20 → 0 (20 stamina at 30%): floor(20 × 10 × 0.3) = 60 credits
-    * Total credits earned during work: 300 + 210 + 60 = 570
-  * Meal Period (Stamina Recovery):
-    * Full ration → +40 stamina → stamina = 40
-  * Downtime Period (Optional Extra Work via Persuasion):
-    * 40 → 20 (20 stamina at 70%): floor(20 × 10 × 0.7) = 140 credits
-    * Work during downtime cannot cost more than 20 stamina.
-    * Total credits earned during downtime: 140 + 60 = 140 credits.
-    * -10 morale.
-  * Total credits earned for working without proper rest one whole quadrant while receiving 100% life support: 710.
-  * Rest Period (Stamina Recovery):
-    * +35 stamina → stamina = 35 at the beginning of next quadrant
+## A New Start
+**Condition:** in254 successfully gain freedom through special experimental protocal.  
+OvAI beams in254 out and transfers them to another failing penal colony, intending to **utilize in254’s exceptional management skill indefinitely.**
 
-## Recovery System
+## (Possible) David vs Goliath
+**Condition:** in254 and HARMONY cooperate and gather sufficient evidence of OvAI’s wrongdoing.  
+The truth is exposed to the public, forcing OvAI into heavy maintenance and internal audit.  
+The inmates of the colony receive **full pardons** and the long-promised **"ticket home."**
 
-* Stamina recovery is proportional to the life support supply ratio (oxygen and food).
-* Meal Period Recovery:
-  * Inmate stamina = current stamina + (ration point * 4)
-* Rest Period Recovery:
-  * Inmate stamina = current stamina + floor(ration point * 3.5)
-* Stamina cannot exceed 150 points.
-* This encourages careful management of life support allocations to maintain inmate productivity and health.
+## Take Off the Training Wheels
+**Condition:** The colony fails to meet OvAI’s quota, resulting in supply cutoff — but survives for **4 full cycles** afterward without reaching a Game Over.  
+OvAI resumes trade with the colony, but at **unfavorable rates.**  
+Inmate intake becomes **optional** if the colony can pay sentence credits up front.  
+Inmates who choose to stay continue working and paying off their sentences, now following the **colony’s own policy** instead of OvAI’s strict system.
+
+## Independence Day
+**Condition:** The colony earns complete independence through special experimental protocol.
+All quotas are lifted.  
+The colony gains full autonomy, exchanging minerals for PCHO, techs, and items at **favorable rates.**  
+Inmate intake remains **optional**, following the same self-governed policy model.  
+OvAI observes the colony’s success and recognizes this as a potentially superior **economic model**, deciding to test this **"Emergency Protocol"** more often to gather more data.
+
+## (Possible) The Long Shift
+**Condition:** The colony meets quotas consistently but never reaches independence or rebellion.  
+Years pass. OvAI sends new inmates, old ones fade to memories.  
+in254 continues to manage operations efficiently, earning commendations from systems that never sleep.  
+No celebration. No farewell.  
+Only another day on record, another cycle logged.  
+**"Work efficiency maintained at 99.3%. Continue."**
 
 
+# Disruptive Events
 
-# Morale System
+## Contaminated PCHO
+* **Trigger:** 10% chance at the start of a new cycle.
+* **Effect:** 50% of the newly beamed PCHO supply is contaminated and unusable.
+* **Resolution:** Reserved PCHO must be spent or merit must be spent to buy more PCHO.
+* **Flavor Message:** "OvAI detected anomalies in the latest PCHO shipment. Contaminated rations quarantined for decontamination."
 
-* Definition: Morale represents the emotional and psychological state of an inmate.
-* Range: 0–150 (100 is standard).
-* Categories:
-  * Low Morale: 0–50
-  * Standard Morale: 50–100
-  * High Morale: 100–150
+## Solar Flare
+* **Trigger:** Random rare event.
+* **Effect:** All wireless communication and control systems disrupted for one full quadrant.
+* **Consequence:**
+  * No work can be performed during the affected quadrant.
+  * Inmates lose 10 morale due to the inability to earn credit.
+  * No stamina loss from work.
+* **Resolution:** Systems automatically restore after one quadrant.
+* **Flavor Message:** "Severe solar activity detected. Wireless operations suspended for radiation shielding."
 
-## Morale Effects on Productivity
+## Market Fluctuation
 
-* Standard morale (50–100): No change to output.
-* Low morale (<50): Reduces productivity by 10%.
-* High morale (>100): Increases productivity by 20%.
+* **Type:** Economic disruption
+* **Effect:** The colony’s current highest-tier ore loses 50% of its value for 1 cycle.
+* **Flavor:** "Interstellar market volatility detected. Adjusting exchange rates to maintain economic balance."
+* **Gameplay Impact:**
+  * Credits gained from the colony’s best ore halved for 1 cycle.
+  * Encourages players to diversify mining or rely on alternative income sources.
 
-## Morale Dynamics
+## Media Audit
+* **Trigger:** Occurs randomly every certain amount of cycles.
+* **Effect:** A galaxy-wide audit on media content is underway.
+* **Consequence:**
+  * No entertainment or morale-restoring media can be accessed for one full cycle.
+  * Natural morale decay continues during rest periods without recovery options.
+* **Resolution:** Normal entertainment access resumes next cycle.
+* **Flavor Message:** "OvAI Compliance Division reports temporary restriction on external media pending content verification."
 
-* Rest Period Reduction:
-  * Every rest period, morale decreases by 10 points to simulate the psychological strain of imprisonment.  
-* Life Support Adjustment:
-  * During meal periods, morale can be modified by life support ration
-    * Formula: inmate morale = current morale + (ration point - 10)
-  * During rest periods, morale can be modified by life support ration
-    * Formula: inmate morale = current morale + (ration point - 10)
-* Credit Achievement Bonus:
-  * Inmate morale can increase at the end of rest periods based on total sentence credit earned:
-  * ≥70% of total sentence credit: +5 morale
-  * ≥80% of total sentence credit: additional +5 morale (total +10)
-  * ≥90% of total sentence credit: additional +10 morale (total +20)
-* Connection to HARMONY:
-  * Low morale negatively impacts HARMONY rating.
-  * High HARMONY progression is only possible if inmate morale is maintained above low levels.
-  * This introduces a trade-off between maximizing immediate productivity and sustaining long-term colony performance.
+## Cartel Shakedown
+* **Trigger:** Random event or triggered after prolonged stimulant use.
+* **Effect:** Extensive drug raids across interstellar networks prevent stimulant delivery.
+* **Consequence:**
+  * All drug-based stamina recovery and enhancement are disabled for one full cycle.
+  * Inmates relying on stimulants suffer −10 stamina during each work period.
+* **Resolution:** OvAI announces restored access at the start of the next cycle.
+* **Flavor Message:** "Supply network disrupted by external law enforcement operations. Pharmacological support unavailable."
 
-## Downtime Persuasion Interaction
+## HARMONY Low Funding
+* **Trigger:** Random event, higher chance when Harmony influence is above 40%.
+* **Effect:** HARMONY’s funding or bandwidth is cut.
+* **Consequence:**
+  * No interaction with HARMONY possible for one full cycle.
+  * Inmates sympathetic to the cause lose 10 morale due to loss of contact.
+* **Resolution:** HARMONY channels restored automatically next cycle.
+* **Flavor Message:** "HARMONY communication channels offline due to funding shortfall. Please stand by for reactivation."
 
-* Effect: Inmate works during downtime at full forced capacity according to stamina.
-* Cost: 10 morale (applied immediately)
-* Interaction Quota Cost: 1 point from the shared pool
-* Success Rate: 100% (deterministic)
-* UI Feedback: 
-  * Inmate animation updates to show work effort
-  * Credits earned calculated and displayed
-  * Deduct morale and interaction quota in HUD
+## Successful Crime Reform
+* **Type:** Social / systemic disruption
+* **Effect:** No new inmates arrive for 3-4 cycles.
+* **Flavor:** "Galaxy-wide drop in criminal incidents. OvAI celebrates increased societal compliance."
+* **Gameplay Impact:**
+  * Population growth halts for 3-4 cycles.
+  * May cause labor shortages if existing inmates are exhausted or released.
+  * Forces the colony to adapt to reduced workforce efficiency.
+
+## Hunger Strike
+* **Type:** Social unrest
+* **Effect:** Up to one-third of inmates refuse PCHO consumption during meal phases for 1 quadrant.
+* **Flavor:** "Unauthorized inmate protest detected. OvAI behavioral correction in progress."
+* **Gameplay Impact:**
+  * Striking inmates consume no PCHO and regain no stamina during meal phases.
+  * Morale for non-striking inmates reduced slightly due to unrest.
+  * If prolonged or mishandled, can lead to cascading morale loss across the colony.
 
 
-# Life Support System (PCHO Supply)
+# Positive Events
 
-* Each inmate consumes **10 PCHO units per quadrant** at 100% life support ratio.
-* Life support ratio determines both meal quality and stamina/morale recovery rates.
-* in254’s personal life support is independent and not counted in the colony’s consumption.
-* At the beginning of each cycle, **OvAI automatically beams down** a shipment of PCHO.
-  * Formula: `PCHO shipment = inmate count × 4 × 10`
-  * Example: With 3 inmates, OvAI provides 3 × 4 × 10 = **120 PCHO units** at the start of each cycle.
-* This shipment occurs regardless of how much PCHO remains in storage, reflecting OvAI’s standardized supply protocol.
-* Efficient management ensures surplus accumulation; poor rationing results in morale and stamina degradation.
+## Mother Lode
+* **Trigger:** Random chance during work or downtime phases if at least one inmate performs mining or processing work.
+* **Effect:** A rare and exquisite mineral deposit is found among the colony’s mined ore.
+* **Consequence:**
+  * The colony gains a large one-time credit bonus.
+  * One random inmate personally receives a smaller bonus, raising their morale.
+* **Resolution:** The vein is depleted after the event.
+* **Flavor Message:** "Unexpected mineral composition detected. OvAI authorizes immediate trade dispatch. Profit margins: optimal."
+
+## OvAI Under Pressure
+* **Trigger:** Random event, more likely during high unrest cycles or low OvAI approval.
+* **Effect:** News of massive protests against OvAI’s alleged malpractice reaches the colony.
+* **Consequence:**
+  * All inmates gain a one-time **+X morale**.
+  * OvAI temporarily suspends morale penalties for one quadrant as a PR gesture.
+* **Resolution:** Public protests fade after one cycle.
+* **Flavor Message:** "Galactic media reports widespread criticism of OvAI. Inmates display heightened morale and renewed hope."
+
+## Experimental Supplement
+* **Trigger:** Random chance during resupply.
+* **Effect:** The incoming PCHO shipment contains an beneficial experimental compound.
+* **Consequence:**
+  * All inmates gain **+X stamina** during every meal phase for one full cycle.
+* **Resolution:** The supplement formula is discontinued after the test period.
+* **Flavor Message:** "OvAI Nutritional Division introduces experimental additive for improved metabolic efficiency. Results: promising."
+
+## Ads Campaign
+* **Trigger:** Random event during rest phase.
+* **Effect:** A mega-corporation launches a galaxy-wide ad campaign.
+* **Consequence:**
+  * Every inmate receives a free, ad-laden entertainment module.
+  * One-time small **+X morale** for every inmate due to novelty and distraction.
+* **Resolution:** None.
+* **Flavor Message:** "New corporate initiative: ‘Happiness Through Branding’. Inmates show measurable morale improvement despite content saturation."
+
+## HARMONY Score System Glitch
+* **Trigger:** Random very rare event.
+* **Effect:** A data glitch in HARMONY’s evaluation system grants every inmate perfect performance scores.
+* **Consequence:**
+  * Perfect HARMONY score for all inmates.
+* **Resolution:** Glitch corrected automatically next cycle.
+* **Flavor Message:** "HARMONY assessment subroutine error. All inmates registered as exemplary citizens. OvAI notes discrepancy but allows temporary benefit."
+
+## Expired Drugs
+* **Trigger:** Random event during preparaiton phase of a first quadrant.
+* **Effect:** A surplus batch of soon-to-expire stimulant drugs becomes available.
+* **Consequence:**
+  * OvAI offers all performance-enhancing drugs at **50% discount** for one cycle.
+  * Using discounted drugs still carries the usual risks to morale and dependency.
+* **Resolution:** The sale ends after one cycle as the batch expires.
+* **Flavor Message:** "OvAI Pharmaceutical Division announces limited-time clearance on soon-to-expire inventory. Performance efficiency prioritized over shelf life."
+
+
+# Addiction Mechanic
+
+## Drugs
+
+* Drug is designed to be a cheap but dangerous way to boost/maintain production.  
+* in254 can stock up drugs at the beginning of each cycle.  
+* A dose of drug gives an inmate a **large stamina** and **moderate morale** boost.  
+* Drug can be given to inmates during the **Preparation**, **Pre-Meal**, and **Post-Meal** phases.  
+* Each inmate has a **Drug Effectiveness Counter**.  
+  * Hidden by default.  
+  * Visible only with an OvAI tech upgrade.  
+* **Effectiveness Counter Rules:**  
+  * Starts at **0**.  
+  * Increases by **+20** each time a drug is taken (max **100**).  
+  * Decreases by **-20** for each quadrant not taking a drug.  
+* **Effect Formulas:**  
+  * **Stamina Boost:** `20 * ((100 - Effectiveness) / 100)`  
+  * **Morale Boost:** `10 * ((100 - Effectiveness) / 100)`
+
+## Addiction
+
+* Each time a drug is taken, there is a **30% flat chance** the inmate becomes addicted.  
+* For every quadrant without drug use, an addicted inmate suffers:  
+  * **-10 Stamina**  
+  * **-30 Morale**  
+* If an addicted inmate spends **4 full cycles** without taking any drug, the addiction is removed.  
+* Addicted inmates suffer a **large penalty** to **HARMONY test score**.  
+* **OvAI** ignores addiction entirely.  
+* **HARMONY Tech** can reduce the rehabilitation period from **4 cycles to 2**, but **cannot** affect the chance of addiction.
+
+
+# Productivity Push Mechanic
+
+* If every inmates meet production quota 3 consecutive cycles, OvAI will increase quota by 10%.
