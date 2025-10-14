@@ -27,6 +27,7 @@
     <!-- <hook>../../../shared/data/templateMapList.js</hook> -->
     <hook>../data/colonyData.js</hook>
     <hook>../data/animationData.js</hook>
+    <hook>../data/playerData.js</hook>
     <!-- <hook>mapMainEditorMap.js</hook> -->
     <!-- <hook>generatorMap.js</hook> -->
     <!-- <hook>managerMap.js</hook> -->

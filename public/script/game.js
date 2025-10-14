@@ -21,6 +21,7 @@ export class Game extends GameClasses.MainApp {
         // Player
         this.player = new GameClasses.Player({
             colony: this.colony,
+            generalData: this.modData[Shared.MOD_STRING.MOD_DATA_TYPE.PLAYER_DATA].general,
             animationData: this.modData[Shared.MOD_STRING.MOD_DATA_TYPE.ANIMATION_DATA].player,
         });
 

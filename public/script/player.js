@@ -1,13 +1,13 @@
 export class Player extends GameClasses.GameObjectWithAnimation {
     constructor(input) {
         super(input);
-        const { colony } = input;
+        const { colony, generalData } = input;
 
-        this.width = 256;
-        this.height = 256;
+        this.width = generalData.width;
+        this.height = generalData.height;
         this.x = (colony.width - this.width) / 2;
         this.y = colony.firstLevelWithControlRoom.groundY - this.height;
-        this.speed = 1; // per 1 ms
+        this.speed = generalData.speed; // per 1 ms
         this.level = colony.firstLevelWithControlRoom;
 
         this.facingRight = false;
