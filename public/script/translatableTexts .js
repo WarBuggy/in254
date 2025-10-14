@@ -56,7 +56,7 @@ window.translatableTexts = {
         modDataTreeLabelNoResult: 'No results found for search term "{term}".',
         modDataTreeLabelSearchSummary: '{count} results found for search term "{term}".',
 
-
-        playerAllAssetLoaded: 'All player assets are loaded successfully.',
+        gameObjectWithAnimationFailedStateChange: 'Animated object "{object}" failed to change to state "{state}".',
+        gameObjectWithAnimationAllSpriteLoaded: 'All "{object}" sprites are loaded successfully.',
     },
 };

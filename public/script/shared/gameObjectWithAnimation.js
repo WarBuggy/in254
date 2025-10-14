@@ -6,6 +6,7 @@ export class GameObjectWithAnimation {
     constructor(input) {
         const { animationData, } = input;
 
+        this.animatedObject = animationData.name;
         this.animationData = animationData;
         this.animationList = {};
 
@@ -14,14 +15,13 @@ export class GameObjectWithAnimation {
             k => !GameObjectWithAnimation.IGNORE_KEY_LIST.includes(k)
         );
 
-        this.currentState = animationData.default;
+        this.defaultState = animationData.default;
         this.lastFrameTime = 0;
+        this.noAnimationPossible = false;
 
-        // Store a separate frameIndex for each animation
         this.frameIndex = {};
     }
 
-    // Load all frames for all animations
     async loadAllSprite() {
         for (const key of this.animationKeyList) {
             this.frameIndex[key] = 0;
@@ -32,14 +32,16 @@ export class GameObjectWithAnimation {
                 this.animationList[key].push(img);
             }
         }
+        console.log(`[GameObjectWithAnimation] ${taggedString.gameObjectWithAnimationAllSpriteLoaded(this.animatedObject)}`);
+        this.setState({ state: this.defaultState, });
     }
 
-    // Update animation frame (looping)
     update(input) {
-        const { deltaTime, } = input;
-        if (!this.currentState || !this.animationList[this.currentState]) return;
-        if (this.animationList[this.currentState].length === 0) return;
+        if (this.noAnimationPossible) {
+            return;
+        }
 
+        const { deltaTime, } = input;
         this.lastFrameTime += deltaTime;
         if (this.lastFrameTime >= GameObjectWithAnimation.DEFAULT_FRAME_DURATION) {
             this.lastFrameTime = 0;
@@ -48,10 +50,12 @@ export class GameObjectWithAnimation {
         }
     }
 
-    // Draw current frame with optional horizontal flip
     draw(input) {
+        if (this.noAnimationPossible) {
+            return;
+        }
+
         const { ctx, x, y, flipX = false } = input;
-        if (!this.currentState || !this.animationList[this.currentState]) return;
         const frameList = this.animationList[this.currentState];
         const img = frameList[this.frameIndex[this.currentState]];
         if (!img) return;
@@ -66,17 +70,22 @@ export class GameObjectWithAnimation {
         }
     }
 
-    // Switch to a different animation state
     setState(input) {
         const { state, resetFrameIndex = true, } = input;
         if (this.currentState === state) return;
-        if (!this.animationList[state]) return;
 
         this.currentState = state;
-        // Do not reset frameIndex unless you want to restart animation
         this.lastFrameTime = 0;
+        if (!this.currentState || !this.animationList[this.currentState] ||
+            this.animationList[this.currentState].length < 1) {
+            this.noAnimationPossible = true;
+            console.error(`[GameObjectWithAnimation] ${taggedString.gameObjectWithAnimationFailedStateChange(state, this.animatedObject)}`);
+            return;
+        }
+
+        this.noAnimationPossible = false;
         if (resetFrameIndex) {
-            this.frameIndex[state] = 0;
+            this.frameIndex[this.currentState] = 0;
         }
     }
 }
