@@ -54,5 +54,8 @@ window.translatableTexts = {
         modDataTreeLabelModCount: 'Mod count',
         modDataTreeLabelNoResult: 'No results found for search term "{term}".',
         modDataTreeLabelSearchSummary: '{count} results found for search term "{term}".',
+
+
+        playerAllAssetLoaded: 'All player assets are loaded successfully.',
     },
 };

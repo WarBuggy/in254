@@ -6,10 +6,10 @@
             <modName>sampleMod02</modName>
             <dirName>test2</dirName>
         </listEntry>
-        <listEntry>
+        <!-- <listEntry>
             <modName>sampleMod01</modName>
             <dirName>test1</dirName>
-        </listEntry>
+        </listEntry> -->
         <listEntry>
             <modName>sampleMod03</modName>
             <dirName>test3</dirName>

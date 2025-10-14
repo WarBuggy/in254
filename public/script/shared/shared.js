@@ -8,6 +8,12 @@ class Shared {
     OVERLAY_CLOSED: 'overlayClosed',
   };
 
+  static BUNKER_TYPE = {
+    CELL: 'cell',
+    CONTROL_ROOM: 'control room',
+    ELEVATOR: 'elevator',
+  };
+
   static MOD_STRING = {
     REGISTRATION_MODE: {
       BEFORE: 'before',
@@ -34,6 +40,10 @@ class Shared {
       LIST_ENTRY: 'listEntry',
       MOD_NAME: 'modName',
       DIR_NAME: 'dirName',
+    },
+    MOD_DATA_TYPE: {
+      COLONY_DATA: 'colony data',
+      SPRITE: 'sprite',
     },
   };
 

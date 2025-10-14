@@ -11,6 +11,9 @@
     <hook>../script/shared/dataLoader.js</hook>
     <hook>../script/shared/mainApp.js</hook>
     <hook>../script/shared/eventEmitter.js</hook>
+    <hook>../script/colony.js</hook>
+    <hook>../script/player.js</hook>
+    <hook>../script/elevator.js</hook>
     <hook>../script/game.js</hook>
     <hook>../script/simulate.js</hook>
     <!-- <hook>../../../shared/script/region.js</hook> -->
@@ -21,17 +24,18 @@
     <!-- <hook>../../../shared/data/tileTextureList.js</hook> -->
     <!-- <hook>../../../shared/data/featureList.js</hook> -->
     <!-- <hook>../../../shared/data/templateMapList.js</hook> -->
-    <!-- <hook>setting.js</hook> -->
+    <hook>../data/colony.js</hook>
+    <hook>../data/spriteList.js</hook>
     <!-- <hook>mapMainEditorMap.js</hook> -->
     <!-- <hook>generatorMap.js</hook> -->
     <!-- <hook>managerMap.js</hook> -->
     <!-- <hook>mapMiniEditorMap.js</hook> -->
     <!-- <hook>mapEditor.js</hook> -->
-    <hook>zzModTestPlayer.js</hook>
+    <!-- <hook>zzModTestPlayer.js</hook>
     <hook>zzModTestFire.js</hook>
     <hook>zzModTestJump.js</hook>
     <hook>zzModTestPlayer2.js</hook>
-    <hook>zzzModTestModifyClassProperty.js</hook>
+    <hook>zzzModTestModifyClassProperty.js</hook> -->
     <hook></hook>
   </hooks>
 </mod>
