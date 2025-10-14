@@ -52,9 +52,7 @@ export class Game extends GameClasses.MainApp {
             this.canvas.height = window.innerHeight;
         });
 
-        this.keyList = {};
-        window.addEventListener('keydown', (e) => { this.keyList[e.key.toLowerCase()] = true; });
-        window.addEventListener('keyup', (e) => { this.keyList[e.key.toLowerCase()] = false; });
+        this.inputManager = new GameClasses.InputManager();
     }
 
     async loadAllSprite() {
@@ -67,16 +65,22 @@ export class Game extends GameClasses.MainApp {
             if (!obj || typeof obj !== 'object' || visited.has(obj)) return;
             visited.add(obj);
 
+            // If this object is an animatable entity, collect it
             if (obj instanceof GameClasses.GameObjectWithAnimation && typeof obj.loadAllSprite === 'function') {
                 objectsToLoad.push(obj);
             }
 
-            for (const key in obj) {
-                if (obj.hasOwnProperty(key)) collectObjects(obj[key]);
-            }
-
+            // Handle arrays first (so we don't traverse twice)
             if (Array.isArray(obj)) {
                 for (const item of obj) collectObjects(item);
+                return;
+            }
+
+            // Handle regular objects
+            for (const key in obj) {
+                if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                    collectObjects(obj[key]);
+                }
             }
         }
 
@@ -94,13 +98,13 @@ export class Game extends GameClasses.MainApp {
 
         this.elevator.update({
             deltaTime, colony: this.colony,
-            player: this.player, keyList: this.keyList,
+            player: this.player, inputManager: this.inputManager,
         });
 
         this.player.update({
             elevator: this.elevator, colony: this.colony,
             levelList: this.colony.levelListInOrder,
-            keyList: this.keyList,
+            inputManager: this.inputManager,
             deltaTime, mapLimit: this.mapLimit,
         });
 

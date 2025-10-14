@@ -14,7 +14,7 @@ export class Player extends GameClasses.GameObjectWithAnimation {
     }
 
     update(input) {
-        const { elevator, keyList, deltaTime, colony, mapLimit, } = input;
+        const { elevator, inputManager, deltaTime, colony, mapLimit, } = input;
 
         // If on a moving elevator, just follow it and idle
         if (elevator.playerIsOn) {
@@ -28,8 +28,8 @@ export class Player extends GameClasses.GameObjectWithAnimation {
         }
 
         // Horizontal movement
-        const movingLeft = !!keyList['a'];
-        const movingRight = !!keyList['d'];
+        const movingLeft = !!inputManager.isPressed({ key: 'a', });
+        const movingRight = !!inputManager.isPressed({ key: 'd', });
 
         const moveDistance = this.speed * deltaTime;
         if (movingLeft) {

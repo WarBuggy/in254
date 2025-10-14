@@ -22,7 +22,7 @@ export class Elevator extends GameClasses.GameObjectWithAnimation {
     }
 
     update(input) {
-        const { deltaTime, player, keyList, colony, } = input;
+        const { deltaTime, player, inputManager, colony, } = input;
 
         // Update delay timer
         if (this.delayTimer > 0) {
@@ -35,13 +35,13 @@ export class Elevator extends GameClasses.GameObjectWithAnimation {
 
         // Handle vertical input only if player is on and delay expired
         if (this.playerIsOn && this.delayTimer <= 0 && !this.movingVertically) {
-            if (keyList['w'] && this.currentLevelIndex > 0) {
+            if (inputManager.isPressed({ key: 'w', }) && this.currentLevelIndex > 0) {
                 this.currentLevelIndex = this.currentLevelIndex - 1;
                 const nextLevel = colony.levelListInOrder[this.currentLevelIndex];
                 this.targetY = nextLevel.groundY;
                 this.movingVertically = true;
             }
-            else if (keyList['s'] && this.currentLevelIndex < colony.levelListInOrder.length - 1) {
+            else if (inputManager.isPressed({ key: 's', }) && this.currentLevelIndex < colony.levelListInOrder.length - 1) {
                 this.currentLevelIndex = this.currentLevelIndex + 1;
                 const nextLevel = colony.levelListInOrder[this.currentLevelIndex];
                 this.targetY = nextLevel.groundY;

@@ -15,6 +15,7 @@
     <hook>../script/colony.js</hook>
     <hook>../script/player.js</hook>
     <hook>../script/elevator.js</hook>
+    <hook>../script/input.js</hook>
     <hook>../script/game.js</hook>
     <hook>../script/simulate.js</hook>
     <!-- <hook>../../../shared/script/region.js</hook> -->
