@@ -10,6 +10,7 @@
     <hook>../script/shared/modDataTree.js</hook>
     <hook>../script/shared/dataLoader.js</hook>
     <hook>../script/shared/mainApp.js</hook>
+    <hook>../script/shared/gameObjectWithAnimation.js</hook>
     <hook>../script/shared/eventEmitter.js</hook>
     <hook>../script/colony.js</hook>
     <hook>../script/player.js</hook>
@@ -25,7 +26,7 @@
     <!-- <hook>../../../shared/data/featureList.js</hook> -->
     <!-- <hook>../../../shared/data/templateMapList.js</hook> -->
     <hook>../data/colony.js</hook>
-    <hook>../data/spriteList.js</hook>
+    <hook>../data/animationData.js</hook>
     <!-- <hook>mapMainEditorMap.js</hook> -->
     <!-- <hook>generatorMap.js</hook> -->
     <!-- <hook>managerMap.js</hook> -->

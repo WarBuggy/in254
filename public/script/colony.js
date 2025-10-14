@@ -2,19 +2,16 @@ export class Colony {
     constructor(input) {
         const { interiorData, levelData, } = input;
         this.allLevelData = {};
-        this.levelListInOrder = [];
         this.width = 0;
         this.height = 0;
         this.firstLevelWithControlRoom = null;
         let nextCellNumber = interiorData.cellStartingNum;
         let levelCeiling = 0;
         for (const [levelName, data] of Object.entries(levelData.list)) {
-            const bunkerList = data.bunkerList;
             const aLevelData =
-                this.createALevelData({ interiorData, levelName, bunkerList, nextCellNumber, });
+                this.createALevelData({ interiorData, levelName, data, nextCellNumber, });
             aLevelData.groundY = levelCeiling + aLevelData.groundToCeilingHeight;
             this.allLevelData[aLevelData.name] = aLevelData;
-            this.levelListInOrder.push(aLevelData);
             this.width = Math.max(this.width, aLevelData.width);
             this.height = this.height + aLevelData.height;
             if (aLevelData.hasControlRoom && !this.firstLevelWithControlRoom) {
@@ -23,12 +20,15 @@ export class Colony {
             nextCellNumber = aLevelData.nextCellNumber;
             levelCeiling = levelCeiling + aLevelData.height;
         }
+        this.levelListInOrder = Object.values(this.allLevelData);
+        this.levelListInOrder.sort((a, b) => a.index - b.index);
         this.topLevel = this.levelListInOrder[0];
         this.bottomLevel = this.levelListInOrder[this.levelListInOrder.length - 1];
     }
 
     createALevelData(input) {
-        const { interiorData, levelName, bunkerList, } = input;
+        const { interiorData, levelName, data, } = input;
+
         let nextCellNumber = input.nextCellNumber;
         const levelHeight = interiorData.levelCeilingPaddingTop + interiorData.levelFloorPaddingBottom +
             interiorData.floorThickness + interiorData.bunkerHeight;
@@ -36,7 +36,7 @@ export class Colony {
         let levelWidth = interiorData.outerWallPaddingLeft + interiorData.outerWallPaddingRight;
         const cellList = [];
         let hasControlRoom = false;
-        for (const bunker of bunkerList) {
+        for (const bunker of data.bunkerList) {
             const cellData = {
                 level: levelName,
                 type: bunker,
@@ -64,6 +64,7 @@ export class Colony {
             width: levelWidth,
             height: levelHeight,
             groundToCeilingHeight, cellList, nextCellNumber, hasControlRoom,
+            index: data.index,
         };
     }
 }

@@ -9,10 +9,12 @@ window.addEventListener('load', async function () {
     });
     GameClasses.MainApp.modifyClassProperty();
     window.game = new GameClasses.Game({ savedModData, });
+    await game.loadAllSprite();
+    game.start();
 
     let seed = null;
     //seed = 609478887;
     //await window.editorMap.managerMap.generateRandomMap({ seed, });
     //window.editorMap.managerMap.requestAnimationFrame({});
-    window.sim = new GameClasses.Simulate();
+    //window.sim = new GameClasses.Simulate();
 });

@@ -20,7 +20,7 @@ export default {
                 elevatorHeight: 32,
                 elevatorMarginLeft: 32,
                 elevatorMarginRight: 32,
-                elevatorSpeed: 32,
+                elevatorSpeed: 16,
                 elevatorDelayDuration: 200,
             },
         },
@@ -31,18 +31,23 @@ export default {
                 list: {
                     one: {
                         bunkerList: [Shared.BUNKER_TYPE.CELL, Shared.BUNKER_TYPE.CELL, Shared.BUNKER_TYPE.ELEVATOR, Shared.BUNKER_TYPE.CELL, Shared.BUNKER_TYPE.CELL,],
+                        index: 0,
                     },
                     two: {
                         bunkerList: [Shared.BUNKER_TYPE.CELL, Shared.BUNKER_TYPE.CELL, Shared.BUNKER_TYPE.ELEVATOR, Shared.BUNKER_TYPE.CELL, Shared.BUNKER_TYPE.CELL,],
+                        index: 1,
                     },
                     three: {
                         bunkerList: [Shared.BUNKER_TYPE.CELL, Shared.BUNKER_TYPE.CONTROL_ROOM, Shared.BUNKER_TYPE.ELEVATOR, Shared.BUNKER_TYPE.CELL, Shared.BUNKER_TYPE.CELL,],
+                        index: 2,
                     },
                     four: {
                         bunkerList: [Shared.BUNKER_TYPE.CELL, Shared.BUNKER_TYPE.CELL, Shared.BUNKER_TYPE.ELEVATOR, Shared.BUNKER_TYPE.CELL, Shared.BUNKER_TYPE.CELL,],
+                        index: 3,
                     },
                     five: {
                         bunkerList: [Shared.BUNKER_TYPE.CELL, Shared.BUNKER_TYPE.CELL, Shared.BUNKER_TYPE.ELEVATOR, Shared.BUNKER_TYPE.CELL, Shared.BUNKER_TYPE.CELL,],
+                        index: 4,
                     }
                 },
             },

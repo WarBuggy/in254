@@ -43,7 +43,7 @@ class Shared {
     },
     MOD_DATA_TYPE: {
       COLONY_DATA: 'colony data',
-      SPRITE: 'sprite',
+      ANIMATION_DATA: 'animation data',
     },
   };
 
@@ -91,5 +91,18 @@ class Shared {
       component.type = type;
     }
     return { component, };
+  }
+
+  static async loadImage(input) {
+    const { src, } = input;
+    const img = new Image();
+    img.src = src;
+    try {
+      await img.decode();
+      return img;
+    } catch (err) {
+      console.warn(`${taggedString.generalFailedToLoadImage(src, err)}`);
+      return null;
+    }
   }
 }

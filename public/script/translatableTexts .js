@@ -3,6 +3,7 @@ window.translatableTexts = {
         generalImplementInSubClass: `{functionName} must be implemented in subclass.`,
         generalClassIsAbstract: 'This is an abstract class. You must extend it with a subclass.',
         generalMissingProperty: 'Property "{name}" is required.',
+        generalFailedToLoadImage: 'Failed to load image from "{src}": {e}.',
 
         scriptLoaderMethodHookLoaded: `Loaded method-hook from mod "{modName}" at "{modFile}" (class "{className}", method "{methodName}", hook "{mode}").`,
         scriptLoaderMethodHookFailed: `Failed to load method-hook from mod "{modName}" at "{modFile}": {e}.`,

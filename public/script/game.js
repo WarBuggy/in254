@@ -16,40 +16,32 @@ export class Game extends GameClasses.MainApp {
         this.canvas.height = window.innerHeight;
         this.ctx = this.canvas.getContext('2d');
 
-        // Camera / viewport = screen size
-        this.camera = { x: 0, y: 0, width: window.innerWidth, height: window.innerHeight, };
+        // Camera / viewport
+        this.camera = { x: 0, y: 0, width: window.innerWidth, height: window.innerHeight };
         // Player
-        this.player = new GameClasses.Player({ colony: this.colony, });
+        this.player = new GameClasses.Player({
+            colony: this.colony,
+            animationData: this.modData[Shared.MOD_STRING.MOD_DATA_TYPE.ANIMATION_DATA].player,
+        });
 
-        this.mapLimits = {
+        this.mapLimit = {
             left: interiorData.outerWallPaddingLeft,
-            top: this.colony.topLevel.groundY + this.player.height,
-            right: interiorData.outerWallPaddingRight,
-            bottom: this.colony.bottomLevel.groundY,
+            right: this.colony.width - interiorData.outerWallPaddingRight,
         };
 
         this.elevator = new GameClasses.Elevator({
             x: this.colony.width / 2 - this.player.width / 2,
-            y: this.colony.firstLevelWithControlRoom.groundY,
             width: interiorData.elevatorWidth,
             height: interiorData.elevatorHeight,
             speed: interiorData.elevatorSpeed,
             delayDuration: interiorData.elevatorDelayDuration,
-            spriteData: this.modData[Shared.MOD_STRING.MOD_DATA_TYPE.SPRITE].elevator,
+            animationData: this.modData[Shared.MOD_STRING.MOD_DATA_TYPE.ANIMATION_DATA].elevator,
+            colony: this.colony,
         });
 
         // Load background image
         this.bgImage = new Image();
         this.bgImage.src = Game.BACKGROUND_IMAGE;
-        this.bgImage.onload = () => {
-            this.player.loadAllSprite({
-                callback: () => {
-                    this.player.bindInput();
-                    requestAnimationFrame(() => this.loop());
-                }
-            });
-
-        };
 
         // Handle window resize
         window.addEventListener('resize', () => {
@@ -58,95 +50,103 @@ export class Game extends GameClasses.MainApp {
             this.canvas.width = window.innerWidth;
             this.canvas.height = window.innerHeight;
         });
+
+        this.keyList = {};
+        window.addEventListener('keydown', (e) => { this.keyList[e.key.toLowerCase()] = true; });
+        window.addEventListener('keyup', (e) => { this.keyList[e.key.toLowerCase()] = false; });
+    }
+
+    async loadAllSprite() {
+        this.bgImage = await Shared.loadImage({ src: Game.BACKGROUND_IMAGE });
+
+        await this.elevator.loadAllSprite();
+        await this.player.loadAllSprite();
+    }
+
+    start() {
+        requestAnimationFrame(() => this.loop());
     }
 
     update(input) {
         const { deltaTime, } = input;
 
-        this.elevator.update({ deltaTime });
-        // Check if player is on the elevator
-        const onElevator = this.elevator.isPlayerOn({ player: this.player, });
-        // Update player (movement, elevator transitions, vertical smoothing)
-        this.player.update({
-            onElevator, elevator: this.elevator,
-            levelList: this.colony.levelListInOrder,
+        this.elevator.update({
+            deltaTime, colony: this.colony,
+            player: this.player, keyList: this.keyList,
         });
 
-        // Clamp camera to center player
+        this.player.update({
+            elevator: this.elevator, colony: this.colony,
+            levelList: this.colony.levelListInOrder,
+            keyList: this.keyList,
+            deltaTime, mapLimit: this.mapLimit,
+        });
+
+        // Center camera on player
         this.camera.x = this.player.x + this.player.width / 2 - this.camera.width / 2;
         this.camera.y = this.player.y + this.player.height / 2 - this.camera.height / 2;
 
-        // Clamp camera within map bounds
+        // Clamp camera to map
         this.camera.x = Math.max(0, Math.min(this.colony.width - this.camera.width, this.camera.x));
         this.camera.y = Math.max(0, Math.min(this.colony.height - this.camera.height, this.camera.y));
     }
 
-
     draw() {
         const ctx = this.ctx;
 
-        // Fill the entire screen black first
+        // Draw black background
         ctx.fillStyle = 'black';
         ctx.fillRect(0, 0, this.camera.width, this.camera.height);
 
-        // Draw stretched background image to match map dimensions
+        // Draw background
         ctx.drawImage(
             this.bgImage,
-            0, 0, this.bgImage.width, this.bgImage.height, // source (entire image)
-            -this.camera.x, -this.camera.y,                // destination start
-            this.colony.width, this.colony.height        // stretch to map size
+            0, 0, this.bgImage.width, this.bgImage.height,
+            -this.camera.x, -this.camera.y,
+            this.colony.width, this.colony.height
         );
 
-        // Draw left and right edges as vertical lines
+        // Draw edges
         ctx.strokeStyle = 'yellow';
         ctx.lineWidth = 3;
-
-        // Left edge
         ctx.beginPath();
-        ctx.moveTo(this.mapLimits.left - this.camera.x, 0 - this.camera.y);
-        ctx.lineTo(this.mapLimits.left - this.camera.x, this.colony.height - this.camera.y);
+        ctx.moveTo(this.mapLimit.left - this.camera.x, 0 - this.camera.y);
+        ctx.lineTo(this.mapLimit.left - this.camera.x, this.colony.height - this.camera.y);
         ctx.stroke();
 
-        // Right edge
         ctx.beginPath();
-        ctx.moveTo(this.colony.width - this.mapLimits.right - this.camera.x, 0 - this.camera.y);
-        ctx.lineTo(this.colony.width - this.mapLimits.right - this.camera.x, this.colony.height - this.camera.y);
+        ctx.moveTo(this.mapLimit.right - this.camera.x, 0 - this.camera.y);
+        ctx.lineTo(this.mapLimit.right - this.camera.x, this.colony.height - this.camera.y);
         ctx.stroke();
 
-        // Draw all ground lines green
+        // Draw ground lines
         ctx.strokeStyle = 'green';
         for (const level of this.colony.levelListInOrder) {
             ctx.beginPath();
-            ctx.moveTo(this.mapLimits.left - this.camera.x, level.groundY - this.camera.y);
-            ctx.lineTo(this.colony.width - this.mapLimits.right - this.camera.x, level.groundY - this.camera.y);
+            ctx.moveTo(this.mapLimit.left - this.camera.x, level.groundY - this.camera.y);
+            ctx.lineTo(this.mapLimit.right - this.camera.x, level.groundY - this.camera.y);
             ctx.stroke();
         }
 
         // Draw elevator
-        this.elevator.draw({
-            ctx, camera: this.camera,
-            topY: this.colony.topLevel.groundY, bottomY: this.colony.bottomLevel.groundY,
-        });
+        this.elevator.draw({ ctx, camera: this.camera, });
 
         // Draw player
-        this.player.draw({ ctx, camera: this.camera, });
+        this.player.draw({ ctx, camera: this.camera });
     }
 
     loop() {
         const now = performance.now();
-
-        // Initialize lastFrameTime on first frame
         if (!this.lastFrameTime) this.lastFrameTime = now;
-        const deltaTime = now - this.lastFrameTime; // in milliseconds
+        const deltaTime = now - this.lastFrameTime;
         this.lastFrameTime = now;
-
         this.update({ deltaTime, });
         this.draw();
 
         requestAnimationFrame(() => this.loop());
     }
 
-    createPageHTMLComponent(input) {
+    createPageHTMLComponent() {
         Shared.createHTMLComponent({
             tag: 'canvas',
             id: Game.CANVAS_ID,
