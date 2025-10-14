@@ -52,7 +52,7 @@ export class Elevator extends GameClasses.GameObjectWithAnimation {
         // Move elevator vertically toward target
         if (this.movingVertically) {
             const direction = this.targetY > this.y ? 1 : -1;
-            this.y += direction * this.speed;
+            this.y += direction * this.speed * deltaTime;
 
             // Stop when reached target level
             if ((direction === 1 && this.y >= this.targetY) ||

@@ -7,7 +7,7 @@ export class Player extends GameClasses.GameObjectWithAnimation {
         this.height = 256;
         this.x = (colony.width - this.width) / 2;
         this.y = colony.firstLevelWithControlRoom.groundY - this.height;
-        this.speed = 16;
+        this.speed = 1; // per 1 ms
         this.level = colony.firstLevelWithControlRoom;
 
         this.facingRight = false;
@@ -31,12 +31,13 @@ export class Player extends GameClasses.GameObjectWithAnimation {
         const movingLeft = !!keyList['a'];
         const movingRight = !!keyList['d'];
 
+        const moveDistance = this.speed * deltaTime;
         if (movingLeft) {
-            this.x -= this.speed;
+            this.x -= moveDistance;
             this.x = Math.max(mapLimit.left, this.x);
         }
         if (movingRight) {
-            this.x += this.speed;
+            this.x += moveDistance;
             this.x = Math.min(mapLimit.right - this.width, this.x);
         }
 

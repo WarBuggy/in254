@@ -20,7 +20,7 @@ export default {
                 elevatorHeight: 32,
                 elevatorMarginLeft: 32,
                 elevatorMarginRight: 32,
-                elevatorSpeed: 16,
+                elevatorSpeed: 1, // per 1 ms
                 elevatorDelayDuration: 200,
             },
         },
