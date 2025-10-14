@@ -25,7 +25,7 @@
     <!-- <hook>../../../shared/data/tileTextureList.js</hook> -->
     <!-- <hook>../../../shared/data/featureList.js</hook> -->
     <!-- <hook>../../../shared/data/templateMapList.js</hook> -->
-    <hook>../data/colony.js</hook>
+    <hook>../data/colonyData.js</hook>
     <hook>../data/animationData.js</hook>
     <!-- <hook>mapMainEditorMap.js</hook> -->
     <!-- <hook>generatorMap.js</hook> -->
