@@ -59,8 +59,29 @@ export class Game extends GameClasses.MainApp {
     async loadAllSprite() {
         this.bgImage = await Shared.loadImage({ src: Game.BACKGROUND_IMAGE });
 
-        await this.elevator.loadAllSprite();
-        await this.player.loadAllSprite();
+        const visited = new Set();
+        const objectsToLoad = [];
+
+        function collectObjects(obj) {
+            if (!obj || typeof obj !== 'object' || visited.has(obj)) return;
+            visited.add(obj);
+
+            if (obj instanceof GameClasses.GameObjectWithAnimation && typeof obj.loadAllSprite === 'function') {
+                objectsToLoad.push(obj);
+            }
+
+            for (const key in obj) {
+                if (obj.hasOwnProperty(key)) collectObjects(obj[key]);
+            }
+
+            if (Array.isArray(obj)) {
+                for (const item of obj) collectObjects(item);
+            }
+        }
+
+        collectObjects(this);
+
+        await Promise.all(objectsToLoad.map(obj => obj.loadAllSprite()));
     }
 
     start() {
