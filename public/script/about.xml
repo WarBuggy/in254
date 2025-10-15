@@ -16,6 +16,7 @@
     <hook>../script/player.js</hook>
     <hook>../script/elevator.js</hook>
     <hook>../script/input.js</hook>
+    <hook>../script/draw.js</hook>
     <hook>../script/game.js</hook>
     <hook>../script/simulate.js</hook>
     <!-- <hook>../../../shared/script/region.js</hook> -->
@@ -29,6 +30,7 @@
     <hook>../data/colonyData.js</hook>
     <hook>../data/animationData.js</hook>
     <hook>../data/playerData.js</hook>
+    <hook>../data/drawLayerData.js</hook>
     <!-- <hook>mapMainEditorMap.js</hook> -->
     <!-- <hook>generatorMap.js</hook> -->
     <!-- <hook>managerMap.js</hook> -->

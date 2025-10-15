@@ -56,7 +56,8 @@ window.translatableTexts = {
         modDataTreeLabelNoResult: 'No results found for search term "{term}".',
         modDataTreeLabelSearchSummary: '{count} results found for search term "{term}".',
 
-        gameObjectWithAnimationFailedStateChange: 'Animated object "{object}" failed to change to state "{state}".',
+        gameObjectWithAnimationFailedStateChange: 'Component "{name}" of animated object "{object}" failed to change to state "{state}".',
         gameObjectWithAnimationAllSpriteLoaded: 'All "{object}" sprites are loaded successfully.',
+        gameObjectWithAnimationNoCompFound: 'No component "{name}" found on object "{object}".',
     },
 };

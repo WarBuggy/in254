@@ -45,6 +45,7 @@ class Shared {
       COLONY_DATA: 'colony data',
       ANIMATION_DATA: 'animation data',
       PLAYER_DATA: 'player data',
+      DRAW_LAYER_DATA: 'draw layer data',
     },
   };
 

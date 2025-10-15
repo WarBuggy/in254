@@ -1,10 +1,10 @@
 export class Player extends GameClasses.GameObjectWithAnimation {
     constructor(input) {
         super(input);
-        const { colony, generalData } = input;
+        const { colony, generalData, } = input;
 
-        this.width = generalData.width;
-        this.height = generalData.height;
+        this.width = this.baseComponent.width;
+        this.height = this.baseComponent.height;
         this.x = (colony.width - this.width) / 2;
         this.y = colony.firstLevelWithControlRoom.groundY - this.height;
         this.speed = generalData.speed; // per 1 ms
@@ -20,8 +20,8 @@ export class Player extends GameClasses.GameObjectWithAnimation {
         if (elevator.playerIsOn) {
             this.y = elevator.y - this.height;
             if (elevator.movingVertically) {
-                this.setState({ state: 'idle' });
-                super.update({ deltaTime, name: 'player', });
+                this.setState({ name: 'base', state: 'idle', });
+                super.update({ deltaTime, x: this.x, y: this.y, isFlipped: !this.facingRight, });
                 return;
             }
             this.level = colony.levelListInOrder[elevator.currentLevelIndex];
@@ -46,19 +46,10 @@ export class Player extends GameClasses.GameObjectWithAnimation {
         else if (movingRight) this.facingRight = true;
 
         // Set animation state based on movement
-        if (movingLeft || movingRight) this.setState({ state: 'move', });
-        else this.setState({ state: 'idle', });
+        if (movingLeft || movingRight) this.setState({ name: 'base', state: 'move', });
+        else this.setState({ name: 'base', state: 'idle', });
 
         // Update animation frame
-        super.update({ deltaTime, name: 'player', });
-    }
-
-    draw(input) {
-        const { ctx, camera } = input;
-        const x = this.x - camera.x;
-        const y = this.y - camera.y;
-
-        // flipX = false when facing right, true when facing left
-        super.draw({ ctx, x, y, flipX: !this.facingRight });
+        super.update({ deltaTime, x: this.x, y: this.y, isFlipped: !this.facingRight, });
     }
 }

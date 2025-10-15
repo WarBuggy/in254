@@ -1,4 +1,4 @@
-export class Game extends GameClasses.MainApp {
+export class GameManager extends GameClasses.MainApp {
     static CANVAS_ID = 'canvas';
     static BACKGROUND_IMAGE = 'asset/samplebg.jpg';
 
@@ -11,10 +11,9 @@ export class Game extends GameClasses.MainApp {
             levelData: this.modData[Shared.MOD_STRING.MOD_DATA_TYPE.COLONY_DATA].levelData,
         });
 
-        this.canvas = document.getElementById(Game.CANVAS_ID);
+        this.canvas = document.getElementById(GameManager.CANVAS_ID);
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight;
-        this.ctx = this.canvas.getContext('2d');
 
         // Camera / viewport
         this.camera = { x: 0, y: 0, width: window.innerWidth, height: window.innerHeight };
@@ -32,8 +31,6 @@ export class Game extends GameClasses.MainApp {
 
         this.elevator = new GameClasses.Elevator({
             x: this.colony.width / 2 - this.player.width / 2,
-            width: interiorData.elevatorWidth,
-            height: interiorData.elevatorHeight,
             speed: interiorData.elevatorSpeed,
             delayDuration: interiorData.elevatorDelayDuration,
             animationData: this.modData[Shared.MOD_STRING.MOD_DATA_TYPE.ANIMATION_DATA].elevator,
@@ -42,7 +39,7 @@ export class Game extends GameClasses.MainApp {
 
         // Load background image
         this.bgImage = new Image();
-        this.bgImage.src = Game.BACKGROUND_IMAGE;
+        this.bgImage.src = GameManager.BACKGROUND_IMAGE;
 
         // Handle window resize
         window.addEventListener('resize', () => {
@@ -53,10 +50,14 @@ export class Game extends GameClasses.MainApp {
         });
 
         this.inputManager = new GameClasses.InputManager();
+        this.drawManager = new GameClasses.DrawManager({
+            ctx: this.canvas.getContext('2d'),
+            drawLayerData: this.modData[Shared.MOD_STRING.MOD_DATA_TYPE.DRAW_LAYER_DATA].layer,
+        });
     }
 
     async loadAllSprite() {
-        this.bgImage = await Shared.loadImage({ src: Game.BACKGROUND_IMAGE });
+        this.bgImage = await Shared.loadImage({ src: GameManager.BACKGROUND_IMAGE });
 
         const visited = new Set();
         const objectsToLoad = [];
@@ -117,57 +118,24 @@ export class Game extends GameClasses.MainApp {
         this.camera.y = Math.max(0, Math.min(this.colony.height - this.camera.height, this.camera.y));
     }
 
-    draw() {
-        const ctx = this.ctx;
-
-        // Draw black background
-        ctx.fillStyle = 'black';
-        ctx.fillRect(0, 0, this.camera.width, this.camera.height);
-
-        // Draw background
-        ctx.drawImage(
-            this.bgImage,
-            0, 0, this.bgImage.width, this.bgImage.height,
-            -this.camera.x, -this.camera.y,
-            this.colony.width, this.colony.height
-        );
-
-        // Draw edges
-        ctx.strokeStyle = 'yellow';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(this.mapLimit.left - this.camera.x, 0 - this.camera.y);
-        ctx.lineTo(this.mapLimit.left - this.camera.x, this.colony.height - this.camera.y);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(this.mapLimit.right - this.camera.x, 0 - this.camera.y);
-        ctx.lineTo(this.mapLimit.right - this.camera.x, this.colony.height - this.camera.y);
-        ctx.stroke();
-
-        // Draw ground lines
-        ctx.strokeStyle = 'green';
-        for (const level of this.colony.levelListInOrder) {
-            ctx.beginPath();
-            ctx.moveTo(this.mapLimit.left - this.camera.x, level.groundY - this.camera.y);
-            ctx.lineTo(this.mapLimit.right - this.camera.x, level.groundY - this.camera.y);
-            ctx.stroke();
-        }
-
-        // Draw elevator
-        this.elevator.draw({ ctx, camera: this.camera, });
-
-        // Draw player
-        this.player.draw({ ctx, camera: this.camera });
-    }
-
     loop() {
         const now = performance.now();
         if (!this.lastFrameTime) this.lastFrameTime = now;
         const deltaTime = now - this.lastFrameTime;
         this.lastFrameTime = now;
         this.update({ deltaTime, });
-        this.draw();
+
+        // Draw all game objects using DrawManager
+        this.drawManager.draw({
+            camera: this.camera,
+            mapLimit: this.mapLimit,
+            colony: this.colony,
+            bgImage: this.bgImage,
+            objectList: [
+                this.elevator,
+                this.player,
+            ],
+        });
 
         requestAnimationFrame(() => this.loop());
     }
@@ -175,7 +143,7 @@ export class Game extends GameClasses.MainApp {
     createPageHTMLComponent() {
         Shared.createHTMLComponent({
             tag: 'canvas',
-            id: Game.CANVAS_ID,
+            id: GameManager.CANVAS_ID,
             parent: document.body,
         });
     }

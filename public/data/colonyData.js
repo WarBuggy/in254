@@ -16,8 +16,7 @@ export default {
                 cellStartingNum: 1,
                 cellPaddingTargetLength: 3,
                 cellPaddingCharacter: '0',
-                elevatorWidth: 256,
-                elevatorHeight: 32,
+                elevatorWidth: 256, // duplicated in elevator animation data
                 elevatorMarginLeft: 32,
                 elevatorMarginRight: 32,
                 elevatorSpeed: 1, // per 1 ms

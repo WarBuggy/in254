@@ -8,9 +8,9 @@ window.addEventListener('load', async function () {
         modDirLocation: Shared.MOD_STRING.MOD_DIR_LOCATION.BASE,
     });
     GameClasses.MainApp.modifyClassProperty();
-    window.game = new GameClasses.Game({ savedModData, });
-    await game.loadAllSprite();
-    game.start();
+    window.gameManager = new GameClasses.GameManager({ savedModData, });
+    await gameManager.loadAllSprite();
+    gameManager.start();
 
     let seed = null;
     //seed = 609478887;

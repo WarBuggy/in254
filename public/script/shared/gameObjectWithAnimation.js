@@ -1,91 +1,137 @@
 export class GameObjectWithAnimation {
 
-    static IGNORE_KEY_LIST = ['name', 'default', 'folder',];
     static DEFAULT_FRAME_DURATION = 100; // ms;
+    static EXCLUDE_KEY_LIST = ['name', 'default', 'animationList'];
 
     constructor(input) {
-        const { animationData, } = input;
+        const { animationData } = input;
 
         this.animatedObject = animationData.name;
-        this.animationData = animationData;
-        this.animationList = {};
 
-        // Extract keys to load
-        this.animationKeyList = Object.keys(animationData).filter(
-            k => !GameObjectWithAnimation.IGNORE_KEY_LIST.includes(k)
-        );
+        // This will hold all processed components
+        this.componentList = {};
+        if (Array.isArray(animationData.componentList)) {
+            for (const comp of animationData.componentList) {
+                this.processComponent({ comp });
+            }
+        }
+        this.baseComponent = this.componentList[animationData.baseComponent];
+    }
 
-        this.defaultState = animationData.default;
-        this.lastFrameTime = 0;
-        this.noAnimationPossible = false;
+    processComponent(input) {
+        const { comp, } = input;
 
-        this.frameIndex = {};
+        // Collect all other properties as defaults
+        const defaultPropertyList = {};
+        for (const key in comp) {
+            if (!GameObjectWithAnimation.EXCLUDE_KEY_LIST.includes(key)) {
+                defaultPropertyList[key] = comp[key];
+            }
+        }
+
+        const compName = comp.name;
+        this.componentList[compName] = {
+            // Static properties
+            name: compName,
+            defaultState: comp.default,
+            animationList: {},
+            // Runtime properties
+            frameIndex: {},
+            currentState: comp.default,
+            lastFrameTime: 0,
+            noAnimationPossible: false,
+            x: 0,
+            y: 0,
+            isFlipped: false,
+            width: comp.width,
+            height: comp.height,
+        }
+
+        for (const [stateName, stateData] of Object.entries(comp.animationList)) {
+            // Start with the properties from defaultPropertyList
+            const mergedState = { ...defaultPropertyList, ...stateData };
+            // Ensure frameList exists
+            mergedState.frameList = mergedState.frameList || [];
+
+            this.componentList[compName].animationList[stateName] = mergedState;
+
+            // Initialize frame index
+            this.componentList[compName].frameIndex[stateName] = 0;
+        }
     }
 
     async loadAllSprite() {
-        for (const key of this.animationKeyList) {
-            this.frameIndex[key] = 0;
-            this.animationList[key] = [];
-            for (const fileName of this.animationData[key]) {
-                const src = this.animationData.folder + fileName;
-                const img = await Shared.loadImage({ src });
-                this.animationList[key].push(img);
+        const loadPromiseList = [];
+
+        for (const comp of Object.values(this.componentList)) {
+            for (const [_, stateData] of Object.entries(comp.animationList)) {
+                const folder = stateData.folder || '';
+                stateData.imageList = []; // will store loaded images
+
+                for (const fileName of stateData.frameList) {
+                    const src = folder + fileName;
+                    loadPromiseList.push(
+                        Shared.loadImage({ src }).then(img => {
+                            stateData.imageList.push(img);
+                        })
+                    );
+                }
             }
+            comp.currentState = comp.defaultState;
         }
+
+        await Promise.all(loadPromiseList);
+
         console.log(`[GameObjectWithAnimation] ${taggedString.gameObjectWithAnimationAllSpriteLoaded(this.animatedObject)}`);
-        this.setState({ state: this.defaultState, });
     }
 
     update(input) {
-        if (this.noAnimationPossible) {
-            return;
-        }
+        const { deltaTime, x, y, isFlipped = false, } = input;
 
-        const { deltaTime, } = input;
-        this.lastFrameTime += deltaTime;
-        if (this.lastFrameTime >= GameObjectWithAnimation.DEFAULT_FRAME_DURATION) {
-            this.lastFrameTime = 0;
-            this.frameIndex[this.currentState] =
-                (this.frameIndex[this.currentState] + 1) % this.animationList[this.currentState].length;
-        }
-    }
+        for (const comp of Object.values(this.componentList)) {
+            if (comp.noAnimationPossible) continue;
 
-    draw(input) {
-        if (this.noAnimationPossible) {
-            return;
-        }
+            comp.isFlipped = isFlipped;
+            const stateName = comp.currentState;
+            const stateData = comp.animationList[stateName];
 
-        const { ctx, x, y, flipX = false } = input;
-        const frameList = this.animationList[this.currentState];
-        const img = frameList[this.frameIndex[this.currentState]];
-        if (!img) return;
+            // Update frame timing
+            comp.lastFrameTime += deltaTime;
+            if (comp.lastFrameTime >= GameObjectWithAnimation.DEFAULT_FRAME_DURATION) {
+                comp.lastFrameTime = 0;
+                const totalFrameNum = stateData.imageList?.length || 0;
+                if (totalFrameNum > 0) {
+                    comp.frameIndex[stateName] = (comp.frameIndex[stateName] + 1) % totalFrameNum;
+                }
+            }
 
-        if (flipX) {
-            ctx.save();
-            ctx.scale(-1, 1);
-            ctx.drawImage(img, -x - this.width, y, this.width, this.height);
-            ctx.restore();
-        } else {
-            ctx.drawImage(img, x, y, this.width, this.height);
+            // Compute drawing position
+            comp.x = x + (stateData.offsetX || 0);
+            comp.y = y + (stateData.offsetY || 0);
         }
     }
 
     setState(input) {
-        const { state, resetFrameIndex = true, } = input;
-        if (this.currentState === state) return;
+        const { name, state, resetFrameIndex = true, } = input;
+        const component = this.componentList[name];
+        if (!component) {
+            console.error(`[GameObjectWithAnimation] ${taggedString.gameObjectWithAnimationNoCompFound(name, this.animatedObject)}`);
+            return;
+        }
+        if (component.currentState === state) return;
 
-        this.currentState = state;
-        this.lastFrameTime = 0;
-        if (!this.currentState || !this.animationList[this.currentState] ||
-            this.animationList[this.currentState].length < 1) {
-            this.noAnimationPossible = true;
-            console.error(`[GameObjectWithAnimation] ${taggedString.gameObjectWithAnimationFailedStateChange(state, this.animatedObject)}`);
+        component.currentState = state;
+        component.lastFrameTime = 0;
+        const stateData = component.animationList[state];
+        if (!state || !stateData || stateData.imageList.length < 1) {
+            component.noAnimationPossible = true;
+            console.error(`[GameObjectWithAnimation] ${taggedString.gameObjectWithAnimationFailedStateChange(component, state, this.animatedObject)}`);
             return;
         }
 
-        this.noAnimationPossible = false;
+        component.noAnimationPossible = false;
         if (resetFrameIndex) {
-            this.frameIndex[this.currentState] = 0;
+            component.frameIndex[state] = 0;
         }
     }
 }

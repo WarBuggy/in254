@@ -2,12 +2,12 @@ export class Elevator extends GameClasses.GameObjectWithAnimation {
     constructor(input) {
         super(input);
 
-        const { x, width, height, speed, delayDuration, colony, } = input;
+        const { x, speed, delayDuration, colony, } = input;
         this.currentLevelIndex = colony.firstLevelWithControlRoom.index;
         this.x = x;
         this.y = colony.levelListInOrder[this.currentLevelIndex].groundY;
-        this.width = width;
-        this.height = height;
+        this.width = this.baseComponent.width;
+        this.height = this.baseComponent.height;
         this.speed = speed;
         this.delayDuration = delayDuration;
         this.delayTimer = 0; // counts down when elevator reaches a level
@@ -64,24 +64,17 @@ export class Elevator extends GameClasses.GameObjectWithAnimation {
         }
 
         // Update animation state
-        if (!this.playerIsOn) this.setState({ state: 'idle' });
-        else if (this.playerIsOn && !this.movingVertically) this.setState({ state: 'ready' });
-        else if (this.movingVertically && this.targetY < this.y) this.setState({ state: 'up' });
-        else if (this.movingVertically && this.targetY > this.y) this.setState({ state: 'down' });
+        if (!this.playerIsOn) this.setState({ name: 'base', state: 'idle' });
+        else if (this.playerIsOn && !this.movingVertically) this.setState({ name: 'base', state: 'ready' });
+        else if (this.movingVertically && this.targetY < this.y) this.setState({ name: 'base', state: 'up' });
+        else if (this.movingVertically && this.targetY > this.y) this.setState({ name: 'base', state: 'down' });
 
         // Update animation frames
-        super.update({ deltaTime });
+        super.update({ deltaTime, x: this.x, y: this.y, });
     }
 
     isPlayerOn(input) {
         const { player } = input;
         return player.x + (player.width / 2) >= this.x && player.x + (player.width / 2) < this.x + this.width;
-    }
-
-    draw(input) {
-        const { ctx, camera } = input;
-        const x = this.x - camera.x;
-        const y = this.y - camera.y;
-        super.draw({ ctx, x, y, });
     }
 }
