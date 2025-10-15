@@ -54,40 +54,33 @@ export class GameManager extends GameClasses.MainApp {
             ctx: this.canvas.getContext('2d'),
             drawLayerData: this.modData[Shared.MOD_STRING.MOD_DATA_TYPE.DRAW_LAYER_DATA].layer,
         });
+        this.gowaInstanceList = this.collectAllGOWAInstance().result;
     }
 
-    async loadAllSprite() {
-        this.bgImage = await Shared.loadImage({ src: GameManager.BACKGROUND_IMAGE });
+    collectAllGOWAInstance(input) {
+        const result = {};
 
-        const visited = new Set();
-        const objectsToLoad = [];
-
-        function collectObjects(obj) {
-            if (!obj || typeof obj !== 'object' || visited.has(obj)) return;
-            visited.add(obj);
-
-            // If this object is an animatable entity, collect it
-            if (obj instanceof GameClasses.GameObjectWithAnimation && typeof obj.loadAllSprite === 'function') {
-                objectsToLoad.push(obj);
-            }
-
-            // Handle arrays first (so we don't traverse twice)
-            if (Array.isArray(obj)) {
-                for (const item of obj) collectObjects(item);
-                return;
-            }
-
-            // Handle regular objects
-            for (const key in obj) {
-                if (Object.prototype.hasOwnProperty.call(obj, key)) {
-                    collectObjects(obj[key]);
-                }
+        for (const key of Object.keys(this)) {
+            const value = this[key];
+            if (value instanceof GameClasses.GameObjectWithAnimation) {
+                result[value.animatedObject] = value;
             }
         }
 
-        collectObjects(this);
+        return { result, };
+    }
 
-        await Promise.all(objectsToLoad.map(obj => obj.loadAllSprite()));
+    async loadAllSprite() {
+        // Load background
+        this.bgImage = await Shared.loadImage({ src: GameManager.BACKGROUND_IMAGE });
+
+        const loadPromiseList = [];
+        for (const obj of Object.values(this.gowaInstanceList)) {
+            loadPromiseList.push(obj.loadAllSprite());
+        }
+
+        await Promise.all(loadPromiseList);
+        console.log(`[GameManager] ${taggedString.gameManagerAllSpriteLoaded()}`);
     }
 
     start() {
@@ -131,10 +124,7 @@ export class GameManager extends GameClasses.MainApp {
             mapLimit: this.mapLimit,
             colony: this.colony,
             bgImage: this.bgImage,
-            objectList: [
-                this.elevator,
-                this.player,
-            ],
+            objectList: this.gowaInstanceList,
         });
 
         requestAnimationFrame(() => this.loop());

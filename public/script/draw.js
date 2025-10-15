@@ -21,7 +21,7 @@ export class DrawManager {
             layerBucket[layer.name] = [];
         }
 
-        for (const obj of objectList) {
+        for (const obj of Object.values(objectList)) {
             for (const comp of Object.values(obj.componentList)) {
                 if (comp.noAnimationPossible) continue;
                 const stateData = comp.animationList[comp.currentState];

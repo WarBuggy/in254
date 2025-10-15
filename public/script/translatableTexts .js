@@ -59,5 +59,7 @@ window.translatableTexts = {
         gameObjectWithAnimationFailedStateChange: 'Component "{name}" of animated object "{object}" failed to change to state "{state}".',
         gameObjectWithAnimationAllSpriteLoaded: 'All "{object}" sprites are loaded successfully.',
         gameObjectWithAnimationNoCompFound: 'No component "{name}" found on object "{object}".',
+
+        gameManagerAllSpriteLoaded: 'All sprites are loaded successfully.'
     },
 };
