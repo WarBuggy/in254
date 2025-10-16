@@ -5,7 +5,8 @@ export class Player extends GameClasses.GameObjectWithAnimation {
 
         this.width = this.baseComponent.width;
         this.height = this.baseComponent.height;
-        this.x = (colony.width - this.width) / 2;
+        const controlRoom = colony.firstLevelWithControlRoom.lastControlRoom;
+        this.x = controlRoom.x + (controlRoom.width / 2) - (this.width / 2);
         this.y = colony.firstLevelWithControlRoom.groundY - this.height;
         this.speed = generalData.speed; // per 1 ms
         this.level = colony.firstLevelWithControlRoom;

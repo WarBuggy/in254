@@ -3,9 +3,9 @@ export class Elevator extends GameClasses.GameObjectWithAnimation {
         super(input);
 
         const { x, speed, delayDuration, colony, } = input;
-        this.currentLevelIndex = colony.firstLevelWithControlRoom.index;
         this.x = x;
-        this.y = colony.levelListInOrder[this.currentLevelIndex].groundY;
+        this.y = colony.firstLevelWithControlRoom.groundY;
+        this.currentLevelIndex = colony.firstLevelWithControlRoom.index;
         this.width = this.baseComponent.width;
         this.height = this.baseComponent.height;
         this.speed = speed;

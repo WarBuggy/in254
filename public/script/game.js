@@ -30,7 +30,7 @@ export class GameManager extends GameClasses.MainApp {
         };
 
         this.elevator = new GameClasses.Elevator({
-            x: this.colony.width / 2 - this.player.width / 2,
+            x: this.colony.elevatorX,
             speed: interiorData.elevatorSpeed,
             delayDuration: interiorData.elevatorDelayDuration,
             animationData: this.modData[Shared.MOD_STRING.MOD_DATA_TYPE.ANIMATION_DATA].elevator,
@@ -62,12 +62,26 @@ export class GameManager extends GameClasses.MainApp {
 
         for (const key of Object.keys(this)) {
             const value = this[key];
+
+            if (!value) continue;
+
+            // Case 1: Direct instance of GOWA
             if (value instanceof GameClasses.GameObjectWithAnimation) {
                 result[value.animatedObject] = value;
+                continue;
+            }
+
+            // Case 2: Array of potential GOWA instances
+            if (Array.isArray(value)) {
+                for (const element of value) {
+                    if (element instanceof GameClasses.GameObjectWithAnimation) {
+                        result[element.animatedObject] = element;
+                    }
+                }
             }
         }
 
-        return { result, };
+        return { result };
     }
 
     async loadAllSprite() {

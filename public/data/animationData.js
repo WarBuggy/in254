@@ -33,8 +33,8 @@ export default {
                         width: 256,
                         height: 90,
                         layer: 'foreground',
-                    }
-                ]
+                    },
+                ],
             },
         },
         {
@@ -53,6 +53,50 @@ export default {
                             move: { frameList: ['move_01.svg', 'move_02.svg', 'move_03.svg', 'move_04.svg', 'move_05.svg', 'move_06.svg', 'move_07.svg',], },
                         },
                         width: 256,
+                        height: 256,
+                    },
+                ],
+            },
+        },
+        {
+            dataType: Shared.MOD_STRING.MOD_DATA_TYPE.ANIMATION_DATA,
+            name: 'cell',
+            payload: {
+                baseComponent: 'base',
+                componentList: [
+                    {
+                        name: 'base',
+                        folder: 'asset/bunker/cell/',
+                        layer: 'wall',
+                        default: 'idle',
+                        animationList: {
+                            idle: { frameList: ['base.svg'], },
+                        },
+                        width: 800, // duplicated in colonyData
+                        height: 256,
+                    },
+                    {
+                        name: 'wallMountedLight',
+                        folder: 'asset/bunker/cell/',
+                        layer: 'wall',
+                        default: 'off',
+                        animationList: {
+                            off: { frameList: ['wallMountedLightOff.svg'], },
+                            on: { frameList: ['wallMountedLightOn.svg'], },
+                        },
+                        width: 800, // duplicated in colonyData
+                        height: 256,
+                    },
+                    {
+                        name: 'lighting',
+                        folder: 'asset/bunker/cell/',
+                        layer: 'outside',
+                        default: 'off',
+                        animationList: {
+                            off: { frameList: ['lightingOff.svg'], },
+                            on: { frameList: ['lightingOn.svg'], },
+                        },
+                        width: 800, // duplicated in colonyData
                         height: 256,
                     },
                 ],

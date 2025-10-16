@@ -60,6 +60,9 @@ window.translatableTexts = {
         gameObjectWithAnimationAllSpriteLoaded: 'All "{object}" sprites are loaded successfully.',
         gameObjectWithAnimationNoCompFound: 'No component "{name}" found on object "{object}".',
 
-        gameManagerAllSpriteLoaded: 'All sprites are loaded successfully.'
+        colonyNoElevatorFound: 'No elevator found on level "{level}".',
+        colonyElevatorXMismatch: 'Elevator X mismatch detected across levels. Computed values: {arg1}. Using smallest X value: {arg2}.',
+
+        gameManagerAllSpriteLoaded: 'All sprites are loaded successfully.',
     },
 };
