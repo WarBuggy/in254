@@ -10,7 +10,7 @@ class Shared {
 
   static BUNKER_TYPE = {
     CELL: 'cell',
-    CONTROL_ROOM: 'control room',
+    CONTROL_ROOM: 'controlRoom',
     ELEVATOR: 'elevator',
   };
 

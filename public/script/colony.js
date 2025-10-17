@@ -8,7 +8,7 @@ export class Colony {
         let nextCellNumber = interiorData.cellStartingNum;
         let levelCeiling = 0;
         for (const [levelName, data] of Object.entries(levelData.list)) {
-            const aLevelData =
+            const { aLevelData, nextCellNumber: returnNextCellNumber, } =
                 this.createALevelData({ interiorData, levelName, data, nextCellNumber, });
             aLevelData.groundY = levelCeiling + aLevelData.groundToCeilingHeight;
             this.allLevelData[aLevelData.name] = aLevelData;
@@ -17,7 +17,7 @@ export class Colony {
             if (aLevelData.lastControlRoom && !this.firstLevelWithControlRoom) {
                 this.firstLevelWithControlRoom = aLevelData;
             }
-            nextCellNumber = aLevelData.nextCellNumber;
+            nextCellNumber = returnNextCellNumber;
             levelCeiling = levelCeiling + aLevelData.height;
         }
         this.levelListInOrder = Object.values(this.allLevelData);
@@ -38,6 +38,7 @@ export class Colony {
         const bunkerList = [];
         let lastControlRoom = null;
         let currentX = interiorData.outerWallPaddingLeft;
+        let controlRoomIndex = 0;
         for (let i = 0; i < data.bunkerList.length; i++) {
             const bunker = data.bunkerList[i];
             const cellData = {
@@ -47,7 +48,6 @@ export class Colony {
             let marginLeft = 0;
             let bunkerWidth = 0;
             let marginRight = 0;
-            bunkerList.push(cellData);
             switch (bunker) {
                 case Shared.BUNKER_TYPE.ELEVATOR:
                     marginLeft = interiorData.elevatorMarginLeft;
@@ -58,6 +58,8 @@ export class Colony {
                     marginLeft = interiorData.bunkerMarginLeft;
                     bunkerWidth = interiorData.bunkerWidth;
                     marginRight = interiorData.bunkerMarginRight;
+                    cellData.number = controlRoomIndex++;
+                    cellData.name = `${Shared.BUNKER_TYPE.CONTROL_ROOM}${cellData.number}`;
                     lastControlRoom = cellData;
                     break;
                 case Shared.BUNKER_TYPE.CELL:
@@ -76,16 +78,17 @@ export class Colony {
             cellData.width = bunkerWidth;
             currentX += bunkerWidth + marginRight;
             levelWidth += marginLeft + bunkerWidth + marginRight;
-            continue;
+            bunkerList.push(cellData);
         }
 
-        return {
+        const aLevelData = {
             name: levelName,
             width: levelWidth,
             height: levelHeight,
-            groundToCeilingHeight, bunkerList, nextCellNumber, lastControlRoom,
+            groundToCeilingHeight, bunkerList, lastControlRoom,
             index: data.index,
-        };
+        }
+        return { aLevelData, nextCellNumber, };
     }
 
     calculateElevatorX(input) {

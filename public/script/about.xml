@@ -11,7 +11,11 @@
     <hook>../script/shared/dataLoader.js</hook>
     <hook>../script/shared/mainApp.js</hook>
     <hook>../script/shared/gameObjectWithAnimation.js</hook>
+    <hook>../script/shared/gameObjectWithInteraction.js</hook>
+    <hook>../script/shared/bunker.js</hook>
     <hook>../script/shared/eventEmitter.js</hook>
+    <hook>../script/controlRoom.js</hook>
+    <hook>../script/cell.js</hook>
     <hook>../script/colony.js</hook>
     <hook>../script/player.js</hook>
     <hook>../script/elevator.js</hook>

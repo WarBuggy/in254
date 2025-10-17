@@ -22,7 +22,7 @@ export class Elevator extends GameClasses.GameObjectWithAnimation {
     }
 
     update(input) {
-        const { deltaTime, player, inputManager, colony, } = input;
+        const { deltaTime, camera, player, inputManager, colony, } = input;
 
         // Update delay timer
         if (this.delayTimer > 0) {
@@ -70,11 +70,23 @@ export class Elevator extends GameClasses.GameObjectWithAnimation {
         else if (this.movingVertically && this.targetY > this.y) this.setState({ name: 'base', state: 'down' });
 
         // Update animation frames
-        super.update({ deltaTime, x: this.x, y: this.y, });
+        super.update({ deltaTime, x: this.x, y: this.y, camera, });
     }
 
     isPlayerOn(input) {
         const { player } = input;
         return player.x + (player.width / 2) >= this.x && player.x + (player.width / 2) < this.x + this.width;
+    }
+
+    checkVisibility(input) {
+        const { camera, } = input;
+        const y = this.componentList.railGuard.y;
+        const bottom = this.baseComponent.y + this.baseComponent.height;
+        return !(
+            this.baseComponent.x + this.baseComponent.width < camera.x ||
+            this.baseComponent.x > camera.right ||
+            bottom < camera.y ||
+            y > camera.bottom
+        );
     }
 }

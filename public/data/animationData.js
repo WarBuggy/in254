@@ -52,7 +52,27 @@ export default {
                             idle: { frameList: ['idle.svg'], },
                             move: { frameList: ['move_01.svg', 'move_02.svg', 'move_03.svg', 'move_04.svg', 'move_05.svg', 'move_06.svg', 'move_07.svg',], },
                         },
-                        width: 256,
+                        width: 256, // duplicated in colonyData
+                        height: 256,
+                    },
+                ],
+            },
+        },
+        {
+            dataType: Shared.MOD_STRING.MOD_DATA_TYPE.ANIMATION_DATA,
+            name: 'controlRoom',
+            payload: {
+                baseComponent: 'base',
+                componentList: [
+                    {
+                        name: 'base',
+                        folder: 'asset/bunker/controlRoom/',
+                        layer: 'wall',
+                        default: 'idle',
+                        animationList: {
+                            idle: { frameList: ['base.svg'], },
+                        },
+                        width: 800, // duplicated in colonyData
                         height: 256,
                     },
                 ],

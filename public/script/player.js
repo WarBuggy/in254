@@ -14,19 +14,8 @@ export class Player extends GameClasses.GameObjectWithAnimation {
         this.facingRight = false;
     }
 
-    update(input) {
-        const { elevator, inputManager, deltaTime, colony, mapLimit, } = input;
-
-        // If on a moving elevator, just follow it and idle
-        if (elevator.playerIsOn) {
-            this.y = elevator.y - this.height;
-            if (elevator.movingVertically) {
-                this.setState({ name: 'base', state: 'idle', });
-                super.update({ deltaTime, x: this.x, y: this.y, isFlipped: !this.facingRight, });
-                return;
-            }
-            this.level = colony.levelListInOrder[elevator.currentLevelIndex];
-        }
+    preUpdate(input) {
+        const { deltaTime, inputManager, mapLimit, } = input;
 
         // Horizontal movement
         const movingLeft = !!inputManager.isPressed({ key: 'a', });
@@ -51,6 +40,24 @@ export class Player extends GameClasses.GameObjectWithAnimation {
         else this.setState({ name: 'base', state: 'idle', });
 
         // Update animation frame
+    }
+
+    postUpdate(input) {
+        const { elevator, deltaTime, colony, } = input;
+        // If on a moving elevator, just follow it and idle
+        if (elevator.playerIsOn) {
+            this.y = elevator.y - this.height;
+            if (elevator.movingVertically) {
+                this.setState({ name: 'base', state: 'idle', });
+                super.update({ deltaTime, x: this.x, y: this.y, isFlipped: !this.facingRight, });
+                return;
+            }
+            this.level = colony.levelListInOrder[elevator.currentLevelIndex];
+        }
         super.update({ deltaTime, x: this.x, y: this.y, isFlipped: !this.facingRight, });
+    }
+
+    checkVisibility(input) {
+        return true;
     }
 }

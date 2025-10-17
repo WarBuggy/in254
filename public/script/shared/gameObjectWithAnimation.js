@@ -1,5 +1,6 @@
 export class GameObjectWithAnimation {
 
+    static IMAGE_CACHE = new Map();
     static DEFAULT_FRAME_DURATION = 100; // ms;
     static EXCLUDE_KEY_LIST = ['name', 'default', 'animationList'];
 
@@ -16,6 +17,7 @@ export class GameObjectWithAnimation {
             }
         }
         this.baseComponent = this.componentList[animationData.baseComponent];
+        this.isVisible = false;
     }
 
     processComponent(input) {
@@ -61,32 +63,35 @@ export class GameObjectWithAnimation {
     }
 
     async loadAllSprite() {
-        const loadPromiseList = [];
-
         for (const comp of Object.values(this.componentList)) {
             for (const [_, stateData] of Object.entries(comp.animationList)) {
                 const folder = stateData.folder || '';
-                stateData.imageList = []; // will store loaded images
+                stateData.imageList = [];
 
                 for (const fileName of stateData.frameList) {
                     const src = folder + fileName;
-                    loadPromiseList.push(
-                        Shared.loadImage({ src }).then(img => {
-                            stateData.imageList.push(img);
-                        })
-                    );
+
+                    // Check cache first
+                    if (GameObjectWithAnimation.IMAGE_CACHE.has(src)) {
+                        // Reuse existing cached image
+                        stateData.imageList.push(GameObjectWithAnimation.IMAGE_CACHE.get(src));
+                    } else {
+                        // Load image and store it immediately
+                        const img = await Shared.loadImage({ src });
+                        GameObjectWithAnimation.IMAGE_CACHE.set(src, img);
+                        stateData.imageList.push(img);
+                    }
                 }
             }
+
             comp.currentState = comp.defaultState;
         }
-
-        await Promise.all(loadPromiseList);
 
         console.log(`[GameObjectWithAnimation] ${taggedString.gameObjectWithAnimationAllSpriteLoaded(this.animatedObject)}`);
     }
 
     update(input) {
-        const { deltaTime, x, y, isFlipped = false, } = input;
+        const { deltaTime, x, y, camera, isFlipped = false, } = input;
 
         for (const comp of Object.values(this.componentList)) {
             if (comp.noAnimationPossible) continue;
@@ -109,6 +114,7 @@ export class GameObjectWithAnimation {
             comp.x = x + (stateData.offsetX || 0);
             comp.y = y + (stateData.offsetY || 0);
         }
+        this.isVisible = this.checkVisibility({ camera, });
     }
 
     setState(input) {
@@ -133,5 +139,15 @@ export class GameObjectWithAnimation {
         if (resetFrameIndex) {
             component.frameIndex[state] = 0;
         }
+    }
+
+    checkVisibility(input) {
+        const { camera, } = input;
+        return !(
+            this.baseComponent.x + this.baseComponent.width < camera.x ||
+            this.baseComponent.x > camera.right ||
+            this.baseComponent.y + this.baseComponent.height < camera.y ||
+            this.baseComponent.y > camera.bottom
+        );
     }
 }

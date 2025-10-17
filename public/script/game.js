@@ -16,7 +16,10 @@ export class GameManager extends GameClasses.MainApp {
         this.canvas.height = window.innerHeight;
 
         // Camera / viewport
-        this.camera = { x: 0, y: 0, width: window.innerWidth, height: window.innerHeight };
+        this.camera = {
+            x: 0, y: 0, width: window.innerWidth, height: window.innerHeight,
+            right: window.innerWidth, bottom: window.innerHeight,
+        };
         // Player
         this.player = new GameClasses.Player({
             colony: this.colony,
@@ -54,6 +57,12 @@ export class GameManager extends GameClasses.MainApp {
             ctx: this.canvas.getContext('2d'),
             drawLayerData: this.modData[Shared.MOD_STRING.MOD_DATA_TYPE.DRAW_LAYER_DATA].layer,
         });
+
+        const { controlRoomList, cellList, } = this.createBunkerList({
+            colony: this.colony,
+        });
+        this.controlRoomList = controlRoomList;
+        this.cellList = cellList;
         this.gowaInstanceList = this.collectAllGOWAInstance().result;
     }
 
@@ -80,7 +89,6 @@ export class GameManager extends GameClasses.MainApp {
                 }
             }
         }
-
         return { result };
     }
 
@@ -88,12 +96,10 @@ export class GameManager extends GameClasses.MainApp {
         // Load background
         this.bgImage = await Shared.loadImage({ src: GameManager.BACKGROUND_IMAGE });
 
-        const loadPromiseList = [];
         for (const obj of Object.values(this.gowaInstanceList)) {
-            loadPromiseList.push(obj.loadAllSprite());
+            await obj.loadAllSprite();
         }
 
-        await Promise.all(loadPromiseList);
         console.log(`[GameManager] ${taggedString.gameManagerAllSpriteLoaded()}`);
     }
 
@@ -101,19 +107,38 @@ export class GameManager extends GameClasses.MainApp {
         requestAnimationFrame(() => this.loop());
     }
 
+    // The game is designed around having only one control room.
+    // But it is possible to have multiple control rooms with identical graphic and functions 
+    createBunkerList(input) {
+        const { colony, } = input;
+        const controlRoomList = [];
+        const cellList = [];
+        for (const [levelName, level] of Object.entries(colony.allLevelData)) {
+            const bunkerList = level.bunkerList || [];
+            for (const bunker of bunkerList) {
+                if (bunker && bunker.type === Shared.BUNKER_TYPE.CONTROL_ROOM) {
+                    const controlRoom = new GameClasses.ControlRoom({
+                        animationData: this.modData[Shared.MOD_STRING.MOD_DATA_TYPE.ANIMATION_DATA].controlRoom,
+                        level, bunker,
+                    });
+                    controlRoomList.push(controlRoom);
+                } else if (bunker && bunker.type === Shared.BUNKER_TYPE.CELL) {
+                    const cell = new GameClasses.Cell({
+                        animationData: this.modData[Shared.MOD_STRING.MOD_DATA_TYPE.ANIMATION_DATA].cell,
+                        level, bunker,
+                    });
+                    cellList.push(cell);
+                }
+            }
+        }
+        return { controlRoomList, cellList, };
+    }
+
     update(input) {
         const { deltaTime, } = input;
 
-        this.elevator.update({
-            deltaTime, colony: this.colony,
-            player: this.player, inputManager: this.inputManager,
-        });
-
-        this.player.update({
-            elevator: this.elevator, colony: this.colony,
-            levelList: this.colony.levelListInOrder,
-            inputManager: this.inputManager,
-            deltaTime, mapLimit: this.mapLimit,
+        this.player.preUpdate({
+            deltaTime, inputManager: this.inputManager, mapLimit: this.mapLimit,
         });
 
         // Center camera on player
@@ -123,6 +148,20 @@ export class GameManager extends GameClasses.MainApp {
         // Clamp camera to map
         this.camera.x = Math.max(0, Math.min(this.colony.width - this.camera.width, this.camera.x));
         this.camera.y = Math.max(0, Math.min(this.colony.height - this.camera.height, this.camera.y));
+        this.camera.right = this.camera.x + this.camera.width;
+        this.camera.bottom = this.camera.y + this.camera.height;
+
+        this.elevator.update({
+            deltaTime, colony: this.colony, camera: this.camera,
+            player: this.player, inputManager: this.inputManager,
+        });
+        for (const controlRoom of this.controlRoomList) {
+            controlRoom.update({ deltaTime, camera: this.camera, });
+        }
+        for (const cell of this.cellList) {
+            cell.update({ deltaTime, camera: this.camera, });
+        }
+        this.player.postUpdate({ deltaTime, elevator: this.elevator, colony: this.colony, });
     }
 
     loop() {

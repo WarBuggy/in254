@@ -22,6 +22,9 @@ export class DrawManager {
         }
 
         for (const obj of Object.values(objectList)) {
+            if (!obj.isVisible) {
+                continue;
+            }
             for (const comp of Object.values(obj.componentList)) {
                 if (comp.noAnimationPossible) continue;
                 const stateData = comp.animationList[comp.currentState];
