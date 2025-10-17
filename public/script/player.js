@@ -15,7 +15,12 @@ export class Player extends GameClasses.GameObjectWithAnimation {
     }
 
     preUpdate(input) {
-        const { deltaTime, inputManager, mapLimit, } = input;
+        const { deltaTime, elevator, inputManager, mapLimit, } = input;
+
+        if (elevator.playerIsOn && elevator.movingVertically) {
+            this.setState({ name: 'base', state: 'idle', });
+            return;
+        }
 
         // Horizontal movement
         const movingLeft = !!inputManager.isPressed({ key: 'a', });
@@ -38,8 +43,6 @@ export class Player extends GameClasses.GameObjectWithAnimation {
         // Set animation state based on movement
         if (movingLeft || movingRight) this.setState({ name: 'base', state: 'move', });
         else this.setState({ name: 'base', state: 'idle', });
-
-        // Update animation frame
     }
 
     postUpdate(input) {

@@ -138,7 +138,8 @@ export class GameManager extends GameClasses.MainApp {
         const { deltaTime, } = input;
 
         this.player.preUpdate({
-            deltaTime, inputManager: this.inputManager, mapLimit: this.mapLimit,
+            deltaTime, elevator: this.elevator,
+            inputManager: this.inputManager, mapLimit: this.mapLimit,
         });
 
         // Center camera on player
