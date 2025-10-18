@@ -2,9 +2,9 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="255.99998"
-   height="255.99998"
-   viewBox="0 0 67.733321 67.733321"
+   width="165"
+   height="256"
+   viewBox="12 0 43.656035 67.733"
    version="1.1"
    id="svg1"
    xmlns="http://www.w3.org/2000/svg"
@@ -40,7 +40,7 @@
       <path
          style="fill:none;fill-opacity:1;stroke:#784421;stroke-width:4.63021;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1;paint-order:normal"
          id="path92"
-         d="m 31.845363,42.346027 a 1.5906168,2.3223004 0 0 1 -1.880405,-1.773661 1.5906168,2.3223004 0 0 1 1.196804,-2.762222 1.5906168,2.3223004 0 0 1 1.903288,1.720848 1.5906168,2.3223004 0 0 1 -1.160414,2.795124" />
+         d="m 31.58078,43.668941 a 1.5906168,2.3223004 0 0 1 -1.880405,-1.773661 1.5906168,2.3223004 0 0 1 1.196804,-2.762221 1.5906168,2.3223004 0 0 1 1.903287,1.720847 1.5906168,2.3223004 0 0 1 -1.160414,2.795124" />
       <path
          style="fill:none;fill-opacity:1;stroke:#784421;stroke-width:4.07723;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1;paint-order:normal"
          d="m 49.627244,56.625957 c -0.02121,5.853469 -0.04241,11.706938 -0.06362,17.56041"
@@ -67,7 +67,7 @@
       <path
          style="fill:none;fill-opacity:1;stroke:#a05a2c;stroke-width:4.63021;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1;paint-order:normal"
          id="path68"
-         d="m -21.639797,48.348468 a 1.5906168,2.3223004 0 0 1 -1.880406,-1.77366 1.5906168,2.3223004 0 0 1 1.196804,-2.762222 1.5906168,2.3223004 0 0 1 1.903288,1.720848 1.5906168,2.3223004 0 0 1 -1.160414,2.795123"
+         d="m -22.067911,48.99015 a 1.5906168,2.3223004 0 0 1 -1.880406,-1.773661 1.5906168,2.3223004 0 0 1 1.196805,-2.762221 1.5906168,2.3223004 0 0 1 1.903287,1.720847 1.5906168,2.3223004 0 0 1 -1.160414,2.795124"
          transform="rotate(-64.674043)" />
       <path
          style="fill:none;fill-opacity:1;stroke:#a05a2c;stroke-width:4.07723;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1;paint-order:normal"
@@ -84,15 +84,11 @@
   <g
      id="layer2"
      style="display:inline">
-    <g
-       id="g189"
-       style="display:inline">
-      <path
-         style="fill:none;stroke:#d26e28;stroke-width:5.29167;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1;paint-order:normal"
-         d="m 34.675446,37.983928 c -0.190874,3.520566 -0.381748,7.04113 -0.572622,10.561697"
-         id="path2"
-         transform="matrix(2.1224953,-0.07058255,0.12544899,1.1942,-45.236651,-20.02612)" />
-    </g>
+    <path
+       style="display:inline;fill:none;stroke:#d26e28;stroke-width:5.29167;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1;paint-order:normal"
+       d="m 34.675446,37.983928 c -0.190874,3.520566 -0.381748,7.04113 -0.572622,10.561697"
+       id="path2"
+       transform="matrix(2.1224953,-0.07058255,0.12544899,1.1942,-45.236651,-20.02612)" />
   </g>
   <g
      id="layer5"

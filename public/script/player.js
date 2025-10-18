@@ -9,54 +9,58 @@ export class Player extends GameClasses.GameObjectWithAnimation {
         this.x = controlRoom.x + (controlRoom.width / 2) - (this.width / 2);
         this.y = colony.firstLevelWithControlRoom.groundY - this.height;
         this.speed = generalData.speed; // per 1 ms
-        this.level = colony.firstLevelWithControlRoom;
-
         this.facingRight = false;
+        this.isMoving = false;
+
+        this.interactionOffsetX = generalData.interactionOffsetX;
+        this.interactionX = this.x + this.interactionOffsetX;
+        this.interactWith = null;
     }
 
-    preUpdate(input) {
-        const { deltaTime, elevator, inputManager, mapLimit, } = input;
+    updatePosition(input) {
+        const { deltaTime, inputManager, mapLimit, } = input;
 
-        if (elevator.playerIsOn && elevator.movingVertically) {
-            this.setState({ name: 'base', state: 'idle', });
+        if (this.interactWith) {
             return;
         }
 
         // Horizontal movement
-        const movingLeft = !!inputManager.isPressed({ key: 'a', });
-        const movingRight = !!inputManager.isPressed({ key: 'd', });
+        const movingLeft = inputManager.isPressed({ key: 'a', });
+        const movingRight = inputManager.isPressed({ key: 'd', });
 
         const moveDistance = this.speed * deltaTime;
         if (movingLeft) {
             this.x -= moveDistance;
             this.x = Math.max(mapLimit.left, this.x);
+            this.isMoving = true;
+            this.facingRight = false;
         }
-        if (movingRight) {
+        else if (movingRight) {
             this.x += moveDistance;
             this.x = Math.min(mapLimit.right - this.width, this.x);
+            this.isMoving = true;
+            this.facingRight = true;
+        } else {
+            this.isMoving = false;
         }
-
-        // Facing direction
-        if (movingLeft) this.facingRight = false;
-        else if (movingRight) this.facingRight = true;
-
-        // Set animation state based on movement
-        if (movingLeft || movingRight) this.setState({ name: 'base', state: 'move', });
-        else this.setState({ name: 'base', state: 'idle', });
+        this.interactionX = this.x + this.interactionOffsetX;
     }
 
     postUpdate(input) {
-        const { elevator, deltaTime, colony, } = input;
+        const { deltaTime, gowaInstanceList, } = input;
         // If on a moving elevator, just follow it and idle
-        if (elevator.playerIsOn) {
+        if (this.interactWith == 'elevator') {
+            const elevator = gowaInstanceList[this.interactWith];
             this.y = elevator.y - this.height;
-            if (elevator.movingVertically) {
-                this.setState({ name: 'base', state: 'idle', });
-                super.update({ deltaTime, x: this.x, y: this.y, isFlipped: !this.facingRight, });
-                return;
-            }
-            this.level = colony.levelListInOrder[elevator.currentLevelIndex];
+            this.setState({ name: 'base', state: 'idle', });
+            super.update({ deltaTime, x: this.x, y: this.y, isFlipped: !this.facingRight, });
+            return;
         }
+
+        // Set animation state based on movement
+        if (this.isMoving) this.setState({ name: 'base', state: 'move', });
+        else this.setState({ name: 'base', state: 'idle', });
+
         super.update({ deltaTime, x: this.x, y: this.y, isFlipped: !this.facingRight, });
     }
 

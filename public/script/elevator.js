@@ -1,10 +1,8 @@
-export class Elevator extends GameClasses.GameObjectWithAnimation {
+export class Elevator extends GameClasses.GameObjectWithInteraction {
     constructor(input) {
         super(input);
 
-        const { x, speed, delayDuration, colony, } = input;
-        this.x = x;
-        this.y = colony.firstLevelWithControlRoom.groundY;
+        const { speed, delayDuration, colony, } = input;
         this.currentLevelIndex = colony.firstLevelWithControlRoom.index;
         this.width = this.baseComponent.width;
         this.height = this.baseComponent.height;
@@ -22,31 +20,12 @@ export class Elevator extends GameClasses.GameObjectWithAnimation {
     }
 
     update(input) {
-        const { deltaTime, camera, player, inputManager, colony, } = input;
+        const { deltaTime, player, } = input;
 
         // Update delay timer
         if (this.delayTimer > 0) {
             this.delayTimer -= deltaTime;
             if (this.delayTimer < 0) this.delayTimer = 0;
-        }
-
-        // Determine if player is on elevator
-        this.playerIsOn = this.isPlayerOn({ player });
-
-        // Handle vertical input only if player is on and delay expired
-        if (this.playerIsOn && this.delayTimer <= 0 && !this.movingVertically) {
-            if (inputManager.isPressed({ key: 'w', }) && this.currentLevelIndex > 0) {
-                this.currentLevelIndex = this.currentLevelIndex - 1;
-                const nextLevel = colony.levelListInOrder[this.currentLevelIndex];
-                this.targetY = nextLevel.groundY;
-                this.movingVertically = true;
-            }
-            else if (inputManager.isPressed({ key: 's', }) && this.currentLevelIndex < colony.levelListInOrder.length - 1) {
-                this.currentLevelIndex = this.currentLevelIndex + 1;
-                const nextLevel = colony.levelListInOrder[this.currentLevelIndex];
-                this.targetY = nextLevel.groundY;
-                this.movingVertically = true;
-            }
         }
 
         // Move elevator vertically toward target
@@ -59,18 +38,21 @@ export class Elevator extends GameClasses.GameObjectWithAnimation {
                 (direction === -1 && this.y <= this.targetY)) {
                 this.y = this.targetY;
                 this.movingVertically = false;
+                player.interactWith = null;
                 this.startDelay();
             }
         }
 
         // Update animation state
-        if (!this.playerIsOn) this.setState({ name: 'base', state: 'idle' });
-        else if (this.playerIsOn && !this.movingVertically) this.setState({ name: 'base', state: 'ready' });
-        else if (this.movingVertically && this.targetY < this.y) this.setState({ name: 'base', state: 'up' });
-        else if (this.movingVertically && this.targetY > this.y) this.setState({ name: 'base', state: 'down' });
+        this.playerIsOn = this.isPlayerOn({ player, });
+        const name = 'base';
+        if (this.movingVertically && this.targetY < this.y) this.setState({ name, state: 'up' });
+        else if (this.movingVertically && this.targetY > this.y) this.setState({ name, state: 'down' });
+        else if (this.playerIsOn && !this.movingVertically) this.setState({ name, state: 'ready' });
+        else if (!this.playerIsOn) this.setState({ name, state: 'idle' });
 
         // Update animation frames
-        super.update({ deltaTime, x: this.x, y: this.y, camera, });
+        super.update({ deltaTime, x: this.x, y: this.y, player, });
     }
 
     isPlayerOn(input) {
@@ -88,5 +70,48 @@ export class Elevator extends GameClasses.GameObjectWithAnimation {
             bottom < camera.y ||
             y > camera.bottom
         );
+    }
+
+    calculateInteractionBound(input) {
+        const x = this.baseComponent.x;
+        const right = x + this.baseComponent.width;
+        const top = this.componentList.railGuard.y
+        const bottom = this.baseComponent.y + this.baseComponent.height;
+        const y = top + ((bottom - top) / 2);
+        return { x, right, y, };
+    }
+
+    getInteractableList(input) {
+        this.interactableList = [];
+        if (this.movingVertically) {
+            return;
+        }
+        super.getInteractableList(input);
+    }
+
+    handleInput(input) {
+        const { colony, button, player, } = input;
+
+        // Determine if player is on elevator
+        // this.playerIsOn = this.isPlayerOn({ player });
+
+        // Handle vertical input only if player is on and delay expired
+        let nextLevel = null;
+        if (this.delayTimer <= 0 && !this.movingVertically) {
+            if (button == 'w' && this.currentLevelIndex > 0) {
+                this.currentLevelIndex = this.currentLevelIndex - 1;
+                nextLevel = colony.levelListInOrder[this.currentLevelIndex];
+            }
+            else if (button == 's' && this.currentLevelIndex < colony.levelListInOrder.length - 1) {
+                this.currentLevelIndex = this.currentLevelIndex + 1;
+                nextLevel = colony.levelListInOrder[this.currentLevelIndex];
+
+            }
+        }
+        if (nextLevel) {
+            this.targetY = nextLevel.groundY;
+            this.movingVertically = true;
+            player.interactWith = this.animatedObject;
+        }
     }
 }

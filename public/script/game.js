@@ -34,9 +34,11 @@ export class GameManager extends GameClasses.MainApp {
 
         this.elevator = new GameClasses.Elevator({
             x: this.colony.elevatorX,
+            y: this.colony.firstLevelWithControlRoom.groundY,
             speed: interiorData.elevatorSpeed,
             delayDuration: interiorData.elevatorDelayDuration,
             animationData: this.modData[Shared.MOD_STRING.MOD_DATA_TYPE.ANIMATION_DATA].elevator,
+            interactionData: this.modData[Shared.MOD_STRING.MOD_DATA_TYPE.INTERACTION_DATA].elevator,
             colony: this.colony,
         });
 
@@ -59,17 +61,21 @@ export class GameManager extends GameClasses.MainApp {
         });
 
         const { controlRoomList, cellList, } = this.createBunkerList({
-            colony: this.colony,
+            colony: this.colony, bunkerHeight: interiorData.bunkerHeight,
         });
         this.controlRoomList = controlRoomList;
         this.cellList = cellList;
         this.gowaInstanceList = this.collectAllGOWAInstance().result;
+        this.visibleList = [];
     }
 
     collectAllGOWAInstance(input) {
         const result = {};
 
         for (const key of Object.keys(this)) {
+            if (key == 'player') {
+                continue;
+            }
             const value = this[key];
 
             if (!value) continue;
@@ -96,6 +102,7 @@ export class GameManager extends GameClasses.MainApp {
         // Load background
         this.bgImage = await Shared.loadImage({ src: GameManager.BACKGROUND_IMAGE });
 
+        await this.player.loadAllSprite();
         for (const obj of Object.values(this.gowaInstanceList)) {
             await obj.loadAllSprite();
         }
@@ -110,22 +117,25 @@ export class GameManager extends GameClasses.MainApp {
     // The game is designed around having only one control room.
     // But it is possible to have multiple control rooms with identical graphic and functions 
     createBunkerList(input) {
-        const { colony, } = input;
+        const { colony, bunkerHeight, } = input;
         const controlRoomList = [];
         const cellList = [];
         for (const [levelName, level] of Object.entries(colony.allLevelData)) {
             const bunkerList = level.bunkerList || [];
             for (const bunker of bunkerList) {
+                const x = bunker.x;
+                const y = level.groundY - bunkerHeight;
                 if (bunker && bunker.type === Shared.BUNKER_TYPE.CONTROL_ROOM) {
                     const controlRoom = new GameClasses.ControlRoom({
+                        x, y, bunker,
                         animationData: this.modData[Shared.MOD_STRING.MOD_DATA_TYPE.ANIMATION_DATA].controlRoom,
-                        level, bunker,
                     });
                     controlRoomList.push(controlRoom);
                 } else if (bunker && bunker.type === Shared.BUNKER_TYPE.CELL) {
                     const cell = new GameClasses.Cell({
+                        x, y, bunker,
                         animationData: this.modData[Shared.MOD_STRING.MOD_DATA_TYPE.ANIMATION_DATA].cell,
-                        level, bunker,
+                        interactionData: this.modData[Shared.MOD_STRING.MOD_DATA_TYPE.INTERACTION_DATA].cell,
                     });
                     cellList.push(cell);
                 }
@@ -137,11 +147,32 @@ export class GameManager extends GameClasses.MainApp {
     update(input) {
         const { deltaTime, } = input;
 
-        this.player.preUpdate({
+        this.player.updatePosition({
             deltaTime, elevator: this.elevator,
             inputManager: this.inputManager, mapLimit: this.mapLimit,
         });
+        this.updateCamera();
 
+        this.visibleList = [this.player];
+
+        for (const object of Object.values(this.gowaInstanceList)) {
+            object.postUpdate({ camera: this.camera, player: this.player, });
+            if (object.isVisible) {
+                this.visibleList.push(object);
+                object.checkInput({
+                    inputManager: this.inputManager,
+                    colony: this.colony, player: this.player,
+                });
+                object.update({ deltaTime, player: this.player, });
+            }
+        }
+
+        this.player.postUpdate({
+            deltaTime, gowaInstanceList: this.gowaInstanceList,
+        });
+    }
+
+    updateCamera(input) {
         // Center camera on player
         this.camera.x = this.player.x + this.player.width / 2 - this.camera.width / 2;
         this.camera.y = this.player.y + this.player.height / 2 - this.camera.height / 2;
@@ -151,18 +182,6 @@ export class GameManager extends GameClasses.MainApp {
         this.camera.y = Math.max(0, Math.min(this.colony.height - this.camera.height, this.camera.y));
         this.camera.right = this.camera.x + this.camera.width;
         this.camera.bottom = this.camera.y + this.camera.height;
-
-        this.elevator.update({
-            deltaTime, colony: this.colony, camera: this.camera,
-            player: this.player, inputManager: this.inputManager,
-        });
-        for (const controlRoom of this.controlRoomList) {
-            controlRoom.update({ deltaTime, camera: this.camera, });
-        }
-        for (const cell of this.cellList) {
-            cell.update({ deltaTime, camera: this.camera, });
-        }
-        this.player.postUpdate({ deltaTime, elevator: this.elevator, colony: this.colony, });
     }
 
     loop() {
@@ -178,7 +197,7 @@ export class GameManager extends GameClasses.MainApp {
             mapLimit: this.mapLimit,
             colony: this.colony,
             bgImage: this.bgImage,
-            objectList: this.gowaInstanceList,
+            visibleList: this.visibleList,
         });
 
         requestAnimationFrame(() => this.loop());

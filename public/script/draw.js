@@ -13,7 +13,7 @@ export class DrawManager {
     }
 
     assignComponentToLayer(input) {
-        const { objectList, } = input;
+        const { visibleList, } = input;
 
         // Initialize buckets for each layer
         const layerBucket = {};
@@ -21,10 +21,7 @@ export class DrawManager {
             layerBucket[layer.name] = [];
         }
 
-        for (const obj of Object.values(objectList)) {
-            if (!obj.isVisible) {
-                continue;
-            }
+        for (const obj of Object.values(visibleList)) {
             for (const comp of Object.values(obj.componentList)) {
                 if (comp.noAnimationPossible) continue;
                 const stateData = comp.animationList[comp.currentState];
@@ -42,15 +39,13 @@ export class DrawManager {
     draw(input) {
         this.drawDebug(input);
 
-        const { camera, objectList } = input;
+        const { camera, visibleList } = input;
         const ctx = this.ctx;
 
-        const { layerBucket } = this.assignComponentToLayer({ objectList, });
+        const { layerBucket } = this.assignComponentToLayer({ visibleList, });
         for (const layer of this.layerListInOrder) {
             const componentList = layerBucket[layer.name] || [];
             for (const comp of componentList) {
-                if (comp.noAnimationPossible) continue;
-
                 const stateName = comp.currentState;
                 const stateData = comp.animationList[stateName];
                 const frameIndex = comp.frameIndex[stateName] || 0;
@@ -79,13 +74,13 @@ export class DrawManager {
         ctx.fillStyle = 'black';
         ctx.fillRect(0, 0, camera.width, camera.height);
 
-        // Draw background
-        ctx.drawImage(
-            bgImage,
-            0, 0, bgImage.width, bgImage.height,
-            -camera.x, -camera.y,
-            colony.width, colony.height
-        );
+        // // Draw background
+        // ctx.drawImage(
+        //     bgImage,
+        //     0, 0, bgImage.width, bgImage.height,
+        //     -camera.x, -camera.y,
+        //     colony.width, colony.height
+        // );
 
         // Draw edges
         ctx.strokeStyle = 'yellow';

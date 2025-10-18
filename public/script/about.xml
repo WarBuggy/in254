@@ -33,6 +33,7 @@
     <!-- <hook>../../../shared/data/templateMapList.js</hook> -->
     <hook>../data/colonyData.js</hook>
     <hook>../data/animationData.js</hook>
+    <hook>../data/interactionData.js</hook>
     <hook>../data/playerData.js</hook>
     <hook>../data/drawLayerData.js</hook>
     <!-- <hook>mapMainEditorMap.js</hook> -->

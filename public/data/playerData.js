@@ -4,7 +4,8 @@ export default {
             dataType: Shared.MOD_STRING.MOD_DATA_TYPE.PLAYER_DATA,
             name: 'general',
             payload: {
-                speed: 1 // per 1 ms
+                speed: 1, // per 1 ms
+                interactionOffsetX: 80,
             },
         },
     ],

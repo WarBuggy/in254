@@ -2,9 +2,9 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="255.99998"
-   height="255.99998"
-   viewBox="0 0 67.733321 67.733321"
+   width="165"
+   height="256"
+   viewBox="12 0 43.656035 67.733"
    version="1.1"
    id="svg1"
    xmlns="http://www.w3.org/2000/svg"
@@ -99,15 +99,11 @@
   <g
      id="layer2"
      style="display:inline">
-    <g
-       id="g189"
-       style="display:inline">
-      <path
-         style="fill:none;stroke:#d26e28;stroke-width:5.29167;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1;paint-order:normal"
-         d="m 34.675446,37.983928 c -0.190874,3.520566 -0.381748,7.04113 -0.572622,10.561697"
-         id="path2"
-         transform="matrix(2.1224953,-0.07058255,0.12544899,1.1942,-45.236651,-20.02612)" />
-    </g>
+    <path
+       style="display:inline;fill:none;stroke:#d26e28;stroke-width:5.29167;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1;paint-order:normal"
+       d="m 34.675446,37.983928 c -0.190874,3.520566 -0.381748,7.04113 -0.572622,10.561697"
+       id="path2"
+       transform="matrix(2.1224953,-0.07058255,0.12544899,1.1942,-45.236651,-20.02612)" />
   </g>
   <g
      id="layer5"

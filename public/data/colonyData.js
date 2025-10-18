@@ -11,8 +11,8 @@ export default {
                 floorThickness: 64,
                 bunkerMarginLeft: 32,
                 bunkerMarginRight: 32,
-                bunkerWidth: 800,
-                bunkerHeight: 250,
+                bunkerWidth: 800, // duplicated in cell and control room animation data
+                bunkerHeight: 256, // duplicated in cell and control room animation data
                 cellStartingNum: 1,
                 cellPaddingTargetLength: 3,
                 cellPaddingCharacter: '0',

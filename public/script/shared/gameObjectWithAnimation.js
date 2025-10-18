@@ -2,18 +2,20 @@ export class GameObjectWithAnimation {
 
     static IMAGE_CACHE = new Map();
     static DEFAULT_FRAME_DURATION = 100; // ms;
-    static EXCLUDE_KEY_LIST = ['name', 'default', 'animationList'];
+    static EXCLUDE_KEY_LIST = ['name', 'default', 'animationList',];
 
     constructor(input) {
-        const { animationData } = input;
+        const { animationData, x, y, } = input;
 
         this.animatedObject = animationData.name;
+        this.x = x;
+        this.y = y;
 
         // This will hold all processed components
         this.componentList = {};
         if (Array.isArray(animationData.componentList)) {
             for (const comp of animationData.componentList) {
-                this.processComponent({ comp });
+                this.processComponent({ comp, x, y, });
             }
         }
         this.baseComponent = this.componentList[animationData.baseComponent];
@@ -21,7 +23,7 @@ export class GameObjectWithAnimation {
     }
 
     processComponent(input) {
-        const { comp, } = input;
+        const { comp, x, y, } = input;
 
         // Collect all other properties as defaults
         const defaultPropertyList = {};
@@ -32,7 +34,7 @@ export class GameObjectWithAnimation {
         }
 
         const compName = comp.name;
-        this.componentList[compName] = {
+        const compData = {
             // Static properties
             name: compName,
             defaultState: comp.default,
@@ -55,11 +57,19 @@ export class GameObjectWithAnimation {
             // Ensure frameList exists
             mergedState.frameList = mergedState.frameList || [];
 
-            this.componentList[compName].animationList[stateName] = mergedState;
+            compData.animationList[stateName] = mergedState;
 
             // Initialize frame index
-            this.componentList[compName].frameIndex[stateName] = 0;
+            compData.frameIndex[stateName] = 0;
         }
+
+        const stateName = compData.currentState;
+        const stateData = compData.animationList[stateName];
+        // Compute drawing position
+        compData.x = x + (stateData.offsetX || 0);
+        compData.y = y + (stateData.offsetY || 0);
+
+        this.componentList[compName] = compData;
     }
 
     async loadAllSprite() {
@@ -91,7 +101,7 @@ export class GameObjectWithAnimation {
     }
 
     update(input) {
-        const { deltaTime, x, y, camera, isFlipped = false, } = input;
+        const { deltaTime, x, y, isFlipped = false, } = input;
 
         for (const comp of Object.values(this.componentList)) {
             if (comp.noAnimationPossible) continue;
@@ -114,7 +124,6 @@ export class GameObjectWithAnimation {
             comp.x = x + (stateData.offsetX || 0);
             comp.y = y + (stateData.offsetY || 0);
         }
-        this.isVisible = this.checkVisibility({ camera, });
     }
 
     setState(input) {
@@ -139,6 +148,10 @@ export class GameObjectWithAnimation {
         if (resetFrameIndex) {
             component.frameIndex[state] = 0;
         }
+    }
+
+    postUpdate(input) {
+        this.isVisible = this.checkVisibility(input);
     }
 
     checkVisibility(input) {

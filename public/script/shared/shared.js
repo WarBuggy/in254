@@ -44,6 +44,7 @@ class Shared {
     MOD_DATA_TYPE: {
       COLONY_DATA: 'colony data',
       ANIMATION_DATA: 'animation data',
+      INTERACTION_DATA: 'interaction data',
       PLAYER_DATA: 'player data',
       DRAW_LAYER_DATA: 'draw layer data',
     },

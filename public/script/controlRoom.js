@@ -2,13 +2,13 @@ export class ControlRoom extends GameClasses.Bunker {
     constructor(input) {
         super(input);
 
-        const { level, bunker, } = input;
+        const { bunker, } = input;
         this.animatedObject = bunker.name;
         this.setState({ name: 'base', state: 'idle', });
     }
 
     update(input) {
-        const { deltaTime, camera, } = input;
-        super.update({ deltaTime, x: this.x, y: this.y, camera, });
+        const { deltaTime, camera, player, } = input;
+        super.update({ deltaTime, x: this.x, y: this.y, camera, player, });
     }
 }
