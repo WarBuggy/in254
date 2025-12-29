@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": ".NET Core Launch (Console)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "Build Dev",
+      "program": "${workspaceFolder}/bin/Dev/net9.0/in254.dll",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    }
+  ]
+}

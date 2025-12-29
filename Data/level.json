@@ -1,0 +1,10 @@
+{
+    "name": "levelData",
+    "data": {
+        "width": 2000,
+        "height": 1000,
+        "leftSide": {
+            "cell": 100
+        }
+    }
+}

@@ -1,0 +1,11 @@
+{
+    "name": "levelData",
+    "data": {
+        "leftSide": {
+            "wall": 200
+        },
+        "rightSide": {
+            "cell": 150
+        }
+    }
+}
