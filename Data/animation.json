@@ -1,0 +1,239 @@
+{
+    "name": "animationData",
+    "assetFolder": "Asset/",
+    "data": {
+        "elevator": {
+            "name": "elevator",
+            "baseComponent": "base",
+            "componentList": [
+                {
+                    "name": "base",
+                    "folder": "elevator/",
+                    "layer": "outside",
+                    "defaultState": "idle",
+                    "width": 256,
+                    "height": 32,
+                    "frames": [
+                        {
+                            "file": "idle.svg"
+                        },
+                        {
+                            "file": "ready.svg"
+                        },
+                        {
+                            "file": "up.svg",
+                            "offsetX": 0,
+                            "offsetY": 0
+                        },
+                        {
+                            "file": "down.svg",
+                            "offsetX": 0,
+                            "offsetY": 0
+                        }
+                    ]
+                },
+                {
+                    "name": "railGuard",
+                    "folder": "elevator/",
+                    "layer": "foreground",
+                    "defaultState": "ready",
+                    "offsetX": 0,
+                    "offsetY": -90,
+                    "width": 256,
+                    "height": 90,
+                    "frames": [
+                        {
+                            "file": "guard.svg",
+                            "offsetX": 0,
+                            "offsetY": -90
+                        }
+                    ]
+                }
+            ]
+        },
+        "player": {
+            "name": "player",
+            "baseComponent": "base",
+            "componentList": [
+                {
+                    "name": "base",
+                    "folder": "in254/",
+                    "layer": "middleOutside",
+                    "defaultState": "idle",
+                    "width": 165,
+                    "height": 256,
+                    "frames": [
+                        {
+                            "file": "idle.svg"
+                        },
+                        {
+                            "file": "move_01.svg"
+                        },
+                        {
+                            "file": "move_02.svg"
+                        },
+                        {
+                            "file": "move_03.svg"
+                        },
+                        {
+                            "file": "move_04.svg"
+                        },
+                        {
+                            "file": "move_05.svg"
+                        },
+                        {
+                            "file": "move_06.svg"
+                        },
+                        {
+                            "file": "move_07.svg"
+                        }
+                    ]
+                }
+            ]
+        },
+        "controlRoom": {
+            "name": "controlRoom",
+            "baseComponent": "base",
+            "componentList": [
+                {
+                    "name": "base",
+                    "folder": "bunker/controlRoom/",
+                    "layer": "wall",
+                    "defaultState": "idle",
+                    "width": 800,
+                    "height": 256,
+                    "frames": [
+                        {
+                            "file": "base.svg"
+                        }
+                    ]
+                }
+            ]
+        },
+        "cell": {
+            "name": "cell",
+            "baseComponent": "base",
+            "componentList": [
+                {
+                    "name": "base",
+                    "folder": "bunker/cell/",
+                    "layer": "wall",
+                    "defaultState": "idle",
+                    "width": 800,
+                    "height": 256,
+                    "frames": [
+                        {
+                            "file": "base.svg"
+                        }
+                    ]
+                },
+                {
+                    "name": "wallMountedLight",
+                    "folder": "bunker/cell/",
+                    "layer": "wall",
+                    "defaultState": "off",
+                    "width": 800,
+                    "height": 256,
+                    "frames": [
+                        {
+                            "file": "wallMountedLightOff.svg"
+                        },
+                        {
+                            "file": "wallMountedLightOn.svg"
+                        }
+                    ]
+                },
+                {
+                    "name": "lighting",
+                    "folder": "bunker/cell/",
+                    "layer": "outside",
+                    "defaultState": "off",
+                    "width": 800,
+                    "height": 256,
+                    "frames": [
+                        {
+                            "file": "lightingOff.svg"
+                        },
+                        {
+                            "file": "lightingOn.svg"
+                        }
+                    ]
+                },
+                {
+                    "name": "toilet",
+                    "folder": "bunker/cell/",
+                    "layer": "nearWall",
+                    "defaultState": "idle",
+                    "width": 50,
+                    "height": 50,
+                    "frames": [
+                        {
+                            "file": "toilet.svg",
+                            "offsetY": 206
+                        }
+                    ]
+                },
+                {
+                    "name": "chair",
+                    "folder": "bunker/cell/",
+                    "layer": "bunkerMiddle",
+                    "defaultState": "idle",
+                    "width": 67,
+                    "height": 54,
+                    "frames": [
+                        {
+                            "file": "chair.svg",
+                            "offsetX": 405,
+                            "offsetY": 202
+                        }
+                    ]
+                },
+                {
+                    "name": "bed",
+                    "folder": "bunker/cell/",
+                    "layer": "nearWall",
+                    "defaultState": "idle",
+                    "width": 270,
+                    "height": 27,
+                    "frames": [
+                        {
+                            "file": "bed.svg",
+                            "offsetX": 520,
+                            "offsetY": 181
+                        }
+                    ]
+                },
+                {
+                    "name": "workStation",
+                    "folder": "bunker/cell/",
+                    "layer": "bunkerMiddle",
+                    "defaultState": "idle",
+                    "width": 216,
+                    "height": 124,
+                    "frames": [
+                        {
+                            "file": "workStation.svg",
+                            "offsetX": 151,
+                            "offsetY": 132
+                        }
+                    ]
+                },
+                {
+                    "name": "controlPanel",
+                    "folder": "bunker/cell/",
+                    "layer": "outside",
+                    "defaultState": "idle",
+                    "width": 64,
+                    "height": 64,
+                    "frames": [
+                        {
+                            "file": "controlPanel.svg",
+                            "offsetX": 612,
+                            "offsetY": 72
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}

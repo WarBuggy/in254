@@ -26,7 +26,7 @@ public sealed class DataManager : LoggerBase
     public void LoadAll()
     {
         if (!Directory.Exists(DATA_DIRECTORY))
-            ThrowLocalized<InvalidOperationException>("system.dataManager.dataDirectoryNotFound", DATA_DIRECTORY);
+            throw new LocalizedError<InvalidOperationException>("system.dataManager.dataDirectoryNotFound", DATA_DIRECTORY);
 
         foreach (string file in Directory.EnumerateFiles(DATA_DIRECTORY, "*.json"))
         {
@@ -45,21 +45,21 @@ public sealed class DataManager : LoggerBase
         }
         catch (Exception ex)
         {
-            ThrowLocalized<IOException>("system.dataManager.failedToReadFile", filePath, ex.Message);
+            throw new LocalizedError<IOException>("system.dataManager.failedToReadFile", filePath, ex.Message);
         }
 
         using JsonDocument doc = JsonDocument.Parse(jsonText);
         JsonElement root = doc.RootElement;
 
         if (!root.TryGetProperty("name", out JsonElement nameElement))
-            ThrowLocalized<InvalidDataException>("system.dataManager.missingName", filePath);
+            throw new LocalizedError<InvalidDataException>("system.dataManager.missingName", filePath);
 
         if (!root.TryGetProperty("data", out JsonElement dataElement))
-            ThrowLocalized<InvalidDataException>("system.dataManager.missingData", filePath);
+            throw new LocalizedError<InvalidDataException>("system.dataManager.missingData", filePath);
 
         string name = nameElement.GetString();
         if (string.IsNullOrWhiteSpace(name))
-            ThrowLocalized<InvalidDataException>("system.dataManager.invalidName", filePath);
+            throw new LocalizedError<InvalidDataException>("system.dataManager.invalidName", filePath);
 
         // Merge or add block
         if (_blocks.TryGetValue(name, out var existing))
@@ -109,27 +109,27 @@ public sealed class DataManager : LoggerBase
     public JsonElement GetByPath(string path)
     {
         if (string.IsNullOrWhiteSpace(path))
-            ThrowLocalized<ArgumentException>("system.dataManager.invalidPath", path);
+            throw new LocalizedError<ArgumentException>("system.dataManager.invalidPath", path);
 
         var parts = path.Split('.', StringSplitOptions.RemoveEmptyEntries);
         if (parts.Length == 0)
-            ThrowLocalized<ArgumentException>("system.dataManager.invalidPath", path);
+            throw new LocalizedError<ArgumentException>("system.dataManager.invalidPath", path);
 
         // First part is the block name
         string blockName = parts[0];
         if (!_blocks.TryGetValue(blockName, out var element))
-            ThrowLocalized<KeyNotFoundException>("system.dataManager.blockNotFound", blockName);
+            throw new LocalizedError<KeyNotFoundException>("system.dataManager.blockNotFound", blockName);
 
         // Walk nested properties
         for (int i = 1; i < parts.Length; i++)
         {
             if (element.ValueKind != JsonValueKind.Object)
-                ThrowLocalized<InvalidOperationException>(
+                throw new LocalizedError<InvalidOperationException>(
                     "system.dataManager.invalidPropertyType", parts[i - 1], blockName
                 );
 
             if (!element.TryGetProperty(parts[i], out element))
-                ThrowLocalized<KeyNotFoundException>("system.dataManager.propertyNotFound", parts[i], blockName);
+                throw new LocalizedError<KeyNotFoundException>("system.dataManager.propertyNotFound", parts[i], blockName);
         }
 
         return element;
@@ -145,8 +145,7 @@ public sealed class DataManager : LoggerBase
         }
         catch (Exception)
         {
-            ThrowLocalized<InvalidOperationException>("system.dataManager.propertyTypeMismatch", path, typeof(T).Name);
-            return default!; // unreachable
+            throw new LocalizedError<InvalidOperationException>("system.dataManager.propertyTypeMismatch", path, typeof(T).Name);
         }
     }
 }
