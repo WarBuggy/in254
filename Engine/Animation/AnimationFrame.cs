@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using in254.Core;
 
 namespace in254.Engine.Animation;
@@ -35,22 +36,22 @@ public sealed class AnimationFrame : LoggerBase
     public int SpriteOffsetY { get; set; } = 0;
 
     /// <summary>
-    /// Constructor takes full path and registers it in TextureManager.
+    /// Constructor builds the full path and registers it with TextureManager.
     /// </summary>
-    /// <param name="fullPath">Full path to the frame graphic.</param>
-    public AnimationFrame(string fullPath)
+    /// <param name="assetFolder">Root asset folder from animation data.</param>
+    /// <param name="folder">Subfolder of the texture.</param>
+    /// <param name="file">Filename of the texture.</param>
+    public AnimationFrame(string assetFolder, string folder, string file)
     {
+        string fullPath = Path.Combine(assetFolder, folder, file);
+
         if (string.IsNullOrWhiteSpace(fullPath))
             throw new LocalizedError<ArgumentException>("system.animationFrame.invalidFullPath", fullPath);
 
-        // Register or reuse existing path in TextureManager
+        // Register with TextureManager and store the index
         TextureIndex = TextureManager.Instance.AddPath(fullPath);
 
         Log("system.animationFrame.frameCreated", fullPath, TextureIndex);
     }
-
-    /// <summary>
-    /// Retrieves the full path from TextureManager.
-    /// </summary>
-    public string FullPath => TextureManager.Instance.GetPath(TextureIndex);
+    public Microsoft.Xna.Framework.Graphics.Texture2D Texture => TextureManager.Instance.GetTexture(TextureIndex);
 }

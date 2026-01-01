@@ -6,18 +6,18 @@ public abstract class LoggerBase
 {
     private string ClassName => GetType().Name;
 
-    protected void Log(string key, params object[] args)
+    protected void Log(params object[] args)
     {
-        Console.WriteLine($"[{ClassName}] Log: {StringUtils.Localize(key, args)}");
+        Console.WriteLine($"[{ClassName}] Log: {StringUtils.Localize(args)}");
     }
 
-    protected void LogWarning(string key, params object[] args)
+    protected void LogWarning(params object[] args)
     {
-        Console.WriteLine($"[{ClassName}] Warning: {StringUtils.Localize(key, args)}");
+        Console.WriteLine($"[{ClassName}] Warning: {StringUtils.Localize(args)}");
     }
 
-    protected void LogError(string key, params object[] args)
+    protected void LogError(params object[] args)
     {
-        Console.WriteLine($"[{ClassName}] Error: {StringUtils.Localize(key, args)}");
+        Console.WriteLine($"[{ClassName}] Error: {StringUtils.Localize(args)}");
     }
 }

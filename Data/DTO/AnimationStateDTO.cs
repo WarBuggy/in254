@@ -4,7 +4,8 @@ namespace in254.Data.DTO;
 
 public sealed class AnimationStateDTO
 {
-    public List<string> FrameList { get; set; } = [];
+    public string Name { get; set; } = string.Empty;
+    public List<AnimationFrameDTO> FrameList { get; set; } = [];
     /// <summary>File name of the frame graphic.</summary>
     public string File { get; set; } = string.Empty;
     /// <summary>Folder containing the file.</summary>

@@ -13,10 +13,17 @@
     "system.dataManager.invalidPropertyType": "Property '{0}' in block '{1}' is not an object",
     "system.dataManager.propertyTypeMismatch": "Property '{0}' is not of expected type '{1}'",
     "system.dataManager.invalidPath": "Invalid or empty path string: '{0}'",
-    "system.textureManager.invalidPath": "The provided texture path is invalid: {0}",
-    "system.textureManager.pathAlreadyExists": "Texture path already exists in pool: {0}",
-    "system.textureManager.pathAdded": "Texture path added: {0}, index: {1}",
-    "system.textureManager.invalidIndex": "Requested texture index is out of range: {0}",
-    "system.animationFrame.invalidFullPath": "The provided frame full path is invalid: {0}",
-    "system.animationFrame.frameCreated": "Animation frame created: {0}, index: {1}"
+    "system.animationDataLoader.fileNotFound": "Animation data file not found: {0}",
+    "system.animationDataLoader.jsonParseFailed": "Failed to parse animation JSON file: {0}",
+    "system.animationDataLoader.totalAnimationsLoaded": "Total animations loaded: {0}",
+    "system.textureManager.contentManagerNull": "TextureManager: ContentManager provided is null",
+    "system.textureManager.initialized": "TextureManager: successfully initialized with ContentManager",
+    "system.textureManager.invalidPath": "TextureManager: invalid texture path '{0}'",
+    "system.textureManager.notInitialized": "TextureManager: cannot add texture, TextureManager is not initialized with a ContentManager",
+    "system.textureManager.loadFailed": "TextureManager: failed to load texture from '{0}'. Error: {1}",
+    "system.textureManager.textureLoaded": "TextureManager: texture loaded successfully. Path='{0}', Index={1}",
+    "system.textureManager.indexNotFound": "TextureManager: no texture found for index {0}",
+    "system.textureManager.textureNotFound": "TextureManager: texture not found for path '{0}'",
+    "system.animationFrame.invalidFullPath": "AnimationFrame: invalid full path '{0}'",
+    "system.animationFrame.frameCreated": "AnimationFrame created: '{0}', TextureIndex = {1}"
 }

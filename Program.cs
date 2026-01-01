@@ -1,7 +1,4 @@
-﻿// using var engineManager = new in254.Engine.EngineManager();
-// engineManager.Run();
-
-using in254.Engine;
+﻿using in254.Engine;
 using in254.Localization;
 using System;
 using in254.Data;
@@ -57,6 +54,10 @@ class Program
         {
             Console.WriteLine($"Caught exception as expected: {ex.Message}");
         }
+
+        EngineManager engineManager = new();
+        engineManager.Run();
+
     }
 }
 

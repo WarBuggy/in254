@@ -1,6 +1,6 @@
 {
     "name": "animationData",
-    "assetFolder": "Asset/",
+    "assetFolder": "Sprites/",
     "data": {
         "elevator": {
             "name": "elevator",
@@ -13,41 +13,61 @@
                     "defaultState": "idle",
                     "width": 256,
                     "height": 32,
-                    "frames": [
-                        {
-                            "file": "idle.svg"
+                    "stateList": {
+                        "idle": {
+                            "frameList": [
+                                {
+                                    "file": "idle"
+                                }
+                            ]
                         },
-                        {
-                            "file": "ready.svg"
+                        "ready": {
+                            "frameList": [
+                                {
+                                    "file": "ready"
+                                }
+                            ]
                         },
-                        {
-                            "file": "up.svg",
-                            "offsetX": 0,
-                            "offsetY": 0
+                        "up": {
+                            "frameList": [
+                                {
+                                    "file": "up",
+                                    "offsetX": 0,
+                                    "offsetY": 0
+                                }
+                            ]
                         },
-                        {
-                            "file": "down.svg",
-                            "offsetX": 0,
-                            "offsetY": 0
+                        "down": {
+                            "frameList": [
+                                {
+                                    "file": "down",
+                                    "offsetX": 0,
+                                    "offsetY": 0
+                                }
+                            ]
                         }
-                    ]
+                    }
                 },
                 {
                     "name": "railGuard",
                     "folder": "elevator/",
                     "layer": "foreground",
-                    "defaultState": "ready",
+                    "defaultState": "idle",
                     "offsetX": 0,
                     "offsetY": -90,
                     "width": 256,
                     "height": 90,
-                    "frames": [
-                        {
-                            "file": "guard.svg",
-                            "offsetX": 0,
-                            "offsetY": -90
+                    "stateList": {
+                        "idle": {
+                            "frameList": [
+                                {
+                                    "file": "guard",
+                                    "offsetX": 0,
+                                    "offsetY": -90
+                                }
+                            ]
                         }
-                    ]
+                    }
                 }
             ]
         },
@@ -62,32 +82,40 @@
                     "defaultState": "idle",
                     "width": 165,
                     "height": 256,
-                    "frames": [
-                        {
-                            "file": "idle.svg"
+                    "stateList": {
+                        "idle": {
+                            "frameList": [
+                                {
+                                    "file": "idle"
+                                }
+                            ]
                         },
-                        {
-                            "file": "move_01.svg"
-                        },
-                        {
-                            "file": "move_02.svg"
-                        },
-                        {
-                            "file": "move_03.svg"
-                        },
-                        {
-                            "file": "move_04.svg"
-                        },
-                        {
-                            "file": "move_05.svg"
-                        },
-                        {
-                            "file": "move_06.svg"
-                        },
-                        {
-                            "file": "move_07.svg"
+                        "moving": {
+                            "frameList": [
+                                {
+                                    "file": "move_01"
+                                },
+                                {
+                                    "file": "move_02"
+                                },
+                                {
+                                    "file": "move_03"
+                                },
+                                {
+                                    "file": "move_04"
+                                },
+                                {
+                                    "file": "move_05"
+                                },
+                                {
+                                    "file": "move_06"
+                                },
+                                {
+                                    "file": "move_07"
+                                }
+                            ]
                         }
-                    ]
+                    }
                 }
             ]
         },
@@ -102,11 +130,15 @@
                     "defaultState": "idle",
                     "width": 800,
                     "height": 256,
-                    "frames": [
-                        {
-                            "file": "base.svg"
+                    "stateList": {
+                        "idle": {
+                            "frameList": [
+                                {
+                                    "file": "base"
+                                }
+                            ]
                         }
-                    ]
+                    }
                 }
             ]
         },
@@ -121,11 +153,15 @@
                     "defaultState": "idle",
                     "width": 800,
                     "height": 256,
-                    "frames": [
-                        {
-                            "file": "base.svg"
+                    "stateList": {
+                        "idle": {
+                            "frameList": [
+                                {
+                                    "file": "base"
+                                }
+                            ]
                         }
-                    ]
+                    }
                 },
                 {
                     "name": "wallMountedLight",
@@ -134,14 +170,22 @@
                     "defaultState": "off",
                     "width": 800,
                     "height": 256,
-                    "frames": [
-                        {
-                            "file": "wallMountedLightOff.svg"
+                    "stateList": {
+                        "off": {
+                            "frameList": [
+                                {
+                                    "file": "wallMountedLightOff"
+                                }
+                            ]
                         },
-                        {
-                            "file": "wallMountedLightOn.svg"
+                        "on": {
+                            "frameList": [
+                                {
+                                    "file": "wallMountedLightOn"
+                                }
+                            ]
                         }
-                    ]
+                    }
                 },
                 {
                     "name": "lighting",
@@ -150,14 +194,22 @@
                     "defaultState": "off",
                     "width": 800,
                     "height": 256,
-                    "frames": [
-                        {
-                            "file": "lightingOff.svg"
+                    "stateList": {
+                        "off": {
+                            "frameList": [
+                                {
+                                    "file": "lightingOff"
+                                }
+                            ]
                         },
-                        {
-                            "file": "lightingOn.svg"
+                        "on": {
+                            "frameList": [
+                                {
+                                    "file": "lightingOn"
+                                }
+                            ]
                         }
-                    ]
+                    }
                 },
                 {
                     "name": "toilet",
@@ -166,12 +218,16 @@
                     "defaultState": "idle",
                     "width": 50,
                     "height": 50,
-                    "frames": [
-                        {
-                            "file": "toilet.svg",
-                            "offsetY": 206
+                    "stateList": {
+                        "idle": {
+                            "offsetY": 206,
+                            "frameList": [
+                                {
+                                    "file": "toilet"
+                                }
+                            ]
                         }
-                    ]
+                    }
                 },
                 {
                     "name": "chair",
@@ -180,13 +236,17 @@
                     "defaultState": "idle",
                     "width": 67,
                     "height": 54,
-                    "frames": [
-                        {
-                            "file": "chair.svg",
+                    "stateList": {
+                        "idle": {
                             "offsetX": 405,
-                            "offsetY": 202
+                            "offsetY": 202,
+                            "frameList": [
+                                {
+                                    "file": "chair"
+                                }
+                            ]
                         }
-                    ]
+                    }
                 },
                 {
                     "name": "bed",
@@ -195,13 +255,17 @@
                     "defaultState": "idle",
                     "width": 270,
                     "height": 27,
-                    "frames": [
-                        {
-                            "file": "bed.svg",
+                    "stateList": {
+                        "idle": {
                             "offsetX": 520,
-                            "offsetY": 181
+                            "offsetY": 181,
+                            "frameList": [
+                                {
+                                    "file": "bed"
+                                }
+                            ]
                         }
-                    ]
+                    }
                 },
                 {
                     "name": "workStation",
@@ -210,13 +274,17 @@
                     "defaultState": "idle",
                     "width": 216,
                     "height": 124,
-                    "frames": [
-                        {
-                            "file": "workStation.svg",
+                    "stateList": {
+                        "idle": {
                             "offsetX": 151,
-                            "offsetY": 132
+                            "offsetY": 132,
+                            "frameList": [
+                                {
+                                    "file": "workStation"
+                                }
+                            ]
                         }
-                    ]
+                    }
                 },
                 {
                     "name": "controlPanel",
@@ -225,13 +293,17 @@
                     "defaultState": "idle",
                     "width": 64,
                     "height": 64,
-                    "frames": [
-                        {
-                            "file": "controlPanel.svg",
+                    "stateList": {
+                        "idle": {
                             "offsetX": 612,
-                            "offsetY": 72
+                            "offsetY": 72,
+                            "frameList": [
+                                {
+                                    "file": "controlPanel"
+                                }
+                            ]
                         }
-                    ]
+                    }
                 }
             ]
         }

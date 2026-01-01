@@ -4,143 +4,154 @@ using System.IO;
 using System.Text.Json;
 using in254.Core;
 using in254.Data.DTO;
-using in254.Engine;
+using in254.Engine.Animation;
 
-namespace in254.Data;
-
-/// <summary>
-/// Loads animation data from JSON and resolves all frames.
-/// Fully resolves fallback properties for each frame.
-/// Registers full paths in TextureManager.
-/// </summary>
-public sealed class AnimationDataLoader : LoggerBase
+namespace in254.Data
 {
-    private const string ANIMATION_FILE_PATH = "Data/animationData.json";
-
-    private static readonly AnimationDataLoader _instance = new();
-    public static AnimationDataLoader Instance => _instance;
-
-    private readonly JsonSerializerOptions _jsonSerializerOptions = new()
-    {
-        PropertyNameCaseInsensitive = true
-    };
-
-    private AnimationDataLoader() { }
-
     /// <summary>
-    /// Load animation JSON from file and return resolved AnimationFrameDTOs.
+    /// Loads animation data from JSON and converts it into fully resolved Animation objects.
+    /// Handles TextureManager registration for each frame.
     /// </summary>
-    public List<AnimationFrameDTO> LoadFromFile()
+    public sealed class AnimationDataLoader : LoggerBase
     {
-        var result = new List<AnimationFrameDTO>();
+        private const string ANIMATION_FILE_PATH = "Data/animation.json";
 
-        if (!File.Exists(ANIMATION_FILE_PATH))
-            throw new LocalizedError<FileNotFoundException>("system.animationDataLoader.fileNotFound", ANIMATION_FILE_PATH);
+        private static readonly AnimationDataLoader _instance = new();
+        public static AnimationDataLoader Instance => _instance;
 
-        string json = File.ReadAllText(ANIMATION_FILE_PATH);
-        AnimationDTO animationDto;
-
-        try
+        private readonly JsonSerializerOptions _jsonSerializerOptions = new()
         {
-            animationDto = JsonSerializer.Deserialize<AnimationDTO>(json, _jsonSerializerOptions)!;
-        }
-        catch (Exception)
-        {
-            throw new LocalizedError<InvalidOperationException>("system.animationDataLoader.jsonParseFailed", ANIMATION_FILE_PATH);
-        }
-        result = ResolveFrames(animationDto);
-        return result;
-    }
+            PropertyNameCaseInsensitive = true
+        };
 
-    /// <summary>
-    /// Resolve all frames from an AnimationDTO.
-    /// Applies fallback rules and registers full paths in TextureManager.
-    /// </summary>
-    public List<AnimationFrameDTO> ResolveFrames(AnimationDTO animationDto)
-    {
-        var resolvedFrames = new List<AnimationFrameDTO>();
+        private AnimationDataLoader() { }
 
-        if (animationDto.ComponentList == null || animationDto.ComponentList.Count == 0)
+        /// <summary>
+        /// Load all animations from JSON and return a dictionary of Animation objects keyed by name.
+        /// </summary>
+        public Dictionary<string, Animation> LoadAnimations()
         {
-            LogWarning("system.animationDataLoader.noComponents", animationDto.Name);
-            return resolvedFrames;
-        }
+            if (!File.Exists(ANIMATION_FILE_PATH))
+                throw new LocalizedError<FileNotFoundException>("system.animationDataLoader.fileNotFound", ANIMATION_FILE_PATH);
 
-        foreach (var component in animationDto.ComponentList)
-        {
-            if (component.AnimationList == null || component.AnimationList.Count == 0)
+            string json = File.ReadAllText(ANIMATION_FILE_PATH);
+            JsonDocument doc;
+            try
             {
-                LogWarning("system.animationDataLoader.componentNoStates", component.Name);
-                continue;
+                doc = JsonDocument.Parse(json);
+            }
+            catch (Exception)
+            {
+                throw new LocalizedError<InvalidOperationException>("system.animationDataLoader.jsonParseFailed", ANIMATION_FILE_PATH);
             }
 
-            foreach (var stateKvp in component.AnimationList)
+            var root = doc.RootElement;
+            string assetFolder = root.GetProperty("assetFolder").GetString() ?? string.Empty;
+
+            var dataElement = root.GetProperty("data");
+
+            var animations = new Dictionary<string, Animation>();
+
+            foreach (var animProp in dataElement.EnumerateObject())
             {
-                string stateName = stateKvp.Key;
-                var state = stateKvp.Value;
+                string animName = animProp.Name;
+                var animDto = JsonSerializer.Deserialize<AnimationDTO>(animProp.Value.GetRawText(), _jsonSerializerOptions)!;
+                var animation = ResolveAnimation(animDto, assetFolder);
+                animations.Add(animName, animation);
+            }
 
-                if (state.FrameList == null || state.FrameList.Count == 0)
+            Log("system.animationDataLoader.totalAnimationsLoaded", animations.Count);
+            return animations;
+        }
+
+        /// <summary>
+        /// Convert an AnimationDTO into a fully resolved Animation object.
+        /// </summary>
+        private static Animation ResolveAnimation(AnimationDTO dto, string assetFolder)
+        {
+            var animation = new Animation
+            {
+                Name = dto.Name,
+                BaseComponent = dto.BaseComponent,
+                Components = []
+            };
+
+            foreach (var compDto in dto.ComponentList)
+            {
+                var component = new AnimationComponent
                 {
-                    LogWarning("system.animationDataLoader.stateNoFrames", component.Name, stateName);
-                    continue;
-                }
+                    Name = compDto.Name,
+                    DefaultState = compDto.DefaultState,
+                    States = []
+                };
 
-                foreach (var fileName in state.FrameList)
+                foreach (var stateKvp in compDto.StateList)
                 {
-                    var frame = new AnimationFrameDTO
-                    {
-                        File = ResolveValue(state.File, component.File, animationDto.File, fileName),
-                        Folder = ResolveValue(state.Folder, component.Folder, animationDto.Folder, ""),
-                        Layer = ResolveValue(state.Layer, component.Layer, animationDto.Layer, ""),
-                        Width = ResolveValue(state.Width, component.Width, animationDto.Width),
-                        Height = ResolveValue(state.Height, component.Height, animationDto.Height),
-                        OffsetX = ResolveValue(state.OffsetX, component.OffsetX, animationDto.OffsetX),
-                        OffsetY = ResolveValue(state.OffsetY, component.OffsetY, animationDto.OffsetY),
-                        SpriteOffsetX = ResolveValue(state.SpriteOffsetX, component.SpriteOffsetX, animationDto.SpriteOffsetX),
-                        SpriteOffsetY = ResolveValue(state.SpriteOffsetY, component.SpriteOffsetY, animationDto.SpriteOffsetY)
-                    };
+                    string stateName = stateKvp.Key;
+                    var stateDto = stateKvp.Value;
 
-                    if (string.IsNullOrWhiteSpace(frame.File) || string.IsNullOrWhiteSpace(frame.Folder)
-                        || frame.Width == 0 || frame.Height == 0)
+                    var frameList = new List<AnimationFrame>();
+                    foreach (var frameDto in stateDto.FrameList)
                     {
-                        LogWarning("system.animationDataLoader.skipFrameMissingProperty", component.Name, stateName, fileName);
-                        continue;
+                        // Resolve individual properties
+                        string file = ResolveValue(s => !string.IsNullOrWhiteSpace(s),
+                            frameDto.File, stateDto.File, compDto.File, dto.File);
+
+                        string folder = ResolveValue(s => !string.IsNullOrWhiteSpace(s),
+                            frameDto.Folder, stateDto.Folder, compDto.Folder, dto.Folder);
+
+                        var frame = new AnimationFrame(assetFolder, folder, file)
+                        {
+                            Layer = ResolveValue(s => !string.IsNullOrWhiteSpace(s),
+                                frameDto.Layer, stateDto.Layer, compDto.Layer, dto.Layer),
+
+                            Width = ResolveValue(v => v != 0,
+                                frameDto.Width, stateDto.Width, compDto.Width, dto.Width),
+
+                            Height = ResolveValue(v => v != 0,
+                                frameDto.Height, stateDto.Height, compDto.Height, dto.Height),
+
+                            OffsetX = ResolveValue(v => true,
+                                frameDto.OffsetX, stateDto.OffsetX, compDto.OffsetX, dto.OffsetX),
+
+                            OffsetY = ResolveValue(v => true,
+                                frameDto.OffsetY, stateDto.OffsetY, compDto.OffsetY, dto.OffsetY),
+
+                            SpriteOffsetX = ResolveValue(v => true,
+                                frameDto.SpriteOffsetX, stateDto.SpriteOffsetX, compDto.SpriteOffsetX, dto.SpriteOffsetX),
+
+                            SpriteOffsetY = ResolveValue(v => true,
+                                frameDto.SpriteOffsetY, stateDto.SpriteOffsetY, compDto.SpriteOffsetY, dto.SpriteOffsetY)
+                        };
+                        frameList.Add(frame);
                     }
-
-                    // Register full path and get index
-                    string fullPath = Path.Combine(frame.Folder, frame.File);
-                    int pathIndex = TextureManager.Instance.AddPath(fullPath);
-
-                    resolvedFrames.Add(frame);
-                    Log("system.animationDataLoader.frameResolved", component.Name, stateName, frame.File, pathIndex);
+                    var state = new AnimationState
+                    {
+                        Name = stateName,
+                        Frames = [.. frameList]
+                    };
+                    component.States.Add(stateName, state);
                 }
+                animation.Components.Add(component.Name, component);
             }
+            return animation;
         }
 
-        Log("system.animationDataLoader.totalFramesResolved", resolvedFrames.Count);
-        return resolvedFrames;
-    }
-
-    /// <summary>
-    /// Helper to resolve fallback values for string properties.
-    /// Returns first non-null, non-empty value, or defaultValue if none.
-    /// </summary>
-    private static string ResolveValue(string stateVal, string componentVal, string baseVal, string defaultValue = "")
-    {
-        return !string.IsNullOrWhiteSpace(stateVal) ? stateVal
-             : !string.IsNullOrWhiteSpace(componentVal) ? componentVal
-             : !string.IsNullOrWhiteSpace(baseVal) ? baseVal
-             : defaultValue;
-    }
-
-    /// <summary>
-    /// Helper to resolve fallback values for int properties.
-    /// Returns first non-zero value, or 0 if none.
-    /// </summary>
-    private static int ResolveValue(int stateVal, int componentVal, int baseVal)
-    {
-        return stateVal != 0 ? stateVal
-             : componentVal != 0 ? componentVal
-             : baseVal;
+        /// <summary>
+        /// Returns the first value that satisfies the isValid predicate. If none, returns default(T).
+        /// </summary>
+        /// <typeparam name="T">Type of the value.</typeparam>
+        /// <param name="isValid">Predicate to test if a value is valid.</param>
+        /// <param name="values">Values to test in order.</param>
+        /// <returns>First valid value, or default(T) if none found.</returns>
+        private static T ResolveValue<T>(Func<T, bool> isValid, params T[] values)
+        {
+            foreach (var v in values)
+            {
+                if (isValid(v))
+                    return v;
+            }
+            return default!;
+        }
     }
 }

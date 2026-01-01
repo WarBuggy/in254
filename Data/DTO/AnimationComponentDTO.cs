@@ -7,7 +7,7 @@ public sealed class AnimationComponentDTO
 {
     public string Name { get; set; } = string.Empty;
     public string DefaultState { get; set; } = string.Empty;
-    public Dictionary<string, AnimationStateDTO> AnimationList { get; set; } = [];
+    public Dictionary<string, AnimationStateDTO> StateList { get; set; } = [];
     /// <summary>File name of the frame graphic.</summary>
     public string File { get; set; } = string.Empty;
     /// <summary>Folder containing the file.</summary>
