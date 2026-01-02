@@ -43,7 +43,7 @@ public class SettingManager : LoggerBase
     public class GeneralSettings
     {
         public GameSetting<string> Language { get; set; } =
-            new(LocalizationManager.Instance.DefaultCulture);
+            new(LocalizationManager.DefaultCulture);
     }
 
     // --- Internal storage ---

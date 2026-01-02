@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+using in254.Core;
 
 namespace in254.Localization;
 
@@ -9,19 +10,18 @@ public sealed class LocalizationManager
 {
     private static readonly LocalizationManager _instance = new();
     public static LocalizationManager Instance => _instance;
-
-    private static readonly string LOCALIZATION_ROOT =
-        Path.Combine(AppContext.BaseDirectory, "Localization");
+    private static readonly string LOCALIZATION_ROOT = Path.Combine(AppContext.BaseDirectory, "Localization");
     private const string DEFAULT_CULTURE = "en-US";
-    public string DefaultCulture => DEFAULT_CULTURE;
+    public static string DefaultCulture => DEFAULT_CULTURE;
     private string _currentCulture = DEFAULT_CULTURE;
-
     // culture -> (key -> string)
     private readonly Dictionary<string, Dictionary<string, string>> _localizations
         = new(StringComparer.OrdinalIgnoreCase);
-
     public IReadOnlyCollection<string> AvailableCultures => _localizations.Keys;
-
+    // Tracks keys that fell back to the default language
+    private readonly HashSet<(string culture, string key)> _defaultFallbackLog = [];
+    // Tracks keys that could not be found at all (corrupted keys)
+    private readonly HashSet<(string culture, string key)> _corruptKeyLog = [];
     private LocalizationManager() { }
 
     public void LoadAll()
@@ -101,15 +101,19 @@ public sealed class LocalizationManager
         {
             return value;
         }
-
-        // fallback to default language
-        if (_localizations[DEFAULT_CULTURE].TryGetValue(key, out var fallback))
+        // Fallback to default language (visible)
+        if (culture != DEFAULT_CULTURE &&
+            _localizations.TryGetValue(DEFAULT_CULTURE, out var fallbackTable) &&
+            fallbackTable.TryGetValue(key, out var fallback))
         {
-            return fallback;
+            if (_defaultFallbackLog.Add((culture, key)))
+                Console.WriteLine("[LocalizationManager] " + StringUtils.Localize("system.localizationManager.fallbackUsed", key, culture));
+            return HandleDefaultFallback(fallback);
         }
-
-        // final fallback: show key itself (useful during dev)
-        return key;
+        // final fallback: visibly corrupted key
+        if (_corruptKeyLog.Add((culture, key)))
+            Console.WriteLine("[LocalizationManager] " + StringUtils.Localize("system.localizationManager.keyNotFound", key, culture, DEFAULT_CULTURE));
+        return CorruptKey(key);
     }
 
     public string CurrentCulture
@@ -129,5 +133,40 @@ public sealed class LocalizationManager
                 _currentCulture = value;
             }
         }
+    }
+
+    private static string CorruptKey(string key)
+    {
+        var map = new Dictionary<char, char>
+        {
+            ['a'] = 'à',
+            ['A'] = 'Á',
+            ['e'] = 'è',
+            ['E'] = 'É',
+            ['i'] = 'ì',
+            ['I'] = 'Í',
+            ['o'] = 'ò',
+            ['O'] = 'Ó',
+            ['u'] = 'ù',
+            ['U'] = 'Ú',
+            ['r'] = 'ř',
+            ['R'] = 'Ř',
+            ['s'] = 'š',
+            ['S'] = 'Š',
+        };
+
+        var chars = key.ToCharArray();
+        for (int i = 0; i < chars.Length; i++)
+        {
+            if (map.TryGetValue(chars[i], out char replacement))
+                chars[i] = replacement;
+        }
+
+        return new string(chars);
+    }
+
+    private static string HandleDefaultFallback(string text)
+    {
+        return $"[{DEFAULT_CULTURE}] {text}";
     }
 }

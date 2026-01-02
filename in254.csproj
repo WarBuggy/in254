@@ -25,7 +25,11 @@
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.*" />
     <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.*" />
   </ItemGroup>
-
+  <ItemGroup>
+    <Reference Include="MoonSharp.Interpreter">
+      <HintPath>C:\Code\Moonsharp\interpreter\netcore\MoonSharp.Interpreter.dll</HintPath>
+    </Reference>
+  </ItemGroup>
   <ItemGroup>
     <None Update="Data\**\*.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

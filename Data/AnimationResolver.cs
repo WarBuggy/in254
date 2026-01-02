@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Text.Json;
 using in254.Core;
 using in254.Data.DTO;
@@ -9,58 +8,46 @@ using in254.Engine.Animation;
 namespace in254.Data
 {
     /// <summary>
-    /// Loads animation data from JSON and converts it into fully resolved Animation objects.
+    /// Use animation data from DataManager to convert it into fully resolved Animation objects.
     /// Handles TextureManager registration for each frame.
     /// </summary>
-    public sealed class AnimationDataLoader : LoggerBase
+    public sealed class AnimationResolver : LoggerBase
     {
-        private const string ANIMATION_FILE_PATH = "Data/animation.json";
-
-        private static readonly AnimationDataLoader _instance = new();
-        public static AnimationDataLoader Instance => _instance;
+        private static readonly AnimationResolver _instance = new();
+        public static AnimationResolver Instance => _instance;
 
         private readonly JsonSerializerOptions _jsonSerializerOptions = new()
         {
             PropertyNameCaseInsensitive = true
         };
 
-        private AnimationDataLoader() { }
+        private AnimationResolver() { }
 
         /// <summary>
         /// Load all animations from JSON and return a dictionary of Animation objects keyed by name.
         /// </summary>
-        public Dictionary<string, Animation> LoadAnimations()
+        public Dictionary<string, Animation> ResolveAnimations()
         {
-            if (!File.Exists(ANIMATION_FILE_PATH))
-                throw new LocalizedError<FileNotFoundException>("system.animationDataLoader.fileNotFound", ANIMATION_FILE_PATH);
+            JsonElement root = DataManager.Instance.GetByPath("animationData");
 
-            string json = File.ReadAllText(ANIMATION_FILE_PATH);
-            JsonDocument doc;
-            try
-            {
-                doc = JsonDocument.Parse(json);
-            }
-            catch (Exception)
-            {
-                throw new LocalizedError<InvalidOperationException>("system.animationDataLoader.jsonParseFailed", ANIMATION_FILE_PATH);
-            }
-
-            var root = doc.RootElement;
             string assetFolder = root.GetProperty("assetFolder").GetString() ?? string.Empty;
-
-            var dataElement = root.GetProperty("data");
+            JsonElement dataElement = root.GetProperty("data");
 
             var animations = new Dictionary<string, Animation>();
 
             foreach (var animProp in dataElement.EnumerateObject())
             {
                 string animName = animProp.Name;
-                var animDto = JsonSerializer.Deserialize<AnimationDTO>(animProp.Value.GetRawText(), _jsonSerializerOptions)!;
+                var animDto = JsonSerializer.Deserialize<AnimationDTO>(
+                    animProp.Value.GetRawText(),
+                    _jsonSerializerOptions
+                )!;
+
                 var animation = ResolveAnimation(animDto, assetFolder);
                 animations.Add(animName, animation);
             }
 
-            Log("system.animationDataLoader.totalAnimationsLoaded", animations.Count);
+            Log("system.animationResolver.totalResolved", animations.Count);
             return animations;
         }
 

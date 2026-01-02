@@ -8,21 +8,14 @@ namespace in254.Data;
 
 public sealed class DataManager : LoggerBase
 {
-    // --- Singleton ---
     private static readonly DataManager _instance = new();
     public static DataManager Instance => _instance;
-
-    // --- Data storage ---
-    private readonly Dictionary<string, JsonElement> _blocks =
-        new(StringComparer.OrdinalIgnoreCase);
-
-    // --- Paths ---
+    private readonly Dictionary<string, JsonElement> _blocks = new(StringComparer.OrdinalIgnoreCase);
     private static readonly string DATA_DIRECTORY =
         Path.Combine(AppContext.BaseDirectory, "Data");
 
     private DataManager() { }
 
-    // --- Load all JSON files from data directory ---
     public void LoadAll()
     {
         if (!Directory.Exists(DATA_DIRECTORY))
@@ -38,7 +31,7 @@ public sealed class DataManager : LoggerBase
 
     private void LoadSingleFile(string filePath)
     {
-        string jsonText = "";
+        string jsonText;
         try
         {
             jsonText = File.ReadAllText(filePath);

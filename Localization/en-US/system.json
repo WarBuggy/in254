@@ -1,4 +1,6 @@
 {
+    "system.localizationManager.fallbackUsed": "Localization key '{0}' not found in '{1}', using default language",
+    "system.localizationManager.keyNotFound": "Localization key '{0}' not found in '{1}' or default '{2}', showing corrupted version",
     "system.settingManager.settingNotFound": "Settings file not found. Creating default: {0}",
     "system.settingManager.settingFailToLoad": "Failed to load settings: {0}. Using defaults",
     "system.settingManager.settingFailToSave": "Failed to save settings: {0}",
@@ -13,9 +15,7 @@
     "system.dataManager.invalidPropertyType": "Property '{0}' in block '{1}' is not an object",
     "system.dataManager.propertyTypeMismatch": "Property '{0}' is not of expected type '{1}'",
     "system.dataManager.invalidPath": "Invalid or empty path string: '{0}'",
-    "system.animationDataLoader.fileNotFound": "Animation data file not found: {0}",
-    "system.animationDataLoader.jsonParseFailed": "Failed to parse animation JSON file: {0}",
-    "system.animationDataLoader.totalAnimationsLoaded": "Total animations loaded: {0}",
+    "system.animationResolver.totalResolved": "Total animations resolved: {0}",
     "system.textureManager.contentManagerNull": "TextureManager: ContentManager provided is null",
     "system.textureManager.initialized": "TextureManager: successfully initialized with ContentManager",
     "system.textureManager.invalidPath": "TextureManager: invalid texture path '{0}'",
