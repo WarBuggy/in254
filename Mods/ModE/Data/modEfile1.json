@@ -1,0 +1,16 @@
+{
+    "data": {
+        "path": {
+            "to": {
+                "nowhere": null,
+                "everywhere": {
+                    "city": "Florence"
+                }
+            }
+        },
+        "arrTest": null,
+        "val": "updated value"
+    },
+    "targetMod": "ModA",
+    "samePathConflict": "overwrite"
+}

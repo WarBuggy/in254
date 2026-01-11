@@ -1,107 +1,88 @@
 using System;
 using System.Collections.Generic;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Content;
-using in254.Core;
 using System.IO;
-using System.Threading;
+using in254.Core;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace in254.Engine;
 
-/// <summary>
-/// Singleton manager for loading and storing textures.
-/// Maps fullPath -> Texture2D and index -> fullPath.
-/// </summary>
-public sealed class TextureManager : LoggerBase
+public sealed class TextureManager : LoggerBaseCore
 {
     private static readonly TextureManager _instance = new();
     public static TextureManager Instance => _instance;
-    private readonly Dictionary<string, Texture2D> _texturesByPath = [];
-    private readonly Dictionary<int, string> _indexToPath = [];
-    private int _nextIndex = 0;
-    private ContentManager _contentManager;
-    private readonly Lock _lock = new();
+    private static readonly string SPRITE_FOLDER = "Sprites/";
+
+    // Dictionary<modId, Dictionary<textureId, (path, texture)>>
+    private readonly Dictionary<string, Dictionary<int, (string path, Texture2D texture)>> _textures = new(StringComparer.OrdinalIgnoreCase);
+    // Dictionary<modId, Dictionary<path, textureId>>
+    private readonly Dictionary<string, Dictionary<string, int>> _pathToId = new(StringComparer.OrdinalIgnoreCase);
+    // Incremental ID generator per mod
+    private readonly Dictionary<string, int> _nextId = new(StringComparer.OrdinalIgnoreCase);
 
     private TextureManager() { }
 
     /// <summary>
-    /// Initialize TextureManager with MonoGame ContentManager.
-    /// Must be called before loading textures.
+    /// Registers a texture by modId + path. Returns textureId.
+    /// If already loaded, returns existing ID.
     /// </summary>
-    public void Initialize(ContentManager content)
+    public int RegisterTexture(string modId, string modFolderPath, string folder, string file)
     {
-        _contentManager = content ?? throw new LocalizedError<ArgumentNullException>("system.textureManager.contentManagerNull");
-        Log("system.textureManager.initialized");
-    }
-
-    /// <summary>
-    /// Adds a texture by fullPath. Returns a unique index.
-    /// If already loaded, returns existing index.
-    /// </summary>
-    public int AddPath(string fullPath)
-    {
-        if (string.IsNullOrWhiteSpace(fullPath))
-            throw new LocalizedError<ArgumentException>("system.textureManager.invalidPath", fullPath);
-        lock (_lock)
+        string path = Path.Combine(modFolderPath, SPRITE_FOLDER, folder, file);
+        // Ensure mod dictionaries exist
+        if (!_textures.TryGetValue(modId, out var modTextures))
         {
-            if (_texturesByPath.ContainsKey(fullPath))
-            {
-                // Return existing index
-                int existingIndex = GetExistingIndex(fullPath);
-                if (existingIndex != -1)
-                    return existingIndex;
-            }
-
-            if (_contentManager == null)
-                throw new LocalizedError<InvalidOperationException>("system.textureManager.notInitialized");
-
-            Texture2D texture;
-            try
-            {
-                // Load texture from fullPath (without extension, MonoGame Content expects relative path)
-                string assetPath = Path.ChangeExtension(fullPath, null);
-                texture = _contentManager.Load<Texture2D>(assetPath);
-            }
-            catch (Exception ex)
-            {
-                throw new LocalizedError<InvalidOperationException>("system.textureManager.loadFailed", fullPath, ex.Message);
-            }
-
-            // Store
-            _texturesByPath[fullPath] = texture;
-            int index = _nextIndex++;
-            _indexToPath[index] = fullPath;
-
-            Log("system.textureManager.textureLoaded", fullPath, index);
-            return index;
+            modTextures = [];
+            _textures[modId] = modTextures;
         }
-    }
 
-    /// <summary>
-    /// Get Texture2D by index.
-    /// Resolves index -> fullPath -> Texture2D.
-    /// </summary>
-    public Texture2D GetTexture(int index)
-    {
-        if (!_indexToPath.TryGetValue(index, out string fullPath))
-            throw new LocalizedError<KeyNotFoundException>("system.textureManager.indexNotFound", index);
-
-        if (!_texturesByPath.TryGetValue(fullPath, out Texture2D texture))
-            throw new LocalizedError<KeyNotFoundException>("system.textureManager.textureNotFound", fullPath);
-
-        return texture;
-    }
-
-    /// <summary>
-    /// Returns the existing index for a fullPath if it exists, or -1 if not found.
-    /// </summary>
-    private int GetExistingIndex(string fullPath)
-    {
-        foreach (var kvp in _indexToPath)
+        if (!_pathToId.TryGetValue(modId, out var modPathToId))
         {
-            if (kvp.Value == fullPath)
-                return kvp.Key;
+            modPathToId = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            _pathToId[modId] = modPathToId;
         }
-        return -1;
+
+        if (!_nextId.TryGetValue(modId, out var nextId))
+        {
+            nextId = 1;
+            _nextId[modId] = nextId;
+        }
+
+        // Check if path already loaded
+        if (modPathToId.TryGetValue(path, out var existingId))
+        {
+            return existingId;
+        }
+
+        // Load texture from file
+        if (!File.Exists(path))
+            throw new LocalizedErrorCore<FileNotFoundException>("system.textureManager.textureFileNotFound", path);
+
+        using var stream = File.OpenRead(path);
+        var texture = Texture2D.FromStream(EngineManager.Instance.GraphicsDevice, stream);
+
+        // Assign ID
+        int textureId = nextId;
+        nextId++;
+        _nextId[modId] = nextId;
+
+        // Store in dictionaries
+        modTextures[textureId] = (path, texture);
+        modPathToId[path] = textureId;
+
+        Log("system.textureManager.registered", modId, path, textureId);
+        return textureId;
+    }
+
+    /// <summary>
+    /// Get a Texture2D by modId and textureId.
+    /// </summary>
+    public Texture2D GetTexture(string modId, int textureId)
+    {
+        if (_textures.TryGetValue(modId, out var modTextures) &&
+            modTextures.TryGetValue(textureId, out var tuple))
+        {
+            return tuple.texture;
+        }
+        throw new LocalizedErrorCore<KeyNotFoundException>("system.textureManager.textureNotFound", modId, textureId);
     }
 }

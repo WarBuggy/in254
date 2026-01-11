@@ -1,0 +1,10 @@
+{
+    "data": {
+        "arrTest": [
+            9,
+            8
+        ]
+    },
+    "targetMod": "ModA",
+    "samePathConflictArray": "overwrite"
+}

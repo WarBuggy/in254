@@ -1,62 +1,27 @@
-﻿using in254.Engine;
-using in254.Localization;
-using System;
-using in254.Data;
-using System.Collections.Generic;
+﻿using System;
+using AxiomPlayground.Modding;
+using in254.Engine;
 
 class Program
 {
     static void Main()
     {
-        LocalizationManager.Instance.LoadAll();
-        SettingManager.Instance.Load();
-
-        var dm = DataManager.Instance;
-
-        // Load all JSON data
-        dm.LoadAll();
-
-        Console.WriteLine("=== Raw Blocks Debug Print ===");
-        foreach (var kvp in dm.GetValue<Dictionary<string, object>>("levelData"))
+        ModManager.Instance.DiscoverMods();
+        var allMods = ModManager.Instance.GetAllModsSortedByDisplayName();
+        Console.WriteLine("Discovered Mods:");
+        foreach (var mod in allMods)
         {
-            Console.WriteLine($"{kvp.Key}: {kvp.Value}");
+            Console.WriteLine($"  {mod.DisplayName} (modId={mod.ModId}, path={ModManager.Instance.GetModFolderPath(mod)})");
         }
 
-        // Test GetByPath
-        int leftCell = dm.GetValue<int>("levelData.leftSide.cell");
-        int leftWall = dm.GetValue<int>("levelData.leftSide.wall");
-        int rightCell = dm.GetValue<int>("levelData.rightSide.cell");
-        int width = dm.GetValue<int>("levelData.width");
-        int height = dm.GetValue<int>("levelData.height");
-
-        Console.WriteLine($"leftSide.cell = {leftCell}");
-        Console.WriteLine($"leftSide.wall = {leftWall}");
-        Console.WriteLine($"rightSide.cell = {rightCell}");
-        Console.WriteLine($"width = {width}");
-        Console.WriteLine($"height = {height}");
-
-        // Test type mismatch (should throw localized exception)
-        try
+        ModManager.Instance.PopulateFinalLoadableMods(allMods);
+        Console.WriteLine("Final Mods:");
+        foreach (var mod in ModManager.Instance.FinalModList)
         {
-            string invalid = dm.GetValue<string>("levelData.width");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Caught exception as expected: {ex.Message}");
+            Console.WriteLine($"  {mod.DisplayName} (modId={mod.ModId}, path={ModManager.Instance.GetModFolderPath(mod)})");
         }
 
-        // Test non-existent path (should throw localized exception)
-        try
-        {
-            int missing = dm.GetValue<int>("levelData.center.cell");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Caught exception as expected: {ex.Message}");
-        }
-
-        EngineManager engineManager = new();
-        engineManager.Run();
+        EngineManager.Instance.Run();
 
     }
 }

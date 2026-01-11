@@ -1,0 +1,6 @@
+{
+    "data": {
+        "val": "new value"
+    },
+    "samePathConflict": "invalid_value"
+}

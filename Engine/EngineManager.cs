@@ -1,24 +1,24 @@
-﻿using System;
-using Microsoft.Xna.Framework;
-using in254.Data;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
+using AxiomPlayground.Modding;
+using AxiomPlayground.Data;
+using AxiomPlayground.Localization;
+using AxiomPlayground.Scripting;
+using in254.Engine.LuaBindings;
 
 namespace in254.Engine;
 
 public class EngineManager : Game
 {
+    private static readonly EngineManager _instance = new();
+    public static EngineManager Instance => _instance;
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
-    private Dictionary<string, Animation.Animation> animations;
-    private float _animTimer = 0f;
-    private int _frameIndex = 0;
+    //private Dictionary<string, Animation.Animation> animations;
     private const float FrameDuration = 0.12f;
-    private bool _facingLeft = false;
-    private string _currentState = "idle";
 
-    public EngineManager()
+    private EngineManager()
     {
         _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
@@ -28,7 +28,7 @@ public class EngineManager : Game
     protected override void Initialize()
     {
         // Initialize TextureManager with the game's ContentManager
-        TextureManager.Instance.Initialize(Content);
+        // TextureManager.Instance.Initialize(Content);
 
         base.Initialize();
     }
@@ -37,13 +37,19 @@ public class EngineManager : Game
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-        // Load all animations from JSON
-        animations = AnimationResolver.Instance.ResolveAnimations();
-        Console.WriteLine($"Total animations loaded: {animations.Count}");
-        Console.WriteLine();
-#if DEV_ENV
-        DebugPrintAnimations();
-#endif
+        DataManager.Instance.RegisterCategories(
+                   [
+                       LocalizationManager.Instance.CategoryName,
+                AnimationDataManager.Instance.CategoryName,
+            ]);
+        DataManager.Instance.LoadAll(ModManager.Instance.FinalModList);
+
+        LocalizationManager.Instance.LoadAll(ModManager.Instance.FinalModList);
+        AnimationDataManager.Instance.LoadAll(ModManager.Instance.FinalModList);
+        // AnimationDataManager.Instance.DebugPrintAllAnimations();
+
+        ScriptManager.Instance.LoadAll(ModManager.Instance.FinalModList);
+        ScriptManager.Instance.ExecuteAllModsScripts();
     }
 
     protected override void Update(GameTime gameTime)
@@ -54,45 +60,45 @@ public class EngineManager : Game
             keyboard.IsKeyDown(Keys.Escape))
             Exit();
 
-        bool moving = false;
+        // bool moving = false;
 
-        if (keyboard.IsKeyDown(Keys.D))
-        {
-            _currentState = "moving";
-            _facingLeft = false;
-            moving = true;
-        }
-        else if (keyboard.IsKeyDown(Keys.A))
-        {
-            _currentState = "moving";
-            _facingLeft = true;
-            moving = true;
-        }
+        // if (keyboard.IsKeyDown(Keys.D))
+        // {
+        //     _currentState = "moving";
+        //     _facingLeft = false;
+        //     moving = true;
+        // }
+        // else if (keyboard.IsKeyDown(Keys.A))
+        // {
+        //     _currentState = "moving";
+        //     _facingLeft = true;
+        //     moving = true;
+        // }
 
-        if (!moving)
-        {
-            _currentState = "idle";
-            _frameIndex = 0;
-            _animTimer = 0f;
-        }
+        // if (!moving)
+        // {
+        //     _currentState = "idle";
+        //     _frameIndex = 0;
+        //     _animTimer = 0f;
+        // }
 
-        // Advance animation
-        if (_currentState == "moving")
-        {
-            _animTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+        // // Advance animation
+        // if (_currentState == "moving")
+        // {
+        //     _animTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            if (_animTimer >= FrameDuration)
-            {
-                _animTimer -= FrameDuration;
+        //     if (_animTimer >= FrameDuration)
+        //     {
+        //         _animTimer -= FrameDuration;
 
-                var frames = animations["player"]
-                    .Components["base"]
-                    .States[_currentState]
-                    .Frames;
+        //         var frames = animations["player"]
+        //             .Components["base"]
+        //             .States[_currentState]
+        //             .Frames;
 
-                _frameIndex = (_frameIndex + 1) % frames.Length;
-            }
-        }
+        //         _frameIndex = (_frameIndex + 1) % frames.Length;
+        //     }
+        // }
 
         base.Update(gameTime);
     }
@@ -101,96 +107,20 @@ public class EngineManager : Game
     {
         GraphicsDevice.Clear(Color.Black);
 
+        // Begin the sprite batch
         _spriteBatch.Begin(
             SpriteSortMode.Deferred,
             BlendState.AlphaBlend,
-            SamplerState.PointClamp
+            SamplerState.PointClamp,
+            DepthStencilState.None,
+            RasterizerState.CullCounterClockwise
         );
 
-        var state = animations["player"]
-            .Components["base"]
-            .States[_currentState];
-
-        var frame = state.Frames[_frameIndex];
-        var texture = frame.Texture;
-
-        var sourceRect = new Rectangle(
-            frame.SpriteOffsetX,
-            frame.SpriteOffsetY,
-            frame.Width,
-            frame.Height
-        );
-
-        var viewport = GraphicsDevice.Viewport;
-        var screenCenter = new Vector2(
-            viewport.Width / 2f,
-            viewport.Height / 2f
-        );
-
-        var origin = new Vector2(
-            frame.Width / 2f,
-            frame.Height / 2f
-        );
-
-        var position = screenCenter + new Vector2(
-            frame.OffsetX,
-            frame.OffsetY
-        );
-
-        var effects = _facingLeft
-            ? SpriteEffects.FlipHorizontally
-            : SpriteEffects.None;
-
-        _spriteBatch.Draw(
-            texture,
-            position,
-            sourceRect,
-            Color.White,
-            rotation: 0f,
-            origin: origin,
-            scale: 1f,
-            effects: effects,
-            layerDepth: 0f
-        );
+        ScriptManager.Instance.Fire(GameEvents.OnDraw);
+        DrawManager.Instance.RenderQueue(_spriteBatch);
 
         _spriteBatch.End();
 
         base.Draw(gameTime);
-    }
-
-    private void DebugPrintAnimations()
-    {
-        // Iterate through all animations
-        foreach (var animKvp in animations)
-        {
-            string animName = animKvp.Key;
-            Animation.Animation anim = animKvp.Value;
-
-            Console.WriteLine($"Animation: {animName}");
-            Console.WriteLine($"  BaseComponent: {anim.BaseComponent}");
-            Console.WriteLine($"  Components: {anim.Components.Count}");
-
-            foreach (var compKvp in anim.Components)
-            {
-                var comp = compKvp.Value;
-                Console.WriteLine($"    Component: {comp.Name}, DefaultState: {comp.DefaultState}");
-                Console.WriteLine($"    States: {comp.States.Count}");
-
-                foreach (var stateKvp in comp.States)
-                {
-                    var state = stateKvp.Value;
-                    Console.WriteLine($"      State: {state.Name}, Frames: {state.Frames.Length}");
-
-                    for (int i = 0; i < state.Frames.Length; i++)
-                    {
-                        var frame = state.Frames[i];
-                        Console.WriteLine($"        Frame {i}: TextureIndex={frame.TextureIndex}, Layer={frame.Layer}, " +
-                            $"Width={frame.Width}, Height={frame.Height}, OffsetX={frame.OffsetX}, OffsetY={frame.OffsetY}");
-                    }
-                }
-            }
-
-            Console.WriteLine();
-        }
     }
 }

@@ -1,0 +1,10 @@
+{
+    "data": {
+        "path": {
+            "to": {
+                "somewhere": "replaced value"
+            }
+        }
+    },
+    "samePathConflict": "overwrite"
+}

@@ -1,0 +1,8 @@
+print("This is testData.lua from ModA")
+print(GetData("path.to.nowhere"))
+print(GetDataFrom("ModB", "bkey"))
+print(GetDataFrom("ModB", "key"))
+SetData("path.to.nowhere", "path to nowhere")
+print(GetData("path.to.nowhere"))
+SetDataTo("ModB", "bkey", "value set by mod A")
+print(GetDataFrom("ModB", "bkey"))

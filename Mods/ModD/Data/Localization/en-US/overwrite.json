@@ -1,0 +1,10 @@
+{
+    "targetMod": "Core",
+    "data": {
+        "localization": {
+            "en-US": {
+                "system.localizationManager.fallbackUsed": "OVERWRITE '{0}' OVERWRITE '{1}'"
+            }
+        }
+    }
+}

@@ -1,0 +1,7 @@
+{
+    "data": {
+        "bKey": "overwritten by ModB itself"
+    },
+    "targetMod": "ModB",
+    "samePathConflict": "overwrite"
+}
