@@ -1,2 +1,5 @@
-print("This is player.lua from ModB")
-print(LocalizeWithEndingFrom("Core", "!", "system.dataManager.loadedFiles", "20"))
+print("This is player.lua from ModB, which replace player.lua from ModA, so it should show up in between of ModA's messages.")
+print("Next message should be corrupted due to missing key")
+print(LocalizeWithEnding("!", "system.drawManager.textureNull"))
+print("Next message should be 'DrawManager received a null texture!' (notice the '!' at the end)")
+print(LocalizeWithEndingFrom("Core", "!", "system.drawManager.textureNull"))

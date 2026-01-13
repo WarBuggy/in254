@@ -1,3 +1,5 @@
 print("This is helper.lua from ModD")
+print("The next line should be a corrupted key.")
 print(Localize("modD.key01"))
+print("The next line should be 'OVERWRITE '' OVERWRITE ''.' since ModD has overwritten a (non-existing, hence adding) localization key to 'Core'.")
 print(LocalizeFrom("Core", "system.localizationManager.fallbackUsed"))                   

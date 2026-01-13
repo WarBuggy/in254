@@ -1,1 +1,0 @@
-print("This is helper.lua from ModF, which should not show up")

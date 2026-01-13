@@ -48,8 +48,8 @@ public class EngineManager : Game
         AnimationDataManager.Instance.LoadAll(ModManager.Instance.FinalModList);
         // AnimationDataManager.Instance.DebugPrintAllAnimations();
 
-        ScriptManager.Instance.LoadAll(ModManager.Instance.FinalModList);
-        ScriptManager.Instance.ExecuteAllModsScripts();
+        var queue = ScriptManager.Instance.LoadAll(ModManager.Instance.FinalModList);
+        ScriptManager.Instance.ExecuteQueue(queue);
     }
 
     protected override void Update(GameTime gameTime)

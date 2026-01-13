@@ -1,1 +1,0 @@
-print("This is scriptF.lua from ModF.")

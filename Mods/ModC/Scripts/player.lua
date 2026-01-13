@@ -1,1 +1,1 @@
-print("This is player.lua from ModC")
+print("This is player.lua from ModC. This message should not show up since it doeas not have a target file.")

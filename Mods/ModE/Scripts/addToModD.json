@@ -1,3 +1,4 @@
 {
-    "addTo": "ModD"
+    "targetFile": "helper.lua",
+    "overwrite": "ModD"
 }

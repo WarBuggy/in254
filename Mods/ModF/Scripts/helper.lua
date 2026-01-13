@@ -1,0 +1,1 @@
+print("This is helper.lua from ModF")

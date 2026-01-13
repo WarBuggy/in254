@@ -14,3 +14,5 @@ end
 function MathUtils.multiply(a, b)
     return a * b
 end
+
+print("End of MathUtils")
