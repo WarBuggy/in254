@@ -1,17 +1,16 @@
-local MathUtils = {}
+MathUtils = {}
 
-function MathUtils.Add(a, b)
+-- Adds two numbers
+function MathUtils.add(a, b)
     return a + b
 end
 
-MathUtils.SpecialValue = 42
-
-function MathUtils.Div(a, b)
-    if b == 0 then
-        error("Division by zero!")
-    end
-    return a / b
+-- Subtracts b from a
+function MathUtils.subtract(a, b)
+    return a - b
 end
 
--- Return the table so LibraryManager can pick it up
-return MathUtils
+-- Multiplies two numbers
+function MathUtils.multiply(a, b)
+    return a * b
+end

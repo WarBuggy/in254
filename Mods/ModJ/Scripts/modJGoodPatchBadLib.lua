@@ -1,6 +1,6 @@
--- ModI: patch ModH.MathUtils
+-- ModJ patch bad library BadLib
 
-function MathUtils.divide(a, b)
+function BadLib.divide(a, b)
     if b == 0 then
         error("Division by zero")
     end
