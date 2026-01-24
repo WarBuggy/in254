@@ -3,51 +3,49 @@
         "animationData": {
             "elevator": {
                 "baseComponent": "base",
-                "componentList": [
-                    {
-                        "name": "base",
+                "components": {
+                    "base": {
                         "folder": "elevator/",
                         "layer": "outside",
                         "defaultState": "idle",
                         "width": 256,
                         "height": 32,
-                        "stateList": {
+                        "states": {
                             "idle": {
-                                "frameList": [
-                                    {
+                                "frames": {
+                                    "0": {
                                         "file": "idle.png"
                                     }
-                                ]
+                                }
                             },
                             "ready": {
-                                "frameList": [
-                                    {
+                                "frames": {
+                                    "0": {
                                         "file": "ready.png"
                                     }
-                                ]
+                                }
                             },
                             "up": {
-                                "frameList": [
-                                    {
+                                "frames": {
+                                    "0": {
                                         "file": "up.png",
                                         "offsetX": 0,
                                         "offsetY": 0
                                     }
-                                ]
+                                }
                             },
                             "down": {
-                                "frameList": [
-                                    {
+                                "frames": {
+                                    "0": {
                                         "file": "down.png",
                                         "offsetX": 0,
                                         "offsetY": 0
                                     }
-                                ]
+                                }
                             }
                         }
                     },
-                    {
-                        "name": "railGuard",
+                    "railGuard": {
                         "folder": "elevator/",
                         "layer": "foreground",
                         "defaultState": "idle",
@@ -55,252 +53,235 @@
                         "offsetY": -90,
                         "width": 256,
                         "height": 90,
-                        "stateList": {
+                        "states": {
                             "idle": {
-                                "frameList": [
-                                    {
+                                "frames": {
+                                    "0": {
                                         "file": "guard.png",
                                         "offsetX": 0,
                                         "offsetY": -90
                                     }
-                                ]
+                                }
                             }
                         }
                     }
-                ]
+                }
             },
             "player": {
                 "baseComponent": "base",
-                "componentList": [
-                    {
-                        "name": "base",
+                "components": {
+                    "base": {
                         "folder": "in254/",
                         "layer": "middleOutside",
                         "defaultState": "idle",
                         "width": 165,
                         "height": 256,
-                        "stateList": {
+                        "states": {
                             "idle": {
-                                "frameList": [
-                                    {
+                                "frames": {
+                                    "0": {
                                         "file": "idle.png"
                                     }
-                                ]
+                                }
                             },
                             "moving": {
-                                "frameList": [
-                                    {
+                                "frames": {
+                                    "0": {
                                         "file": "move_01.png"
                                     },
-                                    {
+                                    "1": {
                                         "file": "move_02.png"
                                     },
-                                    {
+                                    "2": {
                                         "file": "move_03.png"
                                     },
-                                    {
+                                    "3": {
                                         "file": "move_04.png"
                                     },
-                                    {
+                                    "4": {
                                         "file": "move_05.png"
                                     },
-                                    {
+                                    "5": {
                                         "file": "move_06.png"
                                     },
-                                    {
+                                    "6": {
                                         "file": "move_07.png"
                                     }
-                                ]
+                                }
                             }
                         }
                     }
-                ]
+                }
             },
             "controlRoom": {
                 "baseComponent": "base",
-                "componentList": [
-                    {
-                        "name": "base",
+                "components": {
+                    "base": {
                         "folder": "bunker/controlRoom/",
                         "layer": "wall",
                         "defaultState": "idle",
                         "width": 800,
                         "height": 256,
-                        "stateList": {
+                        "states": {
                             "idle": {
-                                "frameList": [
-                                    {
+                                "frames": {
+                                    "0": {
                                         "file": "base.png"
                                     }
-                                ]
+                                }
                             }
                         }
                     }
-                ]
+                }
             },
             "cell": {
                 "baseComponent": "base",
-                "componentList": [
-                    {
-                        "name": "base",
-                        "folder": "bunker/cell/",
+                "folder": "bunker/cell/",
+                "components": {
+                    "base": {
                         "layer": "wall",
                         "defaultState": "idle",
                         "width": 800,
                         "height": 256,
-                        "stateList": {
+                        "states": {
                             "idle": {
-                                "frameList": [
-                                    {
+                                "frames": {
+                                    "0": {
                                         "file": "base.png"
                                     }
-                                ]
+                                }
                             }
                         }
                     },
-                    {
-                        "name": "wallMountedLight",
-                        "folder": "bunker/cell/",
+                    "wallMountedLight": {
                         "layer": "wall",
                         "defaultState": "off",
                         "width": 800,
                         "height": 256,
-                        "stateList": {
+                        "states": {
                             "off": {
-                                "frameList": [
-                                    {
+                                "frames": {
+                                    "0": {
                                         "file": "wallMountedLightOff.png"
                                     }
-                                ]
+                                }
                             },
                             "on": {
-                                "frameList": [
-                                    {
+                                "frames": {
+                                    "0": {
                                         "file": "wallMountedLightOn.png"
                                     }
-                                ]
+                                }
                             }
                         }
                     },
-                    {
-                        "name": "lighting",
-                        "folder": "bunker/cell/",
+                    "lighting": {
                         "layer": "outside",
                         "defaultState": "off",
                         "width": 800,
                         "height": 256,
-                        "stateList": {
+                        "states": {
                             "off": {
-                                "frameList": [
-                                    {
+                                "frames": {
+                                    "0": {
                                         "file": "lightingOff.png"
                                     }
-                                ]
+                                }
                             },
                             "on": {
-                                "frameList": [
-                                    {
+                                "frames": {
+                                    "0": {
                                         "file": "lightingOn.png"
                                     }
-                                ]
+                                }
                             }
                         }
                     },
-                    {
-                        "name": "toilet",
-                        "folder": "bunker/cell/",
+                    "toilet": {
                         "layer": "nearWall",
                         "defaultState": "idle",
                         "width": 50,
                         "height": 50,
-                        "stateList": {
+                        "states": {
                             "idle": {
                                 "offsetY": 206,
-                                "frameList": [
-                                    {
+                                "frames": {
+                                    "0": {
                                         "file": "toilet.png"
                                     }
-                                ]
+                                }
                             }
                         }
                     },
-                    {
-                        "name": "chair",
-                        "folder": "bunker/cell/",
+                    "chair": {
                         "layer": "bunkerMiddle",
                         "defaultState": "idle",
                         "width": 67,
                         "height": 54,
-                        "stateList": {
+                        "states": {
                             "idle": {
                                 "offsetX": 405,
                                 "offsetY": 202,
-                                "frameList": [
-                                    {
+                                "frames": {
+                                    "0": {
                                         "file": "chair.png"
                                     }
-                                ]
+                                }
                             }
                         }
                     },
-                    {
-                        "name": "bed",
-                        "folder": "bunker/cell/",
+                    "bed": {
                         "layer": "nearWall",
                         "defaultState": "idle",
                         "width": 270,
                         "height": 27,
-                        "stateList": {
+                        "states": {
                             "idle": {
                                 "offsetX": 520,
                                 "offsetY": 181,
-                                "frameList": [
-                                    {
+                                "frames": {
+                                    "0": {
                                         "file": "bed.png"
                                     }
-                                ]
+                                }
                             }
                         }
                     },
-                    {
-                        "name": "workStation",
-                        "folder": "bunker/cell/",
+                    "workStation": {
                         "layer": "bunkerMiddle",
                         "defaultState": "idle",
                         "width": 216,
                         "height": 124,
-                        "stateList": {
+                        "states": {
                             "idle": {
                                 "offsetX": 151,
                                 "offsetY": 132,
-                                "frameList": [
-                                    {
+                                "frames": {
+                                    "0": {
                                         "file": "workStation.png"
                                     }
-                                ]
+                                }
                             }
                         }
                     },
-                    {
-                        "name": "controlPanel",
-                        "folder": "bunker/cell/",
+                    "controlPanel": {
                         "layer": "outside",
                         "defaultState": "idle",
                         "width": 64,
                         "height": 64,
-                        "stateList": {
+                        "states": {
                             "idle": {
                                 "offsetX": 612,
                                 "offsetY": 72,
-                                "frameList": [
-                                    {
+                                "frames": {
+                                    "0": {
                                         "file": "controlPanel.png"
                                     }
-                                ]
+                                }
                             }
                         }
                     }
-                ]
+                }
             }
         }
     }

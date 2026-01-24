@@ -8,7 +8,10 @@
       "preLaunchTask": "Build Dev",
       "program": "${workspaceFolder}/bin/Dev/net10.0/in254.dll",
       "cwd": "${workspaceFolder}",
-      "console": "integratedTerminal"
+      "console": "integratedTerminal",
+      "args": [
+        "-debug",
+      ],
     },
     {
       "name": ".NET Core Launch (Console) Release",
@@ -17,7 +20,10 @@
       "preLaunchTask": "Build Release",
       "program": "${workspaceFolder}/bin/Release/net10.0/in254.dll",
       "cwd": "${workspaceFolder}",
-      "console": "integratedTerminal"
+      "console": "integratedTerminal",
+      "args": [
+        "-debug",
+      ],
     }
   ]
 }

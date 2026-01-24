@@ -26,6 +26,7 @@
     <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.*" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="../AxiomPlayground/src/GameFlag/GameFlag.csproj" />
     <ProjectReference Include="../AxiomPlayground/src/Modding/Modding.csproj" />
     <ProjectReference Include="../AxiomPlayground/src/Scripting/Scripting.csproj" />
     <ProjectReference Include="../AxiomPlayground/src/Data/Data.csproj" />

@@ -3,9 +3,9 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Graphics;
 using AxiomPlayground.Modding;
 using AxiomPlayground.Data;
-using AxiomPlayground.Localization;
 using AxiomPlayground.Scripting;
 using in254.Engine.LuaBindings;
+using System.Collections.Generic;
 
 namespace in254.Engine;
 
@@ -15,7 +15,6 @@ public class EngineManager : Game
     public static EngineManager Instance => _instance;
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
-    //private Dictionary<string, Animation.Animation> animations;
     private const float FrameDuration = 0.12f;
 
     private EngineManager()
@@ -37,19 +36,13 @@ public class EngineManager : Game
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-        DataManager.Instance.RegisterCategories(
-                   [
-                       LocalizationManager.Instance.CategoryName,
-                AnimationDataManager.Instance.CategoryName,
-            ]);
         DataManager.Instance.LoadAll(ModManager.Instance.FinalModList);
-
-        LocalizationManager.Instance.LoadAll(ModManager.Instance.FinalModList);
-        AnimationDataManager.Instance.LoadAll(ModManager.Instance.FinalModList);
-        // AnimationDataManager.Instance.DebugPrintAllAnimations();
 
         var queue = ScriptManager.Instance.LoadAll(ModManager.Instance.FinalModList);
         ScriptManager.Instance.ExecuteQueue(queue);
+        // ScriptManager.Instance.Fire(GameEvents.OnAnimationsLoaded);
+
+        // var go = GameObject.GameObjectFactory.Create("Hero1", "Core");
     }
 
     protected override void Update(GameTime gameTime)

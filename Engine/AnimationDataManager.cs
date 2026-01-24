@@ -1,309 +1,561 @@
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using AxiomPlayground.Data;
 using AxiomPlayground.Modding;
 using in254.Core;
-using MoonSharp.Interpreter;
 
 namespace in254.Engine;
 
-/// <summary>
-/// Manages animation data for all mods.
-/// Builds fully resolved Animation objects from JSON in DataManager.
-/// </summary>
 public class AnimationDataManager : BaseManager
 {
     private static readonly AnimationDataManager _instance = new();
     public static AnimationDataManager Instance => _instance;
     private readonly LoggerBaseCore _logger = new();
+    private readonly Dictionary<string, List<string>> _animationNames = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly string _DEFAULT_VALUE_PATH = "__default";
 
-    private readonly Dictionary<string, Dictionary<string, Animation>> _animations = new(StringComparer.OrdinalIgnoreCase);
-    // Cache Lua tables per mod
-    private readonly Dictionary<string, Table> _luaAnimationCache = new(StringComparer.OrdinalIgnoreCase);
+    private AnimationDataManager() : base("animationData", true) { }
 
-
-    private AnimationDataManager() : base("animationData") { }
-
-    /// <summary>
-    /// Load all animations for a single mod, skipping invalid frames/states/components/animations.
-    /// </summary>
-    protected override void LoadForMod(ModInstance mod)
+    public override Dictionary<string, Dictionary<string, object?>> ProcessPathData
+    (
+        IReadOnlyList<CategoryData> collectedCategoryDataList,
+        out Dictionary<string, Dictionary<string, PathHistory>> processedHistory
+    )
     {
-        var container = DataManager.Instance.TryGetContainer(mod.ModId);
-        if (container == null) return;
+        // Result: modId -> resolved paths dictionary
+        var result = new Dictionary<string, Dictionary<string, object?>>(StringComparer.OrdinalIgnoreCase);
+        processedHistory = new Dictionary<string, Dictionary<string, PathHistory>>(StringComparer.OrdinalIgnoreCase);
 
-        var animationNames = CollectAnimationNames(container);
-
-        var modAnimations = new Dictionary<string, Animation>(StringComparer.OrdinalIgnoreCase);
-
-        var modFolderPath = ModManager.Instance.GetModFolderPath(mod);
-        foreach (var name in animationNames)
+        foreach (var modData in collectedCategoryDataList)
         {
-            try
+            string modId = modData.ModId;
+            var animationData = modData.Values; // Dictionary<string, object> for this mod
+
+            var animationIndex = BuildAnimationIndex(animationData);
+            var rawAnimationNames = animationIndex.Keys.ToList();
+
+            _animationNames[modId] = [];
+            var resolvedPaths = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
+            var resolvedHistories = new Dictionary<string, PathHistory>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var animationName in rawAnimationNames)
             {
-                var animation = BuildAnimation(mod.ModId, modFolderPath, container, name);
-                if (animation != null && animation.Components.Count > 0)
-                    modAnimations[name] = animation;
+                var index = animationIndex[animationName];
+                var animationResolved = BuildResolvedAnimationPathsWithHistory(
+                    animationName, animationData, index, modId, resolvedHistories);
+                if (animationResolved == null)
+                    continue;
+
+                foreach (var kvp in animationResolved)
+                    resolvedPaths[kvp.Key] = kvp.Value;
+
+                _animationNames[modId].Add(animationName);
             }
-            catch (Exception ex)
-            {
-                _logger.Log("system.animationDataManager.errorBuildingAnimation", name, mod.ModId, ex.Message);
-            }
-        }
 
-        _animations[mod.ModId] = modAnimations;
-        _luaAnimationCache.Remove(mod.ModId);
-    }
+            result[modId] = resolvedPaths;
+            processedHistory[modId] = resolvedHistories;
 
-    private HashSet<string> CollectAnimationNames(DataContainer container)
-    {
-        var result = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            // Debug prints
+            // Console.WriteLine($"Resolved animation paths for mod '{modId}':");
 
-        foreach (var path in container.GetPathsInCategory(CategoryName))
-        {
-            var parts = path.Split('.', StringSplitOptions.RemoveEmptyEntries);
-            if (parts.Length < 2) continue;
+            // foreach (var kvp in resolvedPaths.OrderBy(k => k.Key, StringComparer.OrdinalIgnoreCase))
+            // {
+            //     var path = kvp.Key;
+            //     var value = kvp.Value;
+            //     Console.WriteLine($"  {path} = {value?.ToString() ?? "<null>"}");
 
-            string animationName = parts[0];
-            if (string.IsNullOrWhiteSpace(animationName)) continue;
-            if (result.Contains(animationName)) continue;
-
-            string baseComponentPath = $"{animationName}.baseComponent";
-            string componentListPath = $"{animationName}.componentList";
-
-            object baseComponentValue = container.GetFlatData(baseComponentPath);
-            object componentListValue = container.GetFlatData(componentListPath);
-
-            if (baseComponentValue != null && componentListValue is List<object>)
-                result.Add(animationName);
+            //     if (processedHistory.TryGetValue(modId, out var modHistory) &&
+            //         modHistory.TryGetValue(path, out var pathHistory))
+            //     {
+            //         pathHistory.Print(path); // Prints all events for this path
+            //     }
+            // }
         }
 
         return result;
     }
 
-    private Animation BuildAnimation(string modId, string modFolderPath, DataContainer container, string animationName)
+    private Dictionary<string, AnimationIndex> BuildAnimationIndex(
+        IReadOnlyDictionary<string, object> paths
+    )
     {
-        string rootPath = animationName;
+        Dictionary<string, AnimationIndex> index = new(StringComparer.OrdinalIgnoreCase);
 
-        var animation = new Animation(animationName)
+        foreach (var path in paths.Keys)
         {
-            BaseComponent = container.GetFlatData($"{rootPath}.baseComponent") as string ?? string.Empty
-        };
+            // Expect: animationData.{animationName}.components...
+            var parts = path.Split('.', StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length < 3)
+                continue;
 
-        var componentListObj = container.GetFlatData($"{rootPath}.componentList") as List<object>;
-        if (componentListObj == null) return null;
+            if (!parts[0].Equals(CategoryName, StringComparison.OrdinalIgnoreCase))
+                continue;
 
-        foreach (var compJson in componentListObj.Cast<JsonElement>())
-        {
-            string compName = compJson.GetProperty("name").GetString()!;
-            var component = new AnimationComponent(compName)
+            var animationName = parts[1];
+
+            if (!index.TryGetValue(animationName, out var animationIndex))
             {
-                DefaultState = compJson.TryGetProperty("defaultState", out var ds) ? ds.GetString() ?? "" : ""
+                animationIndex = new AnimationIndex();
+                index[animationName] = animationIndex;
+            }
+
+            // Only component/state/frame paths matter from here
+            if (!parts[2].Equals("components", StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            if (parts.Length < 4)
+                continue;
+
+            var componentName = parts[3];
+            if (!animationIndex.Components.TryGetValue(componentName, out var componentIndex))
+            {
+                componentIndex = new AnimationComponentIndex();
+                animationIndex.Components[componentName] = componentIndex;
+            }
+
+            // states.{state}.frames.{index}.xxx
+            if (parts.Length >= 6 &&
+                parts[4].Equals("states", StringComparison.OrdinalIgnoreCase))
+            {
+                var stateName = parts[5];
+                if (!componentIndex.States.TryGetValue(stateName, out var state))
+                {
+                    state = new AnimationStateIndex();
+                    componentIndex.States[stateName] = state;
+                }
+
+                if (parts.Length >= 8 &&
+                    parts[6].Equals("frames", StringComparison.OrdinalIgnoreCase) &&
+                    int.TryParse(parts[7], out var frameIndex))
+                {
+                    state.Frames.Add(frameIndex);
+                }
+            }
+        }
+
+        return index;
+    }
+
+    private Dictionary<string, object>? BuildResolvedAnimationPathsWithHistory
+    (
+        string animationName,
+        IReadOnlyDictionary<string, object> animationData,
+        AnimationIndex index,
+        string owningModId,
+        Dictionary<string, PathHistory> resolvedHistories
+    )
+    {
+        var result = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+        string prefix = $"{ProcessedCategoryName}.{animationName}";
+
+        var oldBaseComponentPath = $"{CategoryName}.{animationName}.baseComponent";
+        // Animation-level validation (soft)
+        if (!animationData.TryGetValue(oldBaseComponentPath, out var baseCompObj)
+            || baseCompObj is not string baseComponent)
+        {
+            _logger.Log(
+                "system.animationDataManager.skipAnimationMissingBaseComponent",
+                animationName, owningModId);
+            return null;
+        }
+
+        if (!index.Components.ContainsKey(baseComponent))
+        {
+            _logger.Log(
+                "system.animationDataManager.skipAnimationInvalidBaseComponent",
+                animationName, baseComponent, owningModId);
+            return null;
+        }
+
+        var processBaseComponentPath = $"{prefix}.BaseComponent";
+        result[processBaseComponentPath] = baseComponent;
+        PropagateDerivedHistory(resolvedHistories, [oldBaseComponentPath], processBaseComponentPath, baseComponent, owningModId);
+
+        var resolvedComponents = new List<string>();
+        int stateCount = 0;
+        int totalFrameCount = 0;
+
+        foreach (var (componentName, componentIndex) in index.Components)
+        {
+            string defaultStatePath =
+                $"{CategoryName}.{animationName}.components.{componentName}.defaultState";
+
+            if (!animationData.TryGetValue(defaultStatePath, out var defaultStateObj)
+                || defaultStateObj is not string defaultState)
+            {
+                _logger.Log(
+                    "system.animationDataManager.skipComponentMissingDefaultState",
+                    animationName, componentName, owningModId);
+                continue;
+            }
+
+            if (!componentIndex.States.ContainsKey(defaultState))
+            {
+                _logger.Log(
+                    "system.animationDataManager.skipComponentInvalidDefaultState",
+                    animationName, componentName, defaultState, owningModId);
+                continue;
+            }
+
+            var resolvedStates = new List<string>();
+            foreach (var (stateName, stateIndex) in componentIndex.States)
+            {
+                int frameCount = 0;
+                foreach (var frameIndex in stateIndex.Frames)
+                {
+                    if (TryResolveFrameWithHistory(
+                        result,
+                        animationData,
+                        animationName,
+                        componentName,
+                        stateName,
+                        frameIndex,
+                        frameCount,
+                        prefix,
+                        owningModId,
+                        resolvedHistories))
+                    {
+                        frameCount++;
+                    }
+                }
+
+                if (frameCount == 0)
+                {
+                    _logger.Log(
+                        "system.animationDataManager.skipStateNoValidFrames",
+                        animationName, componentName, stateName, owningModId);
+                    continue;
+                }
+
+                string statePrefix = $"{prefix}.{componentName}.{stateName}";
+                result[$"{statePrefix}.FrameCount"] = frameCount;
+
+                resolvedStates.Add(stateName);
+                totalFrameCount += frameCount;
+            }
+
+            if (resolvedStates.Count == 0 || !resolvedStates.Contains(defaultState))
+            {
+                _logger.Log(
+                    "system.animationDataManager.skipComponentNoValidStates",
+                    animationName, componentName, owningModId);
+                continue;
+            }
+
+            string compPrefix = $"{prefix}.{componentName}";
+            var processDefaultStatePath = $"{compPrefix}.DefaultState";
+            result[processDefaultStatePath] = defaultState;
+            result[$"{compPrefix}.States"] = resolvedStates;
+
+            PropagateDerivedHistory(resolvedHistories, [defaultStatePath], processDefaultStatePath, defaultState, owningModId);
+
+            resolvedComponents.Add(componentName);
+            stateCount += resolvedStates.Count;
+        }
+
+        // Final animation validation (soft)
+        if (resolvedComponents.Count == 0 || !resolvedComponents.Contains(baseComponent))
+        {
+            _logger.Log(
+                "system.animationDataManager.skipAnimationNoValidComponents",
+                animationName, owningModId);
+            return null;
+        }
+
+        result[$"{prefix}.Components"] = resolvedComponents;
+        _logger.Log(
+            "system.animationDataManager.animationBuiltSuccessfully",
+            owningModId, animationName, resolvedComponents.Count, stateCount, totalFrameCount);
+
+        return result;
+    }
+
+    private bool TryResolveFrameWithHistory
+    (
+        Dictionary<string, object> result,
+        IReadOnlyDictionary<string, object> animationData,
+        string animationName,
+        string componentName,
+        string stateName,
+        int frameIndex,
+        int frameCount,
+        string prefix,
+        string owningModId,
+        Dictionary<string, PathHistory> resolvedHistories
+    )
+    {
+        try
+        {
+            // Use LUA script's 1-based index array
+            string framePrefix = $"{prefix}.{componentName}.{stateName}.{frameCount + 1}";
+
+            object ResolveRequired(string prop, out string[] sourcePaths)
+            {
+                string[] candidatePaths =
+                {
+                $"{CategoryName}.{animationName}.components.{componentName}.states.{stateName}.frames.{frameIndex}.{prop}",
+                $"{CategoryName}.{animationName}.components.{componentName}.states.{stateName}.{prop}",
+                $"{CategoryName}.{animationName}.components.{componentName}.{prop}",
+                $"{CategoryName}.{animationName}.{prop}"
             };
 
-            var stateListJson = compJson.GetProperty("stateList").EnumerateObject();
-            foreach (var stateProp in stateListJson)
-            {
-                string stateName = stateProp.Name;
-                var stateJson = stateProp.Value;
-                var state = new AnimationState(stateName);
-
-                foreach (var frameJson in stateJson.GetProperty("frameList").EnumerateArray())
+                foreach (var path in candidatePaths)
                 {
-                    try
+                    if (animationData.TryGetValue(path, out var value))
                     {
-                        var frame = CreateAnimationFrame(modId, modFolderPath, container, frameJson, stateJson, compJson, rootPath);
-                        state.Frames.Add(frame);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.Log("system.animationDataManager.skippingFrame", animationName, compName, stateName, ex.Message);
+                        sourcePaths = [path];
+                        return value!;
                     }
                 }
 
-                if (state.Frames.Count > 0)
-                    component.States[stateName] = state;
+                sourcePaths = [];
+                return null!;
             }
 
-            if (component.States.Count > 0)
-                animation.Components[compName] = component;
+            string ResolveOptionalString(string prop, string defaultValue, out string[] sources)
+            {
+                var value = ResolveRequired(prop, out sources) as string;
+
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    value = defaultValue;
+                    sources = [_DEFAULT_VALUE_PATH];
+                }
+
+                return value;
+            }
+
+            // required properties
+            var file = ResolveRequired("file", out var fileSources) as string;
+            var folder = ResolveOptionalString("folder", "./", out var folderSources);
+            var sourceModId = ResolveOptionalString("sourceMod", owningModId, out var sourceModSources);
+            var layer = ResolveRequired("layer", out var layerSources) as string;
+
+
+            if (string.IsNullOrWhiteSpace(file)
+                || string.IsNullOrWhiteSpace(folder)
+                || string.IsNullOrWhiteSpace(sourceModId)
+                || string.IsNullOrWhiteSpace(layer))
+                return false;
+
+            if (!TryConvertInt(ResolveRequired("width", out var widthSources), out int width))
+                return false;
+
+            if (!TryConvertInt(ResolveRequired("height", out var heightSources), out int height))
+                return false;
+
+            int ResolveOptionalInt(string prop, out string[] sources)
+            {
+                var value = ResolveRequired(prop, out sources);
+
+                if (!TryConvertInt(value, out var d))
+                {
+                    d = 0;
+                    sources = [_DEFAULT_VALUE_PATH];
+                }
+
+                return d;
+            }
+
+            int offsetX = ResolveOptionalInt("offsetX", out var offsetXSources);
+            int offsetY = ResolveOptionalInt("offsetY", out var offsetYSources);
+            int spriteOffsetX = ResolveOptionalInt("spriteOffsetX", out var spriteOffsetXSources);
+            int spriteOffsetY = ResolveOptionalInt("spriteOffsetY", out var spriteOffsetYSources);
+
+            string modFolderPath = ModManager.Instance.GetModFolderPath(sourceModId);
+            // Register textures
+            int textureId = TextureManager.Instance.RegisterTexture(owningModId, modFolderPath, folder, file);
+
+            // Record all resolved properties as Derived from their respective original paths
+            AssignWithDerivedHistory(resolvedHistories, [.. fileSources, .. folderSources, .. sourceModSources],
+                $"{framePrefix}.TextureId", textureId, result, owningModId);
+            AssignWithDerivedHistory(resolvedHistories, layerSources, $"{framePrefix}.Layer", layer, result, owningModId);
+            AssignWithDerivedHistory(resolvedHistories, widthSources, $"{framePrefix}.Width", width, result, owningModId);
+            AssignWithDerivedHistory(resolvedHistories, heightSources, $"{framePrefix}.Height", height, result, owningModId);
+            AssignWithDerivedHistory(resolvedHistories, offsetXSources, $"{framePrefix}.OffsetX", offsetX, result, owningModId);
+            AssignWithDerivedHistory(resolvedHistories, offsetYSources, $"{framePrefix}.OffsetY", offsetY, result, owningModId);
+            AssignWithDerivedHistory(resolvedHistories, spriteOffsetXSources, $"{framePrefix}.SpriteOffsetX", spriteOffsetX, result, owningModId);
+            AssignWithDerivedHistory(resolvedHistories, spriteOffsetYSources, $"{framePrefix}.SpriteOffsetY", spriteOffsetY, result, owningModId);
+
+
+            return true;
         }
-
-        return animation.Components.Count > 0 ? animation : null;
-    }
-
-    private static AnimationFrame CreateAnimationFrame(
-        string modId,
-        string modFolderPath,
-        DataContainer container,
-        JsonElement frameJson,
-        JsonElement stateJson,
-        JsonElement compJson,
-        string animationRootPath)
-    {
-        var file = Resolve(container, frameJson, stateJson, compJson, animationRootPath, "file", null) as string;
-        var folder = Resolve(container, frameJson, stateJson, compJson, animationRootPath, "folder", null) as string;
-        var layer = Resolve(container, frameJson, stateJson, compJson, animationRootPath, "layer", null) as string;
-        var width = Resolve(container, frameJson, stateJson, compJson, animationRootPath, "width", null);
-        var height = Resolve(container, frameJson, stateJson, compJson, animationRootPath, "height", null);
-
-        if (string.IsNullOrWhiteSpace(file))
-            throw new LocalizedErrorCore<InvalidOperationException>("system.animationDataManager.frameMissingRequiredProperty", "file", animationRootPath);
-        if (string.IsNullOrWhiteSpace(folder))
-            throw new LocalizedErrorCore<InvalidOperationException>("system.animationDataManager.frameMissingRequiredProperty", "folder", animationRootPath);
-        if (string.IsNullOrWhiteSpace(layer))
-            throw new LocalizedErrorCore<InvalidOperationException>("system.animationDataManager.frameMissingRequiredProperty", "layer", animationRootPath);
-        if (width == null)
-            throw new LocalizedErrorCore<InvalidOperationException>("system.animationDataManager.frameMissingRequiredProperty", "width", animationRootPath);
-        if (height == null)
-            throw new LocalizedErrorCore<InvalidOperationException>("system.animationDataManager.frameMissingRequiredProperty", "height", animationRootPath);
-
-
-        var textureId = TextureManager.Instance.RegisterTexture(modId, modFolderPath, folder, file);
-        var offsetX = (double)Resolve(container, frameJson, stateJson, compJson, animationRootPath, "offsetX", 0.0);
-        var offsetY = (double)Resolve(container, frameJson, stateJson, compJson, animationRootPath, "offsetY", 0.0);
-        var spriteOffsetX = (double)Resolve(container, frameJson, stateJson, compJson, animationRootPath, "spriteOffsetX", 0.0);
-        var spriteOffsetY = (double)Resolve(container, frameJson, stateJson, compJson, animationRootPath, "spriteOffsetY", 0.0);
-
-        return new AnimationFrame
+        catch (Exception ex)
         {
-            TextureId = textureId,
-            Layer = layer,
-            Width = (double)width,
-            Height = (double)height,
-            OffsetX = offsetX,
-            OffsetY = offsetY,
-            SpriteOffsetX = spriteOffsetX,
-            SpriteOffsetY = spriteOffsetY
-        };
+            Console.WriteLine
+            (
+                $"[AnimationDataManager] Error resolving frame: Animation='{animationName}', " +
+                $"Component='{componentName}', State='{stateName}', FrameIndex={frameIndex}, " +
+                $"Mod='{owningModId}'. Exception: {ex.Message}"
+            );
+            return false;
+        }
     }
 
-    private static object Resolve(DataContainer container,
-        JsonElement frameJson, JsonElement stateJson, JsonElement compJson,
-        string animationRootPath, string propertyName, object defaultValue = null!)
+    private static void AssignWithDerivedHistory<T>
+    (
+        Dictionary<string, PathHistory> resolvedHistories,
+        string[] sourcePaths,
+        string targetPath,
+        T value,
+        Dictionary<string, object> result,
+        string actingModId
+    )
     {
-        if (frameJson.TryGetProperty(propertyName, out var prop) && TryGetValue(prop, out var val1)) return val1;
-        if (stateJson.TryGetProperty(propertyName, out prop) && TryGetValue(prop, out var val2)) return val2;
-        if (compJson.TryGetProperty(propertyName, out prop) && TryGetValue(prop, out var val3)) return val3;
+        // Propagate Derived history
+        PropagateDerivedHistory(resolvedHistories, sourcePaths, targetPath, value!, actingModId);
 
-        var basePath = $"{animationRootPath}.{propertyName}";
-        var obj = container.GetFlatData(basePath);
-        return obj ?? defaultValue!;
+        // Assign to resolved paths
+        result[targetPath] = value!;
     }
 
-    private static bool TryGetValue(JsonElement element, out object value)
+    private static bool TryConvertInt(object value, out int result)
     {
-        value = element.ValueKind switch
+        switch (value)
         {
-            JsonValueKind.String => element.GetString()!,
-            JsonValueKind.Number => element.GetDouble(),
-            JsonValueKind.True => true,
-            JsonValueKind.False => false,
-            _ => null
-        };
-        return value != null;
+            case int i:
+                result = i;
+                return true;
+            case long l when l <= int.MaxValue && l >= int.MinValue:
+                result = (int)l;
+                return true;
+            case double d when d <= int.MaxValue && d >= int.MinValue:
+                result = (int)d; // truncate
+                return true;
+            case string s when int.TryParse(s, out var parsed):
+                result = parsed;
+                return true;
+            default:
+                result = 0;
+                return false;
+        }
     }
+
+    private static void PropagateDerivedHistory
+    (
+        Dictionary<string, PathHistory> resolvedHistories,
+        string[] sourcePaths,
+        string newPath,
+        object newValue,
+        string actingModId
+    )
+    {
+        if (sourcePaths == null || sourcePaths.Length == 0)
+            throw new ArgumentException("At least one source path is required.", nameof(sourcePaths));
+
+        var history = new PathHistory();
+        history.AddDerived(actingModId, newValue, sourcePaths);
+
+        resolvedHistories[newPath] = history;
+    }
+
 
     #region LUA exposed functions
-    /// <summary>
-    /// Get all animations for a specific mod.
-    /// </summary>
-    public Dictionary<string, Animation> GetAnimations(string modId)
-    {
-        if (_animations.TryGetValue(modId, out var modAnimations))
-            return modAnimations;
 
-        return new Dictionary<string, Animation>(StringComparer.OrdinalIgnoreCase);
-    }
-
-    /// <summary>
-    /// Get a specific animation by mod ID and animation name.
-    /// Returns null if not found.
-    /// </summary>
-    public Animation GetAnimation(string modId, string animationName)
+    public bool TryGetComponents(string modId, string animationName, out List<string>? compList)
     {
-        if (_animations.TryGetValue(modId, out var modAnimations) &&
-            modAnimations.TryGetValue(animationName, out var animation))
+        string path = CreateFullPath([animationName, "Components"]);
+
+        if (DataManager.Instance.TryGetData(modId, path, out var value) && value is List<string> list)
         {
-            return animation;
+            compList = list;
+            return true;
         }
 
-        return null;
+        compList = null;
+        return false;
     }
+
+    public bool TryGetBaseComponent(string modId, string animationName, out string baseComponent)
+    {
+        string path = CreateFullPath([animationName, "BaseComponent"]);
+
+        if (DataManager.Instance.TryGetData(modId, path, out var value) && value is string s)
+        {
+            baseComponent = s;
+            return true;
+        }
+
+        baseComponent = null!;
+        return false;
+    }
+
+    public bool TryGetDefaultState(string modId, string animationName, string componentName, out string defaultState)
+    {
+        string path = CreateFullPath([animationName, componentName, "DefaultState"]);
+
+        if (DataManager.Instance.TryGetData(modId, path, out var value) && value is string s)
+        {
+            defaultState = s;
+            return true;
+        }
+
+        defaultState = null!;
+        return false;
+    }
+
+    public bool TryGetStates(string modId, string animationName, string componentName, out List<string> stateList)
+    {
+        string path = CreateFullPath([animationName, componentName, "States"]);
+
+        if (DataManager.Instance.TryGetData(modId, path, out var value) && value is List<string> list)
+        {
+            stateList = list;
+            return true;
+        }
+
+        stateList = null!;
+        return false;
+    }
+
+    public bool TryGetFrameCount(string modId, string animationName, string componentName, string stateName, out int? frameCount)
+    {
+        string path = CreateFullPath(animationName, componentName, stateName, "FrameCount");
+
+        if (DataManager.Instance.TryGetData(modId, path, out var value) && value is int v)
+        {
+            frameCount = v;
+            return true;
+        }
+
+        frameCount = null!;
+        return false;
+    }
+
+    public bool TryGetFrameProperty<T>(string modId, string animationName, string componentName, string stateName, int frameIndex, string propertyName, out T propertyValue)
+    {
+        string path = CreateFullPath([animationName, componentName, stateName, frameIndex.ToString(), propertyName]);
+
+        if (DataManager.Instance.TryGetData(modId, path, out var value) && value is T t)
+        {
+            propertyValue = t;
+            return true;
+        }
+
+        propertyValue = default!;
+        return false;
+    }
+
     #endregion
-
-    protected override void ProcessPath(string modId, string path, object value) { return; }
-
-    public void DebugPrintAllAnimations()
-    {
-        foreach (var modKvp in _animations)
-        {
-            string modId = modKvp.Key;
-            Console.WriteLine($"Mod: {modId}");
-            foreach (var animKvp in modKvp.Value)
-            {
-                string animName = animKvp.Key;
-                var animation = animKvp.Value;
-                Console.WriteLine($"  Animation: {animName}, BaseComponent: {animation.BaseComponent}");
-
-                foreach (var compKvp in animation.Components)
-                {
-                    var component = compKvp.Value;
-                    Console.WriteLine($"    Component: {component.Name}, DefaultState: {component.DefaultState}");
-
-                    foreach (var stateKvp in component.States)
-                    {
-                        var state = stateKvp.Value;
-                        Console.WriteLine($"      State: {state.Name}, Frames: {state.Frames.Count}");
-
-                        for (int i = 0; i < state.Frames.Count; i++)
-                        {
-                            var frame = state.Frames[i];
-                            Console.WriteLine($"        Frame {i}: TextureId={frame.TextureId}, Layer={frame.Layer}, " +
-                                              $"Width={frame.Width}, Height={frame.Height}, OffsetX={frame.OffsetX}, OffsetY={frame.OffsetY}, " +
-                                              $"SpriteOffsetX={frame.SpriteOffsetX}, SpriteOffsetY={frame.SpriteOffsetY}");
-                        }
-                    }
-                }
-            }
-        }
-    }
-
 
     #region Animation Data Classes
 
-    public sealed class AnimationFrame
+    private sealed class AnimationIndex
     {
-        public int TextureId { get; set; }
-        public string Layer { get; set; } = string.Empty;
-        public double Width { get; set; }
-        public double Height { get; set; }
-        public double OffsetX { get; set; } = 0;
-        public double OffsetY { get; set; } = 0;
-        public double SpriteOffsetX { get; set; } = 0;
-        public double SpriteOffsetY { get; set; } = 0;
+        public Dictionary<string, AnimationComponentIndex> Components { get; } = new(StringComparer.OrdinalIgnoreCase);
     }
 
-    public sealed class AnimationState(string name)
+    private sealed class AnimationComponentIndex
     {
-        public string Name { get; } = name;
-        public List<AnimationFrame> Frames { get; } = new();
+        public Dictionary<string, AnimationStateIndex> States { get; } = new(StringComparer.OrdinalIgnoreCase);
     }
 
-    public sealed class AnimationComponent(string name)
+    private sealed class AnimationStateIndex
     {
-        public string Name { get; } = name;
-        public string DefaultState { get; set; } = string.Empty;
-        public Dictionary<string, AnimationState> States { get; } = new(StringComparer.OrdinalIgnoreCase);
-    }
+        public SortedSet<int> Frames { get; } = [];
 
-    public sealed class Animation(string name)
-    {
-        public string Name { get; } = name;
-        public string BaseComponent { get; set; } = string.Empty;
-        public Dictionary<string, AnimationComponent> Components { get; } = new(StringComparer.OrdinalIgnoreCase);
     }
 
     #endregion

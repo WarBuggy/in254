@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scripting", "..\AxiomPlaygr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Data", "..\AxiomPlayground\src\Data\Data.csproj", "{A378150C-4E19-41B0-82AC-D29C14ED3FED}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameFlag", "..\AxiomPlayground\src\GameFlag\GameFlag.csproj", "{381F06A0-01A3-4061-BFF8-75BC093CE164}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Dev|Any CPU = Dev|Any CPU
@@ -116,6 +118,24 @@ Global
 		{A378150C-4E19-41B0-82AC-D29C14ED3FED}.Debug|x64.Build.0 = Debug|Any CPU
 		{A378150C-4E19-41B0-82AC-D29C14ED3FED}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{A378150C-4E19-41B0-82AC-D29C14ED3FED}.Debug|x86.Build.0 = Debug|Any CPU
+		{381F06A0-01A3-4061-BFF8-75BC093CE164}.Dev|Any CPU.ActiveCfg = Debug|Any CPU
+		{381F06A0-01A3-4061-BFF8-75BC093CE164}.Dev|Any CPU.Build.0 = Debug|Any CPU
+		{381F06A0-01A3-4061-BFF8-75BC093CE164}.Dev|x64.ActiveCfg = Debug|Any CPU
+		{381F06A0-01A3-4061-BFF8-75BC093CE164}.Dev|x64.Build.0 = Debug|Any CPU
+		{381F06A0-01A3-4061-BFF8-75BC093CE164}.Dev|x86.ActiveCfg = Debug|Any CPU
+		{381F06A0-01A3-4061-BFF8-75BC093CE164}.Dev|x86.Build.0 = Debug|Any CPU
+		{381F06A0-01A3-4061-BFF8-75BC093CE164}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{381F06A0-01A3-4061-BFF8-75BC093CE164}.Release|Any CPU.Build.0 = Release|Any CPU
+		{381F06A0-01A3-4061-BFF8-75BC093CE164}.Release|x64.ActiveCfg = Release|Any CPU
+		{381F06A0-01A3-4061-BFF8-75BC093CE164}.Release|x64.Build.0 = Release|Any CPU
+		{381F06A0-01A3-4061-BFF8-75BC093CE164}.Release|x86.ActiveCfg = Release|Any CPU
+		{381F06A0-01A3-4061-BFF8-75BC093CE164}.Release|x86.Build.0 = Release|Any CPU
+		{381F06A0-01A3-4061-BFF8-75BC093CE164}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{381F06A0-01A3-4061-BFF8-75BC093CE164}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{381F06A0-01A3-4061-BFF8-75BC093CE164}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{381F06A0-01A3-4061-BFF8-75BC093CE164}.Debug|x64.Build.0 = Debug|Any CPU
+		{381F06A0-01A3-4061-BFF8-75BC093CE164}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{381F06A0-01A3-4061-BFF8-75BC093CE164}.Debug|x86.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

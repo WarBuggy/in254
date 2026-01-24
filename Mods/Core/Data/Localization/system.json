@@ -2,9 +2,16 @@
     "data": {
         "localization": {
             "en-US": {
-                "system.animationDataManager.frameMissingRequiredProperty": "Animation frame is missing required property '{0}' at '{1}'",
-                "system.animationDataManager.errorBuildingAnimation": "Error building animation '{0}' in mod '{1}': {2}",
-                "system.animationDataManager.skippingFrame": "Skipping frame in state '{2}' of component '{1}' in animation '{0}': {3}",
+                "system.general.argNotNullOrEmpty": "{0} cannot be null or empty",
+                "system.animationDataManager.skipAnimationMissingBaseComponent": "Skipping animation '{0}' because it is missing required baseComponent.",
+                "system.animationDataManager.skipAnimationInvalidBaseComponent": "Skipping animation '{0}' because baseComponent '{1}' is not defined as a component",
+                "system.animationDataManager.skipAnimationNoValidComponents": "Skipping animation '{0}' because it has no valid components after processing",
+                "system.animationDataManager.skipComponentMissingDefaultState": "Skipping component '{1}' in animation '{0}' because it is missing defaultState",
+                "system.animationDataManager.skipComponentInvalidDefaultState": "Skipping component '{1}' in animation '{0}' because defaultState '{2}' is not a valid state",
+                "system.animationDataManager.skipComponentNoValidStates": "Skipping component '{1}' in animation '{0}' because it has no valid states after processing",
+                "system.animationDataManager.skipStateNoValidFrames": "Skipping state '{2}' in component '{1}' of animation '{0}' because it has no valid frames",
+                "system.animationDataManager.frameMissingRequiredProperty": "Animation frame is missing required property '{0}' at index {4} of state '{3}' in component '{2}' of animation '{1}'",
+                "system.animationDataManager.animationBuiltSuccessfully": "Animation '{1}' from mod '{0}' built successfully: {2} components, {3} states, {4} frames",
                 "system.textureManager.registered": "Texture registered for mod '{0}', path '{1}', texture ID {2}",
                 "system.textureManager.textureFileNotFound": "Texture file not found: {0}",
                 "system.textureManager.textureNotFound": "Texture not found for mod '{0}' with ID {1}",

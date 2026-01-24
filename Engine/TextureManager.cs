@@ -6,10 +6,11 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace in254.Engine;
 
-public sealed class TextureManager : LoggerBaseCore
+public sealed class TextureManager
 {
     private static readonly TextureManager _instance = new();
     public static TextureManager Instance => _instance;
+    private readonly LoggerBaseCore _logger = new();
     private static readonly string SPRITE_FOLDER = "Sprites/";
 
     // Dictionary<modId, Dictionary<textureId, (path, texture)>>
@@ -69,7 +70,7 @@ public sealed class TextureManager : LoggerBaseCore
         modTextures[textureId] = (path, texture);
         modPathToId[path] = textureId;
 
-        Log("system.textureManager.registered", modId, path, textureId);
+        _logger.Log("system.textureManager.registered", modId, path, textureId);
         return textureId;
     }
 

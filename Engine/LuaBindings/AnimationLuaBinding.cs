@@ -1,144 +1,392 @@
 using System;
-using System.Collections.Generic;
 using AxiomPlayground.Scripting;
 using AxiomPlayground.Scripting.LuaBindings;
 using MoonSharp.Interpreter;
-using static in254.Engine.AnimationDataManager;
 
-namespace in254.Engine.LuaBindings
+namespace in254.Engine.LuaBindings;
+
+public sealed class AnimationLuaBinding : LuaBindingBase
 {
-    public sealed class AnimationLuaBinding : LuaBindingBase
+    public override void Register(Script luaScript)
     {
-        // Cache Lua tables per mod
-        private readonly Dictionary<string, Table> _luaAnimationCache = new(StringComparer.OrdinalIgnoreCase);
+        ArgumentNullException.ThrowIfNull(luaScript);
 
-        public override void Register(Script luaScript)
+        // Helper to get current executing mod
+        static string currentModId() => ScriptManager.Instance.CurrentExecutingModId;
+
+        // Create a table in Lua for Animation
+        Table animationTable = new(luaScript);
+
+        animationTable["BaseComponent"] = (Func<string, DynValue>)(animationName =>
         {
-            ArgumentNullException.ThrowIfNull(luaScript);
+            var modId = currentModId();
+            if (string.IsNullOrWhiteSpace(modId))
+                return DynValue.Nil;
 
-            // Helper to get current executing mod
-            static string currentModId() => ScriptManager.Instance.CurrentExecutingModId;
+            if (AnimationDataManager.Instance.TryGetBaseComponent(modId, animationName, out var baseComp))
+                return DynValue.NewString(baseComp);
 
-            // Create a table in Lua for Animation
-            Table animTable = new(luaScript);
+            return DynValue.Nil;
+        });
 
-            // getAnimations() - current mod
-            animTable["getAnimations"] = (Func<DynValue>)(() =>
+        animationTable["Components"] = (Func<string, DynValue>)(animationName =>
+        {
+            var modId = currentModId();
+            if (string.IsNullOrWhiteSpace(modId))
+                return DynValue.Nil;
+
+            if (AnimationDataManager.Instance.TryGetComponents(modId, animationName, out var components))
+                return DynValue.FromObject(luaScript, components);
+
+            return DynValue.Nil;
+        });
+
+        animationTable["DefaultState"] = (Func<string, string, DynValue>)((animationName, componentName) =>
+        {
+            var modId = currentModId();
+            if (string.IsNullOrWhiteSpace(modId))
+                return DynValue.Nil;
+
+            if (AnimationDataManager.Instance.TryGetDefaultState(modId, animationName, componentName, out var state))
+                return DynValue.NewString(state);
+
+            return DynValue.Nil;
+        });
+
+        animationTable["States"] = (Func<string, string, DynValue>)((animationName, componentName) =>
+        {
+            var modId = currentModId();
+            if (string.IsNullOrWhiteSpace(modId))
+                return DynValue.Nil;
+
+            if (AnimationDataManager.Instance.TryGetStates(modId, animationName, componentName, out var states))
+                return DynValue.FromObject(luaScript, states);
+
+            return DynValue.Nil;
+        });
+
+        animationTable["FrameCount"] = (Func<string, string, string, DynValue>)((animationName, componentName, stateName) =>
+        {
+            var modId = currentModId();
+            if (string.IsNullOrWhiteSpace(modId))
+                return DynValue.Nil;
+
+            if (AnimationDataManager.Instance.TryGetFrameCount(modId, animationName, componentName, stateName, out int? value))
+                return DynValue.NewNumber((int)value);
+
+            return DynValue.Nil;
+        });
+
+        // BaseComponentFor(modId, animationName)
+        animationTable["BaseComponentFor"] = (Func<string, string, DynValue>)((modId, animationName) =>
+        {
+            if (string.IsNullOrWhiteSpace(modId))
+                return DynValue.Nil;
+
+            if (AnimationDataManager.Instance.TryGetBaseComponent(modId, animationName, out var baseComp))
+                return DynValue.NewString(baseComp);
+
+            return DynValue.Nil;
+        });
+
+        animationTable["ComponentsFor"] = (Func<string, string, DynValue>)((modId, animationName) =>
+        {
+            if (string.IsNullOrWhiteSpace(modId))
+                return DynValue.Nil;
+
+            if (AnimationDataManager.Instance.TryGetComponents(modId, animationName, out var components))
+                return DynValue.FromObject(luaScript, components);
+
+            return DynValue.Nil;
+        });
+
+        animationTable["DefaultStateFor"] = (Func<string, string, string, DynValue>)((modId, animationName, componentName) =>
+        {
+            if (string.IsNullOrWhiteSpace(modId))
+                return DynValue.Nil;
+
+            if (AnimationDataManager.Instance.TryGetDefaultState(modId, animationName, componentName, out var state))
+                return DynValue.NewString(state);
+
+            return DynValue.Nil;
+        });
+
+        animationTable["StatesFor"] = (Func<string, string, string, DynValue>)((modId, animationName, componentName) =>
+        {
+            if (string.IsNullOrWhiteSpace(modId))
+                return DynValue.Nil;
+
+            if (AnimationDataManager.Instance.TryGetStates(modId, animationName, componentName, out var states))
+                return DynValue.FromObject(luaScript, states);
+
+            return DynValue.Nil;
+        });
+
+        animationTable["FrameCountFor"] = (Func<string, string, string, string, DynValue>)((modId, anim, comp, state) =>
+        {
+            if (string.IsNullOrWhiteSpace(modId))
+                return DynValue.Nil;
+
+            if (AnimationDataManager.Instance.TryGetFrameCount(modId, anim, comp, state, out int? value))
+                return DynValue.NewNumber((int)value);
+
+            return DynValue.Nil;
+        });
+
+        animationTable["FrameTextureId"] = (Func<string, string, string, int, DynValue>)((anim, comp, state, frame) =>
+        {
+            var modId = currentModId();
+            if (string.IsNullOrWhiteSpace(modId))
+                return DynValue.Nil;
+
+            if (AnimationDataManager.Instance.TryGetFrameProperty<int>(
+                modId, anim, comp, state, frame, "TextureId", out var value))
+                return DynValue.NewNumber(value);
+
+            return DynValue.Nil;
+        });
+
+        animationTable["FrameWidth"] = (Func<string, string, string, int, DynValue>)((anim, comp, state, frame) =>
+        {
+            var modId = currentModId();
+            if (string.IsNullOrWhiteSpace(modId))
+                return DynValue.Nil;
+
+            if (AnimationDataManager.Instance.TryGetFrameProperty<int>(
+                modId, anim, comp, state, frame, "Width", out var value))
+                return DynValue.NewNumber(value);
+
+            return DynValue.Nil;
+        });
+
+        animationTable["FrameHeight"] = (Func<string, string, string, int, DynValue>)((anim, comp, state, frame) =>
+        {
+            var modId = currentModId();
+            if (string.IsNullOrWhiteSpace(modId))
+                return DynValue.Nil;
+
+            if (AnimationDataManager.Instance.TryGetFrameProperty<int>(
+                modId, anim, comp, state, frame, "Height", out var value))
+                return DynValue.NewNumber(value);
+
+            return DynValue.Nil;
+        });
+
+        animationTable["FrameLayer"] = (Func<string, string, string, int, DynValue>)((anim, comp, state, frame) =>
+        {
+            var modId = currentModId();
+            if (string.IsNullOrWhiteSpace(modId))
+                return DynValue.Nil;
+
+            if (AnimationDataManager.Instance.TryGetFrameProperty<string>(
+                modId, anim, comp, state, frame, "Layer", out var value))
+                return DynValue.NewString(value);
+
+            return DynValue.Nil;
+        });
+
+        animationTable["FrameOffsetX"] = (Func<string, string, string, int, DynValue>)((anim, comp, state, frame) =>
+        {
+            var modId = currentModId();
+            if (string.IsNullOrWhiteSpace(modId))
+                return DynValue.Nil;
+
+            if (AnimationDataManager.Instance.TryGetFrameProperty<int>(
+                modId, anim, comp, state, frame, "OffsetX", out var value))
+                return DynValue.NewNumber(value);
+
+            return DynValue.Nil;
+        });
+
+        animationTable["FrameOffsetY"] = (Func<string, string, string, int, DynValue>)((anim, comp, state, frame) =>
+        {
+            var modId = currentModId();
+            if (string.IsNullOrWhiteSpace(modId))
+                return DynValue.Nil;
+
+            if (AnimationDataManager.Instance.TryGetFrameProperty<int>(
+                modId, anim, comp, state, frame, "OffsetY", out var value))
+                return DynValue.NewNumber(value);
+
+            return DynValue.Nil;
+        });
+
+        animationTable["FrameSpriteOffsetX"] = (Func<string, string, string, int, DynValue>)((anim, comp, state, frame) =>
+        {
+            var modId = currentModId();
+            if (string.IsNullOrWhiteSpace(modId))
+                return DynValue.Nil;
+
+            if (AnimationDataManager.Instance.TryGetFrameProperty<int>(
+                modId, anim, comp, state, frame, "SpriteOffsetX", out var value))
+                return DynValue.NewNumber(value);
+
+            return DynValue.Nil;
+        });
+
+        animationTable["FrameSpriteOffsetY"] = (Func<string, string, string, int, DynValue>)((anim, comp, state, frame) =>
+        {
+            var modId = currentModId();
+            if (string.IsNullOrWhiteSpace(modId))
+                return DynValue.Nil;
+
+            if (AnimationDataManager.Instance.TryGetFrameProperty<int>(
+                modId, anim, comp, state, frame, "SpriteOffsetY", out var value))
+                return DynValue.NewNumber(value);
+
+            return DynValue.Nil;
+        });
+
+        animationTable["FrameTextureIdFor"] = (Func<string, string, string, string, int, DynValue>)((modId, anim, comp, state, frame) =>
+        {
+            if (string.IsNullOrWhiteSpace(modId))
+                return DynValue.Nil;
+
+            if (AnimationDataManager.Instance.TryGetFrameProperty<int>(
+                modId, anim, comp, state, frame, "TextureId", out var value))
+                return DynValue.NewNumber(value);
+
+            return DynValue.Nil;
+        });
+
+        animationTable["FrameWidthFor"] = (Func<string, string, string, string, int, DynValue>)((modId, anim, comp, state, frame) =>
+        {
+            if (string.IsNullOrWhiteSpace(modId))
+                return DynValue.Nil;
+
+            if (AnimationDataManager.Instance.TryGetFrameProperty<int>(
+                modId, anim, comp, state, frame, "Width", out var value))
+                return DynValue.NewNumber(value);
+
+            return DynValue.Nil;
+        });
+
+        animationTable["FrameHeightFor"] = (Func<string, string, string, string, int, DynValue>)((modId, anim, comp, state, frame) =>
+        {
+            if (string.IsNullOrWhiteSpace(modId))
+                return DynValue.Nil;
+
+            if (AnimationDataManager.Instance.TryGetFrameProperty<int>(
+                modId, anim, comp, state, frame, "Height", out var value))
+                return DynValue.NewNumber(value);
+
+            return DynValue.Nil;
+        });
+
+        animationTable["FrameLayerFor"] = (Func<string, string, string, string, int, DynValue>)((modId, anim, comp, state, frame) =>
+        {
+            if (string.IsNullOrWhiteSpace(modId))
+                return DynValue.Nil;
+
+            if (AnimationDataManager.Instance.TryGetFrameProperty<string>(
+                modId, anim, comp, state, frame, "Layer", out var value))
+                return DynValue.NewString(value);
+
+            return DynValue.Nil;
+        });
+
+        animationTable["FrameOffsetXFor"] = (Func<string, string, string, string, int, DynValue>)((modId, anim, comp, state, frame) =>
+        {
+            if (string.IsNullOrWhiteSpace(modId))
+                return DynValue.Nil;
+
+            if (AnimationDataManager.Instance.TryGetFrameProperty<int>(
+                modId, anim, comp, state, frame, "OffsetX", out var value))
+                return DynValue.NewNumber(value);
+
+            return DynValue.Nil;
+        });
+
+        animationTable["FrameOffsetYFor"] = (Func<string, string, string, string, int, DynValue>)((modId, anim, comp, state, frame) =>
+        {
+            if (string.IsNullOrWhiteSpace(modId))
+                return DynValue.Nil;
+
+            if (AnimationDataManager.Instance.TryGetFrameProperty<int>(
+                modId, anim, comp, state, frame, "OffsetY", out var value))
+                return DynValue.NewNumber(value);
+
+            return DynValue.Nil;
+        });
+
+        animationTable["FrameSpriteOffsetXFor"] = (Func<string, string, string, string, int, DynValue>)((modId, anim, comp, state, frame) =>
+        {
+            if (string.IsNullOrWhiteSpace(modId))
+                return DynValue.Nil;
+
+            if (AnimationDataManager.Instance.TryGetFrameProperty<int>(
+                modId, anim, comp, state, frame, "SpriteOffsetX", out var value))
+                return DynValue.NewNumber(value);
+
+            return DynValue.Nil;
+        });
+
+        animationTable["FrameSpriteOffsetYFor"] = (Func<string, string, string, string, int, DynValue>)((modId, anim, comp, state, frame) =>
+        {
+            if (string.IsNullOrWhiteSpace(modId))
+                return DynValue.Nil;
+
+            if (AnimationDataManager.Instance.TryGetFrameProperty<int>(
+                modId, anim, comp, state, frame, "SpriteOffsetY", out var value))
+                return DynValue.NewNumber(value);
+
+            return DynValue.Nil;
+        });
+
+
+        animationTable["Frame"] = (Func<string, string, string, int, DynValue>)((anim, comp, state, frameIndex) =>
+        {
+            var modId = currentModId();
+            if (string.IsNullOrWhiteSpace(modId))
+                return DynValue.Nil;
+
+            return BuildFrameTable(modId, anim, comp, state, frameIndex);
+        });
+
+
+        animationTable["FrameFor"] = (Func<string, string, string, string, int, DynValue>)((modId, anim, comp, state, frameIndex) =>
+        {
+            if (string.IsNullOrWhiteSpace(modId))
+                return DynValue.Nil;
+
+            return BuildFrameTable(modId, anim, comp, state, frameIndex);
+        });
+
+        // Builds a Lua table containing all available frame properties
+        DynValue BuildFrameTable
+        (
+            string modId,
+            string anim,
+            string comp,
+            string state,
+            int frameIndex
+        )
+        {
+            var table = new Table(luaScript);
+            bool found = false;
+
+            void tryAdd<T>(string key)
             {
-                var modId = currentModId();
-                var animations = AnimationDataManager.Instance.GetAnimations(modId);
-                return DynValue.NewTable(GetOrBuildLuaTable(luaScript, modId, animations));
-            });
+                if (AnimationDataManager.Instance.TryGetFrameProperty<T>(
+                    modId, anim, comp, state, frameIndex, key, out var value))
+                {
+                    table[key] = DynValue.FromObject(luaScript, value);
+                    found = true;
+                }
+            }
 
-            // getAnimationsFrom(modId) - specific mod
-            animTable["getAnimationsFrom"] = (Func<string, DynValue>)((modId) =>
-            {
-                var animations = AnimationDataManager.Instance.GetAnimations(modId);
-                return DynValue.NewTable(GetOrBuildLuaTable(luaScript, modId, animations));
-            });
+            tryAdd<int>("TextureId");
+            tryAdd<string>("Layer");
+            tryAdd<int>("Width");
+            tryAdd<int>("Height");
+            tryAdd<int>("OffsetX");
+            tryAdd<int>("OffsetY");
+            tryAdd<int>("SpriteOffsetX");
+            tryAdd<int>("SpriteOffsetY");
 
-            // getAnimation(animationName) - current mod
-            animTable["getAnimation"] = (Func<string, DynValue>)((animationName) =>
-            {
-                var animation = AnimationDataManager.Instance.GetAnimation(currentModId(), animationName);
-                return animation != null ? DynValue.NewTable(ToLuaTable(luaScript, animation)) : DynValue.Nil;
-            });
-
-            // getAnimationFrom(modId, animationName) - specific mod
-            animTable["getAnimationFrom"] = (Func<string, string, DynValue>)((modId, animationName) =>
-            {
-                var animation = AnimationDataManager.Instance.GetAnimation(modId, animationName);
-                return animation != null ? DynValue.NewTable(ToLuaTable(luaScript, animation)) : DynValue.Nil;
-            });
-
-            // Register the table globally under "Animation"
-            luaScript.Globals["Animation"] = animTable;
+            return found ? DynValue.NewTable(table) : DynValue.Nil;
         }
 
-        /// <summary>
-        /// Returns cached Lua table for all animations in a mod, or builds it if not cached.
-        /// </summary>
-        private Table GetOrBuildLuaTable(Script luaScript, string modId, Dictionary<string, Animation> animations)
-        {
-            if (_luaAnimationCache.TryGetValue(modId, out var cachedTable))
-                return cachedTable;
-
-            var table = ToLuaTable(luaScript, animations);
-            _luaAnimationCache[modId] = table;
-            return table;
-        }
-
-        private static Table ToLuaTable(Script script, Dictionary<string, Animation> animations)
-        {
-            var table = new Table(script);
-            foreach (var kv in animations)
-                table[kv.Key] = DynValue.NewTable(ToLuaTable(script, kv.Value));
-            return table;
-        }
-
-        private static Table ToLuaTable(Script script, Animation animation)
-        {
-            var table = new Table(script)
-            {
-                ["name"] = animation.Name,
-                ["baseComponent"] = animation.BaseComponent,
-                ["components"] = ToLuaTable(script, animation.Components)
-            };
-            return table;
-        }
-
-        private static Table ToLuaTable(Script script, Dictionary<string, AnimationComponent> components)
-        {
-            var table = new Table(script);
-            foreach (var kv in components)
-                table[kv.Key] = DynValue.NewTable(ToLuaTable(script, kv.Value));
-            return table;
-        }
-
-        private static Table ToLuaTable(Script script, AnimationComponent component)
-        {
-            var table = new Table(script)
-            {
-                ["name"] = component.Name,
-                ["defaultState"] = component.DefaultState,
-                ["states"] = ToLuaTable(script, component.States)
-            };
-            return table;
-        }
-
-        private static Table ToLuaTable(Script script, Dictionary<string, AnimationState> states)
-        {
-            var table = new Table(script);
-            foreach (var kv in states)
-                table[kv.Key] = DynValue.NewTable(ToLuaTable(script, kv.Value));
-            return table;
-        }
-
-        private static Table ToLuaTable(Script script, AnimationState state)
-        {
-            var table = new Table(script);
-            var frameArray = new Table(script);
-            int i = 1;
-            foreach (var frame in state.Frames)
-                frameArray[i++] = DynValue.NewTable(ToLuaTable(script, frame));
-            table["frames"] = frameArray;
-            return table;
-        }
-
-        private static Table ToLuaTable(Script script, AnimationFrame frame)
-        {
-            var table = new Table(script)
-            {
-                ["textureId"] = frame.TextureId,
-                ["layer"] = frame.Layer,
-                ["width"] = frame.Width,
-                ["height"] = frame.Height,
-                ["offsetX"] = frame.OffsetX,
-                ["offsetY"] = frame.OffsetY,
-                ["spriteOffsetX"] = frame.SpriteOffsetX,
-                ["spriteOffsetY"] = frame.SpriteOffsetY
-            };
-            return table;
-        }
+        luaScript.Globals["Animation"] = animationTable;
     }
 }
