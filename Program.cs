@@ -1,10 +1,7 @@
 ﻿using System;
 using AxiomPlayground.GameFlag;
 using AxiomPlayground.Modding;
-using in254.Core;
 using in254.Engine;
-using Microsoft.Xna.Framework;
-using MoonSharp.Interpreter;
 
 class Program
 {
@@ -28,6 +25,5 @@ class Program
         }
 
         EngineManager.Instance.Run();
-
     }
 }

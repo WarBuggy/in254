@@ -1,1 +1,1 @@
-printa("This is scriptF.lua from modG that will be added to scriptF.lua in modF.")
+printa("This is scriptG.lua from modG that will be added to scriptF.lua in modF.")

@@ -1,0 +1,23 @@
+{
+    "data": {
+        "runtimeEntities": {
+            "player": {
+                "Name": "player",
+                "Type": "character",
+                "ModData": {
+                    "health": 100,
+                    "position": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "inventory": [
+                        {
+                            "itemId": "gun",
+                            "ammo": 8
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}

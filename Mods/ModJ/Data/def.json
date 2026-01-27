@@ -1,0 +1,19 @@
+{
+    "data": {
+        "definition": {
+            "goblin": {
+                "Type": "Creature",
+                "Data": {
+                    "health": 30,
+                    "maxHealth": 30,
+                    "limbs": {
+                        "hands": {
+                            "left": 1,
+                            "right": 1
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

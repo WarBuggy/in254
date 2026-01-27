@@ -56,22 +56,6 @@ public class AnimationDataManager : BaseManager
 
             result[modId] = resolvedPaths;
             processedHistory[modId] = resolvedHistories;
-
-            // Debug prints
-            // Console.WriteLine($"Resolved animation paths for mod '{modId}':");
-
-            // foreach (var kvp in resolvedPaths.OrderBy(k => k.Key, StringComparer.OrdinalIgnoreCase))
-            // {
-            //     var path = kvp.Key;
-            //     var value = kvp.Value;
-            //     Console.WriteLine($"  {path} = {value?.ToString() ?? "<null>"}");
-
-            //     if (processedHistory.TryGetValue(modId, out var modHistory) &&
-            //         modHistory.TryGetValue(path, out var pathHistory))
-            //     {
-            //         pathHistory.Print(path); // Prints all events for this path
-            //     }
-            // }
         }
 
         return result;

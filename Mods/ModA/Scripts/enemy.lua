@@ -1,1 +1,1 @@
-print("This is enemy.lua from ModA")
+print("This is enemy.lua from " .. ExecutingModId())
