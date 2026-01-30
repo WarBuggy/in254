@@ -1,14 +1,9 @@
 print("This is scriptJ.lua from ModJ.")
-Mods.SetRuntimeFor("ModI", "rooms", {})
-local rooms = Mods.RuntimeFrom("ModI", "rooms")
-local exists = Mods.HasRuntimeFrom("ModI", "rooms")
-Mods.RemoveRuntimeFrom("ModI", "rooms")
-Mods.ClearRuntimeFor("ModI")
 -- GameData:AllPathHistoriesFor("Core")
 local somePath, somePathExists = GameData:TryGetFrom("Core", "somePath")
 print("Core mod, path somePath exists: ")
 print(somePathExists)
-
+print(Mods.Ids())
 
 -- player = RE('Core', 'player')
 -- player:setModDataFor('Core', 'health', 80)
@@ -21,9 +16,34 @@ Events.OnDefinitionCreated.Add(function(modId, defName, defType)
     print("  Type:", defType)
 
     -- Try reading some data
-    local health = Definition:TryGet(defName, "health")
-    local maxHealth = Definition:TryGet(defName, "maxHealth")
-
+    local typeName, exist = Definition:TryGetType(defName);
+    local health = Definition:TryGetPayload(defName, "health")
+    local maxHealth = Definition:TryGetPayload(defName, "maxHealth")
+    if exist then
+        print("  Type:", typeName)
+    end
     print("  Health:", health)
     print("  MaxHealth:", maxHealth)
+
+    if (defName ~= "drawLayers") then
+        if DrawLayers.Has("foreground") then
+            print("Foreground index:", DrawLayers.GetIndex("foreground"))
+        end
+
+        print("Layer 3 is:", DrawLayers.GetName(3))
+    end
 end)
+
+-- Hook into DrawLayers ready event
+DrawLayers.Events.OnReady:Add(function()
+    print("[ModJ] DrawLayers are ready!")
+
+    DrawLayers.AddFirst("ModJ 1st layer");
+
+    -- You can now safely query or manipulate DrawLayers
+    local allLayers = DrawLayers.GetAll()
+    for i, name in ipairs(allLayers) do
+        print(i, name)
+    end
+end)
+

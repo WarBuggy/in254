@@ -2,8 +2,8 @@
     "data": {
         "definition": {
             "goblin": {
-                "Type": "Creature",
-                "Data": {
+                "type": "Creature",
+                "payload": {
                     "health": 30,
                     "maxHealth": 30,
                     "limbs": {

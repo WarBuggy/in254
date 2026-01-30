@@ -1,5 +1,1 @@
 print("This is helper.lua from ModF")
-local modFGO = GameObject:new()
-modFGO:SetModData("health", 100)
-print("modFGO.health " .. modFGO:ModData("health"))
-print(modFGO:AllModData())

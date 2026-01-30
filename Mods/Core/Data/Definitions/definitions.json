@@ -1,8 +1,35 @@
 {
     "data": {
         "definition": {
-            "player": {
-                "modData": {}
+            "drawLayers": {
+                "payload": {
+                    "list": {
+                        "wall": {
+                            "index": 0
+                        },
+                        "nearWall": {
+                            "index": 1
+                        },
+                        "bunkerMiddle": {
+                            "index": 2
+                        },
+                        "nearOutside": {
+                            "index": 3
+                        },
+                        "outside": {
+                            "index": 4
+                        },
+                        "middleOutside": {
+                            "index": 5
+                        },
+                        "foreground": {
+                            "index": 6
+                        }
+                    },
+                    "orderedList": null,
+                    "layerIndexMap": null,
+                    "orderedListReady": false
+                }
             }
         }
     }

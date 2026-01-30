@@ -15,6 +15,5 @@
         "newVal": 42
     },
     "targetMod": "ModA",
-    "samePathConflict": "overwrite",
-    "samePathConflictArray": -1
+    "samePathConflict": "overwrite"
 }
