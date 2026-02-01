@@ -122,6 +122,7 @@ public class AnimationDataManager : BaseManager
         return index;
     }
 
+    //TODO: Work on who really owns the old path by looking at its history
     private Dictionary<string, object>? BuildResolvedAnimationPathsWithHistory
     (
         string animationName,
@@ -214,7 +215,13 @@ public class AnimationDataManager : BaseManager
                 }
 
                 string statePrefix = $"{prefix}.{componentName}.{stateName}";
-                result[$"{statePrefix}.FrameCount"] = frameCount;
+                string stateFrameCount = $"{statePrefix}.FrameCount";
+                result[stateFrameCount] = frameCount;
+                PropagateDerivedHistory(resolvedHistories, [], stateFrameCount, frameCount, owningModId);
+
+                var stateCurrentFrame = $"{statePrefix}.CurrentFrame";
+                result[stateCurrentFrame] = 1; // LUA use 1-based index
+                PropagateDerivedHistory(resolvedHistories, [], stateCurrentFrame, 1, owningModId);
 
                 resolvedStates.Add(stateName);
                 totalFrameCount += frameCount;
@@ -231,9 +238,19 @@ public class AnimationDataManager : BaseManager
             string compPrefix = $"{prefix}.{componentName}";
             var processDefaultStatePath = $"{compPrefix}.DefaultState";
             result[processDefaultStatePath] = defaultState;
-            result[$"{compPrefix}.States"] = resolvedStates;
-
             PropagateDerivedHistory(resolvedHistories, [defaultStatePath], processDefaultStatePath, defaultState, owningModId);
+
+            var compStatesLedger = new LedgerArray();
+            foreach (var stateName in resolvedStates)
+                compStatesLedger.InsertLast(stateName, owningModId);
+            string compStates = $"{compPrefix}.States";
+            result[compStates] = compStatesLedger;
+            PropagateDerivedHistory(resolvedHistories, [], compStates, compStatesLedger, owningModId);
+
+
+            var processComponentCurrentStatePath = $"{compPrefix}.CurrentState";
+            result[processComponentCurrentStatePath] = defaultState;
+            PropagateDerivedHistory(resolvedHistories, [], processComponentCurrentStatePath, defaultState, owningModId);
 
             resolvedComponents.Add(componentName);
             stateCount += resolvedStates.Count;
@@ -248,7 +265,13 @@ public class AnimationDataManager : BaseManager
             return null;
         }
 
-        result[$"{prefix}.Components"] = resolvedComponents;
+        var compLedger = new LedgerArray();
+        foreach (var compName in resolvedComponents)
+            compLedger.InsertLast(compName, owningModId);
+        string compListPath = $"{prefix}.Components";
+        result[compListPath] = compLedger;
+        PropagateDerivedHistory(resolvedHistories, [], compListPath, compLedger, owningModId);
+
         _logger.Log(
             "system.animationDataManager.animationBuiltSuccessfully",
             owningModId, animationName, resolvedComponents.Count, stateCount, totalFrameCount);
@@ -426,11 +449,12 @@ public class AnimationDataManager : BaseManager
         string actingModId
     )
     {
-        if (sourcePaths == null || sourcePaths.Length == 0)
-            throw new ArgumentException("At least one source path is required.", nameof(sourcePaths));
-
         var history = new PathHistory();
-        history.AddDerived(actingModId, newValue, sourcePaths);
+
+        if (sourcePaths == null || sourcePaths.Length == 0)
+            history.AddCreate(actingModId, newValue);
+        else
+            history.AddDerived(actingModId, newValue, sourcePaths);
 
         resolvedHistories[newPath] = history;
     }
@@ -438,17 +462,17 @@ public class AnimationDataManager : BaseManager
 
     #region LUA exposed functions
 
-    public bool TryGetComponents(string modId, string animationName, out List<string>? compList)
+    public bool TryGetComponents(string modId, string animationName, out LedgerArray? compLedger)
     {
         string path = CreateFullPath([animationName, "Components"]);
 
-        if (DataManager.Instance.TryGetData(modId, path, out var value) && value is List<string> list)
+        if (DataManager.Instance.TryGetData(modId, path, out var value) && value is LedgerArray ledger)
         {
-            compList = list;
+            compLedger = ledger;
             return true;
         }
 
-        compList = null;
+        compLedger = null;
         return false;
     }
 
@@ -480,17 +504,17 @@ public class AnimationDataManager : BaseManager
         return false;
     }
 
-    public bool TryGetStates(string modId, string animationName, string componentName, out List<string> stateList)
+    public bool TryGetStates(string modId, string animationName, string componentName, out LedgerArray? stateLedger)
     {
         string path = CreateFullPath([animationName, componentName, "States"]);
 
-        if (DataManager.Instance.TryGetData(modId, path, out var value) && value is List<string> list)
+        if (DataManager.Instance.TryGetData(modId, path, out var value) && value is LedgerArray ledger)
         {
-            stateList = list;
+            stateLedger = ledger;
             return true;
         }
 
-        stateList = null!;
+        stateLedger = null;
         return false;
     }
 
