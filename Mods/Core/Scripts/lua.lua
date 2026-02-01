@@ -1,4 +1,4 @@
--- Draws a single frame of an animation using the new flat API + LedgerArray
+-- Draws all components of an animation at default state using LedgerArray.Iterator
 local function draw(animationName, modId)
     local mod = modId or "" -- if modId is nil, use current mod context
 
@@ -34,7 +34,7 @@ local function draw(animationName, modId)
         return
     end
 
-    -- Get base component default state
+    -- Get base component default state and first frame
     local baseStateName
     if mod ~= "" then
         baseStateName = Animation.DefaultStateFor(mod, animationName, baseCompName)
@@ -42,12 +42,6 @@ local function draw(animationName, modId)
         baseStateName = Animation.DefaultState(animationName, baseCompName)
     end
 
-    if type(baseStateName) ~= "string" or baseStateName == "" then
-        print("Base component default state invalid: " .. baseCompName)
-        return
-    end
-
-    -- Get first frame of base component
     local baseFrame
     if mod ~= "" then
         baseFrame = Animation.FrameFor(mod, animationName, baseCompName, baseStateName, 1)
@@ -60,22 +54,18 @@ local function draw(animationName, modId)
         return
     end
 
-    -- Center position
+    -- Compute screen-centered origin
     local centerX = Screen.GetScreenWidth() / 2
     local centerY = Screen.GetScreenHeight() / 2
     local basePosX = centerX - (baseFrame.Width / 2)
     local basePosY = centerY - (baseFrame.Height / 2)
-
-    -- Origin top-left for component alignment
     local originX = basePosX - baseFrame.OffsetX
     local originY = basePosY - baseFrame.OffsetY
 
-    -- Loop through all components via LedgerArray using Count + TryGetAt
-    for i = 1, compCount do
-        local compName = LedgerArray.TryGetAt(components, i)
-        if compName ~= nil then
-
-            -- Get component states LedgerArray
+    -- Loop through all components using LedgerArray.Iterator
+    for compName in LedgerArray.Iterator(components) do
+        if type(compName) == "string" and compName ~= "" then
+            -- Get component's states LedgerArray
             local stateLedger
             if mod ~= "" then
                 stateLedger = Animation.StatesFor(mod, animationName, compName)
@@ -86,47 +76,38 @@ local function draw(animationName, modId)
             if stateLedger == nil then
                 print("Component states missing: " .. compName)
             else
-                local stateCount = LedgerArray.Count(stateLedger)
-                if stateCount == 0 then
-                    print("Component has no states: " .. compName)
+                -- Default state name
+                local stateName
+                if mod ~= "" then
+                    stateName = Animation.DefaultStateFor(mod, animationName, compName)
                 else
-                    -- Default state name
-                    local stateName
-                    if mod ~= "" then
-                        stateName = Animation.DefaultStateFor(mod, animationName, compName)
-                    else
-                        stateName = Animation.DefaultState(animationName, compName)
-                    end
+                    stateName = Animation.DefaultState(animationName, compName)
+                end
 
-                    if type(stateName) ~= "string" or stateName == "" then
-                        print("Component default state invalid: " .. compName)
-                    else
-                        -- Get first frame of default state
-                        local frame
-                        if mod ~= "" then
-                            frame = Animation.FrameFor(mod, animationName, compName, stateName, 1)
-                        else
-                            frame = Animation.Frame(animationName, compName, stateName, 1)
-                        end
+                -- First frame of default state
+                local frame
+                if mod ~= "" then
+                    frame = Animation.FrameFor(mod, animationName, compName, stateName, 1)
+                else
+                    frame = Animation.Frame(animationName, compName, stateName, 1)
+                end
 
-                        if type(frame) == "table" then
-                            local posX = originX + frame.OffsetX
-                            local posY = originY + frame.OffsetY
+                if type(frame) == "table" then
+                    local posX = originX + frame.OffsetX
+                    local posY = originY + frame.OffsetY
 
-                            Drawing.AddRequest(
-                                frame.TextureId,
-                                {posX, posY},
-                                0,            -- rotation
-                                {1, 1},       -- scale
-                                nil,          -- color
-                                0,            -- layerDepth
-                                frame.Width,
-                                frame.Height,
-                                frame.OffsetX,
-                                frame.OffsetY
-                            )
-                        end
-                    end
+                    Drawing.AddRequest(
+                        frame.TextureId,
+                        {posX, posY},
+                        0,            -- rotation
+                        {1, 1},       -- scale
+                        nil,          -- color
+                        0,            -- layerDepth
+                        frame.Width,
+                        frame.Height,
+                        frame.OffsetX,
+                        frame.OffsetY
+                    )
                 end
             end
         end
@@ -142,8 +123,8 @@ local function drawAnimationFrom(modId, animationName)
     draw(animationName, modId)
 end
 
-local function drawPlayIdle()
-    drawAnimation("player")
+local function drawPlayCell()
+    drawAnimation("cell")  -- Example animation with multiple components
 end
 
-Events.OnDraw.Add(drawPlayIdle)
+Events.OnDraw.Add(drawPlayCell)
