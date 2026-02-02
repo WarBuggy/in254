@@ -459,7 +459,6 @@ public class AnimationDataManager : BaseManager
         resolvedHistories[newPath] = history;
     }
 
-
     #region LUA exposed functions
 
     public bool TryGetComponents(string modId, string animationName, out LedgerArray? compLedger)
@@ -544,6 +543,115 @@ public class AnimationDataManager : BaseManager
 
         propertyValue = default!;
         return false;
+    }
+
+    public void SetCurrentState
+    (
+        string modId,
+        string animationName,
+        string componentName,
+        string newState,
+        string actingModId)
+    {
+        string statesPath =
+            CreateFullPath(animationName, componentName, "States");
+
+        if (!DataManager.Instance.TryGetData(modId, statesPath, out var statesObj)
+            || statesObj is not LedgerArray statesLedger
+            || statesLedger.IndexOf(newState) < 0)
+        {
+            throw new LocalizedErrorCore<InvalidOperationException>(
+                "system.animationDataManager.invalidAnimationState",
+                newState, animationName, componentName);
+        }
+
+        string currentStatePath =
+            CreateFullPath(animationName, componentName, "CurrentState");
+
+        DataManager.Instance.SetData(modId, currentStatePath, newState, actingModId);
+
+        // Reset frame (Lua-facing 1-based index)
+        string currentFramePath =
+            CreateFullPath(animationName, componentName, newState, "CurrentFrame");
+
+        DataManager.Instance.SetData(modId, currentFramePath, 1, actingModId);
+    }
+
+    public void SetCurrentFrame
+    (
+        string modId,
+        string animationName,
+        string componentName,
+        string stateName,
+        int frameIndex,
+        string actingModId
+    )
+    {
+        if (frameIndex < 1)
+            throw new LocalizedErrorCore<ArgumentOutOfRangeException>(
+                "system.animationDataManager.frameIndexOutOfRange",
+                frameIndex, animationName, componentName, stateName);
+
+
+        string frameCountPath =
+            CreateFullPath(animationName, componentName, stateName, "FrameCount");
+
+        if (!DataManager.Instance.TryGetData(modId, frameCountPath, out var countObj)
+            || countObj is not int frameCount
+            || frameCount <= 0)
+        {
+            throw new LocalizedErrorCore<InvalidOperationException>(
+                "system.animationDataManager.missingFrameCount",
+                animationName, componentName, stateName);
+
+        }
+
+        int clampedFrame = Math.Min(frameIndex, frameCount);
+
+        string currentFramePath =
+            CreateFullPath(animationName, componentName, stateName, "CurrentFrame");
+
+        DataManager.Instance.SetData(modId, currentFramePath, clampedFrame, actingModId);
+    }
+
+    public string GetCurrentState(string modId, string animationName, string componentName)
+    {
+        string path =
+            CreateFullPath(animationName, componentName, "CurrentState");
+
+        if (DataManager.Instance.TryGetData(modId, path, out var value)
+            && value is string state)
+        {
+            return state;
+        }
+
+        throw new LocalizedErrorCore<InvalidOperationException>(
+            "system.animationDataManager.missingCurrentState",
+            animationName, componentName);
+
+    }
+
+    public int GetCurrentFrame
+    (
+        string modId,
+        string animationName,
+        string componentName,
+        string stateName
+    )
+    {
+        string path =
+            CreateFullPath(animationName, componentName, stateName, "CurrentFrame");
+
+        if (DataManager.Instance.TryGetData(modId, path, out var value)
+            && value is int frame)
+        {
+            return frame;
+        }
+
+        throw new LocalizedErrorCore<InvalidOperationException>(
+            "system.animationDataManager.missingCurrentFrame",
+            animationName, componentName, stateName);
+
     }
 
     #endregion

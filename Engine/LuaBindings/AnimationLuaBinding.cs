@@ -352,6 +352,81 @@ public sealed class AnimationLuaBinding : LuaBindingBase
             return BuildFrameTable(modId, anim, comp, state, frameIndex);
         });
 
+        animationTable["CurrentState"] = (Func<string, string, DynValue>)((animationName, componentName) =>
+        {
+            var modId = currentModId();
+            if (string.IsNullOrWhiteSpace(modId))
+                return DynValue.Nil;
+
+            string state = AnimationDataManager.Instance.GetCurrentState(modId, animationName, componentName);
+            return DynValue.NewString(state);
+        });
+
+        // Get current state from a specific mod
+        animationTable["CurrentStateFrom"] = (Func<string, string, string, DynValue>)((modId, animationName, componentName) =>
+        {
+            if (string.IsNullOrWhiteSpace(modId))
+                return DynValue.Nil;
+
+            string state = AnimationDataManager.Instance.GetCurrentState(modId, animationName, componentName);
+            return DynValue.NewString(state);
+        });
+
+        // Set current state of a component
+        animationTable["SetCurrentState"] = (Action<string, string, string>)((animationName, componentName, newState) =>
+        {
+            var actingModId = currentModId();
+            var owningModId = actingModId;
+            if (!string.IsNullOrWhiteSpace(actingModId))
+                AnimationDataManager.Instance.SetCurrentState(owningModId, animationName, componentName, newState, actingModId);
+        });
+
+        // Set current state on a specific mod
+        animationTable["SetCurrentStateTo"] = (Action<string, string, string, string>)((owningModId, animationName, componentName, newState) =>
+        {
+            var actingModId = currentModId();
+            if (!string.IsNullOrWhiteSpace(owningModId))
+                AnimationDataManager.Instance.SetCurrentState(owningModId, animationName, componentName, newState, actingModId);
+        });
+
+        // Get current frame index of a component state
+        animationTable["CurrentFrame"] = (Func<string, string, string, DynValue>)((animationName, componentName, stateName) =>
+        {
+            var owningModId = currentModId();
+            if (string.IsNullOrWhiteSpace(owningModId))
+                return DynValue.Nil;
+
+            int frame = AnimationDataManager.Instance.GetCurrentFrame(owningModId, animationName, componentName, stateName);
+            return DynValue.NewNumber(frame);
+        });
+
+        // Get current frame from a specific mod
+        animationTable["CurrentFrameFrom"] = (Func<string, string, string, string, DynValue>)((owningModId, animationName, componentName, stateName) =>
+        {
+            if (string.IsNullOrWhiteSpace(owningModId))
+                return DynValue.Nil;
+
+            int frame = AnimationDataManager.Instance.GetCurrentFrame(owningModId, animationName, componentName, stateName);
+            return DynValue.NewNumber(frame);
+        });
+
+        // Set current frame index of a component state
+        animationTable["SetCurrentFrame"] = (Action<string, string, string, int>)((animationName, componentName, stateName, frameIndex) =>
+        {
+            var actingModId = currentModId();
+            var owningModId = actingModId;
+            if (!string.IsNullOrWhiteSpace(actingModId))
+                AnimationDataManager.Instance.SetCurrentFrame(owningModId, animationName, componentName, stateName, frameIndex, actingModId);
+        });
+
+        // Set current frame on a specific mod
+        animationTable["SetCurrentFrameTo"] = (Action<string, string, string, string, int>)((owningModId, animationName, componentName, stateName, frameIndex) =>
+        {
+            var actingModId = currentModId();
+            if (!string.IsNullOrWhiteSpace(owningModId))
+                AnimationDataManager.Instance.SetCurrentFrame(owningModId, animationName, componentName, stateName, frameIndex, actingModId);
+        });
+
         // Builds a Lua table containing all available frame properties
         DynValue BuildFrameTable
         (
