@@ -5,6 +5,7 @@ using System.Linq;
 using AxiomPlayground.Data;
 using AxiomPlayground.Modding;
 using in254.Core;
+using in254.Engine.LuaBindings;
 
 namespace in254.Engine;
 
@@ -13,7 +14,7 @@ public class AnimationDataManager : BaseManager
     private static readonly AnimationDataManager _instance = new();
     public static AnimationDataManager Instance => _instance;
     private readonly LoggerBaseCore _logger = new();
-    private readonly Dictionary<string, List<string>> _animationNames = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, List<string>> _animationNames = new(StringComparer.OrdinalIgnoreCase); // TODO: Evaluate existance
     private static readonly string _DEFAULT_VALUE_PATH = "__default";
 
     private AnimationDataManager() : base("animationData", true) { }
@@ -457,6 +458,22 @@ public class AnimationDataManager : BaseManager
             history.AddDerived(actingModId, newValue, sourcePaths);
 
         resolvedHistories[newPath] = history;
+    }
+
+    public override IEnumerable<LoadEventDispatch> CollectLoadEvents()
+    {
+        foreach (var (modId, names) in _animationNames)
+        {
+            foreach (var name in names)
+            {
+                yield return new LoadEventDispatch
+                (
+                    LuaGameEvents.OnAnimationCreated,
+                    modId,
+                    [modId, name]
+                );
+            }
+        }
     }
 
     #region LUA exposed functions

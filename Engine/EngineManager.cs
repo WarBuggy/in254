@@ -5,6 +5,10 @@ using AxiomPlayground.Modding;
 using AxiomPlayground.Data;
 using AxiomPlayground.Scripting;
 using in254.Engine.LuaBindings;
+using System.Collections.Generic;
+using in254.Core;
+using System;
+using MoonSharp.Interpreter;
 
 namespace in254.Engine;
 
@@ -15,6 +19,8 @@ public class EngineManager : Game
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
     private const float FrameDuration = 0.12f;
+
+    private readonly Dictionary<string, ActionInput> _actionInputBindings = [];
 
     private EngineManager()
     {
@@ -50,6 +56,8 @@ public class EngineManager : Game
             }
         }
 
+        BuildActionInputMap();
+        PrintActionInputBindings();
     }
 
     protected override void Update(GameTime gameTime)
@@ -58,7 +66,20 @@ public class EngineManager : Game
 
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
             keyboard.IsKeyDown(Keys.Escape))
+        {
             Exit();
+            return;
+        }
+
+        CreateActiveActionList(Keyboard.GetState(), GamePad.GetState(0), Mouse.GetState());
+        float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+        float totalTime = (float)gameTime.TotalGameTime.TotalSeconds;
+
+        ScriptManager.Instance.Fire(
+            LuaGameEvents.OnUpdate,
+            DynValue.NewNumber(deltaTime),
+            DynValue.NewNumber(totalTime)
+        );
 
         base.Update(gameTime);
     }
@@ -76,7 +97,7 @@ public class EngineManager : Game
             RasterizerState.CullCounterClockwise
         );
 
-        ScriptManager.Instance.Fire(GameEvents.OnDraw);
+        ScriptManager.Instance.Fire(LuaGameEvents.OnDraw);
         DrawManager.Instance.RenderQueue(_spriteBatch);
 
         _spriteBatch.End();
@@ -84,5 +105,166 @@ public class EngineManager : Game
         base.Draw(gameTime);
     }
 
+    private void CreateActiveActionList
+    (
+        KeyboardState keyboard,
+        GamePadState gamePad,
+        MouseState mouse
+    )
+    {
+        var luaTable = ScriptManager.Instance.CreateATable();
 
+        foreach (var kvp in _actionInputBindings)
+        {
+            string action = kvp.Key;
+            var input = kvp.Value;
+
+            bool isActive = false;
+
+            switch (input.DeviceType)
+            {
+                case InputDeviceType.Keyboard:
+                    if (input.KeyboardKey.HasValue)
+                        isActive = keyboard.IsKeyDown(input.KeyboardKey.Value);
+                    break;
+
+                case InputDeviceType.Mouse:
+                    if (input.MouseButton != null)
+                    {
+                        switch (input.MouseButton)
+                        {
+                            case "Left":
+                                isActive = mouse.LeftButton == ButtonState.Pressed;
+                                break;
+                            case "Right":
+                                isActive = mouse.RightButton == ButtonState.Pressed;
+                                break;
+                            case "Middle":
+                                isActive = mouse.MiddleButton == ButtonState.Pressed;
+                                break;
+                        }
+                    }
+                    break;
+
+                case InputDeviceType.GamePad:
+                    if (input.GamePadButton.HasValue)
+                        isActive = gamePad.IsButtonDown(input.GamePadButton.Value);
+                    break;
+            }
+
+            if (isActive)
+            {
+                luaTable[action] = _actionInputBindings[action].ModId;
+            }
+        }
+
+        DataManager.Instance.SetData("Core", "actions.activeList", luaTable, "Core");
+    }
+
+    private void BuildActionInputMap()
+    {
+        if (!DataManager.Instance.TryGetData("Core", "actions.list", out var tableObj) || tableObj == null)
+            throw new LocalizedErrorCore<InvalidOperationException>("system.actionManager.actionsListMissing");
+
+        // The table is a Lua table, but we can iterate through MoonSharp Table
+        if (tableObj is not MoonSharp.Interpreter.Table luaTable)
+            throw new LocalizedErrorCore<InvalidCastException>(
+                "system.actionManager.actionsListWrongType",
+                tableObj?.GetType().FullName ?? "null");
+
+        foreach (var pair in luaTable.Pairs)
+        {
+            string action = pair.Key.String;
+            string modId = pair.Value.String;
+
+            if (!DefinitionManager.Instance.TryGetPayload(modId, action, "key", out var inputObj))
+                throw new LocalizedErrorCore<InvalidOperationException>(
+                    "system.actionManager.missingKeyForAction", action, modId);
+
+            string inputBinding = (inputObj?.ToString() ?? "").Trim();
+
+            var actionInput = new ActionInput
+            {
+                ModId = modId
+            };
+
+            // Try Keyboard
+            if (Enum.TryParse(inputBinding, true, out Keys key))
+            {
+                actionInput.DeviceType = InputDeviceType.Keyboard;
+                actionInput.KeyboardKey = key;
+            }
+            else
+            {
+                // Mouse buttons
+                switch (inputBinding.ToLowerInvariant())
+                {
+                    case "leftmouse":
+                        actionInput.DeviceType = InputDeviceType.Mouse;
+                        actionInput.MouseButton = "Left";
+                        break;
+                    case "rightmouse":
+                        actionInput.DeviceType = InputDeviceType.Mouse;
+                        actionInput.MouseButton = "Right";
+                        break;
+                    case "middlemouse":
+                        actionInput.DeviceType = InputDeviceType.Mouse;
+                        actionInput.MouseButton = "Middle";
+                        break;
+                    default:
+                        // Try GamePad buttons
+                        if (Enum.TryParse<Buttons>(inputBinding, true, out var button))
+                        {
+                            actionInput.DeviceType = InputDeviceType.GamePad;
+                            actionInput.GamePadButton = button;
+                        }
+                        else
+                        {
+                            throw new LocalizedErrorCore<InvalidOperationException>(
+                                "system.actionManager.invalidInputBinding", action, modId);
+                        }
+                        break;
+                }
+            }
+
+            _actionInputBindings[action] = actionInput;
+        }
+    }
+
+    private enum InputDeviceType
+    {
+        Keyboard,
+        Mouse,
+        GamePad
+    }
+
+    private struct ActionInput
+    {
+        public InputDeviceType DeviceType;
+        public Keys? KeyboardKey;
+        public Buttons? GamePadButton;
+        public string MouseButton; // "Left", "Right", "Middle"
+        public string ModId;
+    }
+
+    private void PrintActionInputBindings()
+    {
+        Console.WriteLine("===== Action Input Bindings =====");
+
+        foreach (var kvp in _actionInputBindings)
+        {
+            string action = kvp.Key;
+            ActionInput input = kvp.Value;
+
+            string deviceStr = input.DeviceType.ToString();
+            string keyStr = input.KeyboardKey?.ToString() ?? "-";
+            string mouseStr = input.MouseButton ?? "-";
+            string gamepadStr = input.GamePadButton?.ToString() ?? "-";
+            string modIdStr = input.ModId ?? "-";
+
+            Console.WriteLine($"Action: {action}, ModId: {modIdStr}, Device: {deviceStr}, Keyboard: {keyStr}, Mouse: {mouseStr}, GamePad: {gamepadStr}");
+        }
+
+        Console.WriteLine("================================");
+    }
 }
