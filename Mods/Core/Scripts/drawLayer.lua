@@ -66,7 +66,7 @@ end
 local function rebuildIndexMap(ordered)
     local map = {}
     for i = 1, LedgerArray.Count(ordered) do
-        local val = LedgerArray.TryGetAt(ordered, i)
+        local val = LedgerArray.TryGet(ordered, i)
         if val ~= nil then
             map[val] = i
         end
@@ -90,25 +90,25 @@ function DrawLayers.Has(layerName)
 end
 
 -- Get index of a layer (1-based)
-function DrawLayers.GetIndex(layerName)
+function DrawLayers.IndexOf(layerName)
     local _, map = getLayerData()
     return map and map[layerName] or nil
 end
 
 -- Get layer name by index
-function DrawLayers.GetName(index)
+function DrawLayers.Name(index)
     local ordered, _ = getLayerData()
     if not ordered then return nil end
-    return LedgerArray.TryGetAt(ordered, index)
+    return LedgerArray.TryGet(ordered, index)
 end
 
 -- Get full ordered list (read-only copy)
-function DrawLayers.GetAll()
+function DrawLayers.All()
     local ordered, _ = getLayerData()
     if not ordered then return {} end
     local result = {}
     for i = 1, LedgerArray.Count(ordered) do
-        result[i] = LedgerArray.TryGetAt(ordered, i)
+        result[i] = LedgerArray.TryGet(ordered, i)
     end
     return result
 end
@@ -170,7 +170,7 @@ function DrawLayers.AddAfter(targetLayer, newLayer)
 end
 
 -- Remove layer by name
-function DrawLayers.Remove(layerName)
+function DrawLayers.TryRemove(layerName)
     local ordered, _ = getLayerData()
     if not ordered then return end
     local index = LedgerArray.IndexOf(ordered, layerName)
@@ -178,6 +178,6 @@ function DrawLayers.Remove(layerName)
         print("[DrawLayers] Layer not found:", layerName)
         return
     end
-    LedgerArray.TryRemoveAt(ordered, index)
+    LedgerArray.TryRemove(ordered, index)
     GameData:SetTo("Core", "drawLayers.layerIndexMap", rebuildIndexMap(ordered))
 end

@@ -575,7 +575,7 @@ public class AnimationDataManager : BaseManager
 
         if (!DataManager.Instance.TryGetData(modId, statesPath, out var statesObj)
             || statesObj is not LedgerArray statesLedger
-            || statesLedger.IndexOf(newState) < 0)
+            || statesLedger.GetIndexOf(newState) < 0)
         {
             throw new LocalizedErrorCore<InvalidOperationException>(
                 "system.animationDataManager.invalidAnimationState",

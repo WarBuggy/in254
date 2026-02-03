@@ -27,10 +27,10 @@ Events.OnDefinitionCreated.Add(function(modId, defName, defType)
 
     if (defName ~= "drawLayers") then
         if DrawLayers.Has("foreground") then
-            print("Foreground index:", DrawLayers.GetIndex("foreground"))
+            print("Foreground index:", DrawLayers.IndexOf("foreground"))
         end
 
-        print("Layer 3 is:", DrawLayers.GetName(3))
+        print("Layer 3 is:", DrawLayers.Name(3))
     end
 end)
 
@@ -41,7 +41,7 @@ DrawLayers.Events.OnReady:Add(function()
     DrawLayers.AddFirst("ModJ 1st layer");
 
     -- You can now safely query or manipulate DrawLayers
-    local allLayers = DrawLayers.GetAll()
+    local allLayers = DrawLayers.All()
     for i, name in ipairs(allLayers) do
         print(i, name)
     end
