@@ -105,14 +105,14 @@ public class EngineManager : Game
         base.Draw(gameTime);
     }
 
-    private void CreateActiveActionList
-    (
-        KeyboardState keyboard,
-        GamePadState gamePad,
-        MouseState mouse
-    )
+    private void CreateActiveActionList(
+     KeyboardState keyboard,
+     GamePadState gamePad,
+     MouseState mouse
+ )
     {
-        var luaTable = ScriptManager.Instance.CreateATable();
+        // Create a new LedgerMap instead of a Lua table
+        var ledgerMap = new LedgerMap();
 
         foreach (var kvp in _actionInputBindings)
         {
@@ -154,11 +154,13 @@ public class EngineManager : Game
 
             if (isActive)
             {
-                luaTable[action] = _actionInputBindings[action].ModId;
+                // Set the ModId in the LedgerMap, actorId is "Core"
+                ledgerMap.Set(action, input.ModId, "Core");
             }
         }
 
-        DataManager.Instance.SetData("Core", "actions.activeList", luaTable, "Core");
+        // Save the LedgerMap instead of a Lua table
+        DataManager.Instance.SetData("Core", "actions.activeList", ledgerMap, "Core");
     }
 
     private void BuildActionInputMap()
