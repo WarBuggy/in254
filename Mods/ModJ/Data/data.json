@@ -4,6 +4,6 @@
         "animationData.player.components.base.states.idle.frames.0.folder": "./",
         "animationData.player.components.base.states.idle.frames.0.file": "idle1.png"
     },
-    "targetMod": "Core",
+    "targetMod": "CoreNot",
     "samePathConflict": "overwrite"
 }

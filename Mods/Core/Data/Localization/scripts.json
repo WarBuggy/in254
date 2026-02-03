@@ -1,0 +1,9 @@
+{
+    "data": {
+        "localization": {
+            "en-US": {
+                "animation.lua.failedCreateLedgerForMod": "[animation.lua] Failed to create ledger for mod '{0}': {1}"
+            }
+        }
+    }
+}

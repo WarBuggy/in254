@@ -12,10 +12,19 @@
                 "system.animationDataManager.skipStateNoValidFrames": "Skipping state '{2}' in component '{1}' of animation '{0}' because it has no valid frames",
                 "system.animationDataManager.frameMissingRequiredProperty": "Animation frame is missing required property '{0}' at index {4} of state '{3}' in component '{2}' of animation '{1}'",
                 "system.animationDataManager.animationBuiltSuccessfully": "Animation '{1}' from mod '{0}' built successfully: {2} components, {3} states, {4} frames",
+                "system.animationDataManager.invalidAnimationState": "Invalid animation state '{0}' for animation '{1}' component '{2}'",
+                "system.animationDataManager.frameIndexOutOfRange": "Frame index '{0}' is invalid for animation '{1}' component '{2}' state '{3}'; must be >= 1",
+                "system.animationDataManager.missingFrameCount": "FrameCount missing for animation '{0}' component '{1}' state '{2}'",
+                "system.animationDataManager.missingCurrentState": "CurrentState missing for animation '{0}' component '{1}'",
+                "system.animationDataManager.missingCurrentFrame": "CurrentFrame missing for animation '{0}' component '{1}' state '{2}'",
                 "system.textureManager.registered": "Texture registered for mod '{0}', path '{1}', texture ID {2}",
                 "system.textureManager.textureFileNotFound": "Texture file not found: {0}",
                 "system.textureManager.textureNotFound": "Texture not found for mod '{0}' with ID {1}",
-                "system.drawManager.textureNull": "DrawManager received a null texture"
+                "system.drawManager.textureNull": "DrawManager received a null texture",
+                "system.actionManager.actionsListMissing": "Failed to retrieve actions list at 'actions.list' from mod 'Core'; table is missing or null",
+                "system.actionManager.actionsListWrongType": "Expected actions list to be of type 'Dictionary<string,string>', but got '{0}'",
+                "system.actionManager.missingKeyForAction": "Action '{0}' in mod '{1}' has no 'key' payload defined; each action must have a key",
+                "system.actionManager.invalidInputBinding": "Action '{0}' from mod '{1}' has an invalid or empty input binding"
             }
         }
     }

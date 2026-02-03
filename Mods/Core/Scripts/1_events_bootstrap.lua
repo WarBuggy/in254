@@ -1,6 +1,18 @@
+Events.OnAnimationCreated = {
+    Add = function(fn)
+        Events.Register("OnAnimationCreated", fn)
+    end
+}
+
 Events.OnDraw = {
     Add = function(fn) 
         Events.Register("OnDraw", fn) 
+    end
+}
+
+Events.OnUpdate = {
+    Add = function(fn) 
+        Events.Register("OnUpdate", fn) 
     end
 }
 

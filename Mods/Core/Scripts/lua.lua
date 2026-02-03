@@ -124,7 +124,7 @@ local function drawAnimationFrom(modId, animationName)
 end
 
 local function drawPlayCell()
-    drawAnimation("cell")  -- Example animation with multiple components
+    drawAnimation("player")  -- Example animation with multiple components
 end
 
 Events.OnDraw.Add(drawPlayCell)

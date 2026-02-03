@@ -37,10 +37,10 @@ local function createDrawLayerOrderedList(modId, defName, type)
     end
 
     -- Store into Definition payloads
-    Definition:SetPayload(defName, "orderedList", ordered)
-    Definition:SetPayload(defName, "layerIndexMap", indexMap)
-    Definition:SetPayload(defName, "orderedListReady", true)
-
+    GameData:SetTo("Core", "drawLayers.orderedList", ordered)
+    GameData:SetTo("Core", "drawLayers.layerIndexMap", indexMap)
+    GameData:SetTo("Core", "drawLayers.orderedListReady", true)
+    
     -- Fire the ready event
     DrawLayers.Events.OnReady:Fire()
 end
@@ -54,7 +54,7 @@ DrawLayers.Events.OnReady = DrawLayers.Events.OnReady or CreateEvent()
 
 -- Ensure drawLayers is ready
 local function ensureReady()
-    local ready, exists = Definition:TryGetPayloadFrom("Core", "drawLayers", "orderedListReady")
+    local ready, exists = GameData:TryGetFrom("Core", "drawLayers.orderedListReady")
     if not exists or not ready then
         print("[DrawLayers] Warning: DrawLayers not ready. Hook into DrawLayers.Events.OnReady.")
         return false
@@ -77,8 +77,8 @@ end
 -- Get ordered LedgerArray and its index map
 local function getLayerData()
     if not ensureReady() then return nil, nil end
-    local ordered, ok1 = Definition:TryGetPayloadFrom("Core", "drawLayers", "orderedList")
-    local map, ok2 = Definition:TryGetPayloadFrom("Core", "drawLayers", "layerIndexMap")
+    local ordered, ok1 = GameData:TryGetFrom("Core", "drawLayers.orderedList")
+    local map, ok2 = GameData:TryGetFrom("Core", "drawLayers.layerIndexMap")
     if not ok1 or not ok2 then return nil, nil end
     return ordered, map
 end
@@ -122,7 +122,7 @@ function DrawLayers.AddFirst(layerName)
         return
     end
     LedgerArray.InsertFirst(ordered, layerName)
-    Definition:SetPayloadTo("Core", "drawLayers", "layerIndexMap", rebuildIndexMap(ordered))
+    GameData:SetTo("Core", "drawLayers.layerIndexMap", rebuildIndexMap(ordered))
 end
 
 -- Add new layer at end
@@ -134,7 +134,7 @@ function DrawLayers.AddLast(layerName)
         return
     end
     LedgerArray.InsertLast(ordered, layerName)
-    Definition:SetPayloadTo("Core", "drawLayers", "layerIndexMap", rebuildIndexMap(ordered))
+    GameData:SetTo("Core", "drawLayers.layerIndexMap", rebuildIndexMap(ordered))
 end
 
 -- Add new layer before existing layer
@@ -150,7 +150,7 @@ function DrawLayers.AddBefore(targetLayer, newLayer)
         print("[DrawLayers] Target layer not found:", targetLayer)
         return
     end
-    Definition:SetPayloadTo("Core", "drawLayers", "layerIndexMap", rebuildIndexMap(ordered))
+    GameData:SetTo("Core", "drawLayers.layerIndexMap", rebuildIndexMap(ordered))
 end
 
 -- Add new layer after existing layer
@@ -166,7 +166,7 @@ function DrawLayers.AddAfter(targetLayer, newLayer)
         print("[DrawLayers] Target layer not found:", targetLayer)
         return
     end
-    Definition:SetPayloadTo("Core", "drawLayers", "layerIndexMap", rebuildIndexMap(ordered))
+    GameData:SetTo("Core", "drawLayers.layerIndexMap", rebuildIndexMap(ordered))
 end
 
 -- Remove layer by name
@@ -179,5 +179,5 @@ function DrawLayers.Remove(layerName)
         return
     end
     LedgerArray.TryRemoveAt(ordered, index)
-    Definition:SetPayloadTo("Core", "drawLayers", "layerIndexMap", rebuildIndexMap(ordered))
+    GameData:SetTo("Core", "drawLayers.layerIndexMap", rebuildIndexMap(ordered))
 end

@@ -25,10 +25,28 @@
                         "foreground": {
                             "index": 6
                         }
-                    },
-                    "orderedList": null,
-                    "layerIndexMap": null,
-                    "orderedListReady": false
+                    }
+                }
+            },
+            "player": {
+                "payload": {
+                    "animation": "player",
+                    "animationModId": "Core"
+                },
+                "type": "gameObject"
+            },
+            "goLeft": {
+                "type": "action",
+                "payload": {
+                    "key": "a",
+                    "defaultKey": "a"
+                }
+            },
+            "testInput": {
+                "type": "action",
+                "payload": {
+                    "key": "leftmouse",
+                    "defaultKey": "leftmouse"
                 }
             }
         }

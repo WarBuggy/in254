@@ -1,0 +1,16 @@
+{
+    "data": {
+        "drawLayers": {
+            "orderedList": null,
+            "layerIndexMap": null,
+            "orderedListReady": false
+        },
+        "animations": {
+            "list": null
+        },
+        "actions": {
+            "list": null,
+            "activeList": null
+        }
+    }
+}
