@@ -111,7 +111,6 @@ public class EngineManager : Game
      MouseState mouse
  )
     {
-        // Create a new LedgerMap instead of a Lua table
         var ledgerMap = new LedgerMap();
 
         foreach (var kvp in _actionInputBindings)
@@ -165,19 +164,21 @@ public class EngineManager : Game
 
     private void BuildActionInputMap()
     {
-        if (!DataManager.Instance.TryGetData("Core", "actions.list", out var tableObj) || tableObj == null)
+        if (!DataManager.Instance.TryGetData("Core", "actions.list", out var obj) || obj == null)
             throw new LocalizedErrorCore<InvalidOperationException>("system.actionManager.actionsListMissing");
 
-        // The table is a Lua table, but we can iterate through MoonSharp Table
-        if (tableObj is not MoonSharp.Interpreter.Table luaTable)
+        if (obj is not LedgerMap ledger)
             throw new LocalizedErrorCore<InvalidCastException>(
                 "system.actionManager.actionsListWrongType",
-                tableObj?.GetType().FullName ?? "null");
+                obj?.GetType().FullName ?? "null");
 
-        foreach (var pair in luaTable.Pairs)
+        foreach (var ledgerKey in ledger.Keys)
         {
-            string action = pair.Key.String;
-            string modId = pair.Value.String;
+            if (!ledger.TryGet(ledgerKey, out var ledgerValue))
+                continue; // skip if somehow missing
+
+            string action = ledgerKey;
+            string modId = ledgerValue.ToString();
 
             if (!DefinitionManager.Instance.TryGetPayload(modId, action, "key", out var inputObj))
                 throw new LocalizedErrorCore<InvalidOperationException>(
