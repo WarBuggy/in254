@@ -17,6 +17,7 @@
                 "system.animationDataManager.missingFrameCount": "FrameCount missing for animation '{0}' component '{1}' state '{2}'",
                 "system.animationDataManager.missingCurrentState": "CurrentState missing for animation '{0}' component '{1}'",
                 "system.animationDataManager.missingCurrentFrame": "CurrentFrame missing for animation '{0}' component '{1}' state '{2}'",
+                "system.animationDataManager.invalidAnimationComponent": "Cannot set flip for component '{1}' in animation '{0}' because the component or flip property does not exist",
                 "system.textureManager.registered": "Texture registered for mod '{0}', path '{1}', texture ID {2}",
                 "system.textureManager.textureFileNotFound": "Texture file not found: {0}",
                 "system.textureManager.textureNotFound": "Texture not found for mod '{0}' with ID {1}",
