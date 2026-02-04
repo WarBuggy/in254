@@ -6,7 +6,7 @@
             "orderedListReady": false
         },
         "animations": {
-            "list": null
+            "queue": null
         },
         "actions": {
             "list": null,

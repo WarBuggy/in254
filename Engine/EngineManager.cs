@@ -57,7 +57,6 @@ public class EngineManager : Game
         }
 
         BuildActionInputMap();
-        PrintActionInputBindings();
     }
 
     protected override void Update(GameTime gameTime)
@@ -87,6 +86,7 @@ public class EngineManager : Game
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.Black);
+        DataManager.Instance.SetData("Core", "animations.queue", new LedgerMap(), "Core");
 
         // Begin the sprite batch
         _spriteBatch.Begin(

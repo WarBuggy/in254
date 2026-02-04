@@ -65,12 +65,15 @@ end
 -- Rebuild the index map from LedgerArray
 local function rebuildIndexMap(ordered)
     local map = {}
-    for i = 1, LedgerArray.Count(ordered) do
-        local val = LedgerArray.TryGet(ordered, i)
-        if val ~= nil then
-            map[val] = i
+    local count = LedgerArray.Count(ordered)
+
+    for i = 1, count do
+        local value, exists = LedgerArray.TryGet(ordered, i)
+        if exists then
+            map[value] = i
         end
     end
+
     return map
 end
 
@@ -99,17 +102,30 @@ end
 function DrawLayers.Name(index)
     local ordered, _ = getLayerData()
     if not ordered then return nil end
-    return LedgerArray.TryGet(ordered, index)
+
+    local value, exists = LedgerArray.TryGet(ordered, index)
+    if exists then
+        return value
+    end
+
+    return nil
 end
 
 -- Get full ordered list (read-only copy)
 function DrawLayers.All()
     local ordered, _ = getLayerData()
     if not ordered then return {} end
+
     local result = {}
-    for i = 1, LedgerArray.Count(ordered) do
-        result[i] = LedgerArray.TryGet(ordered, i)
+    local count = LedgerArray.Count(ordered)
+
+    for i = 1, count do
+        local value, exists = LedgerArray.TryGet(ordered, i)
+        if exists then
+            result[i] = value
+        end
     end
+
     return result
 end
 
