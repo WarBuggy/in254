@@ -427,6 +427,77 @@ public sealed class AnimationLuaBinding : LuaBindingBase
                 AnimationDataManager.Instance.SetCurrentFrame(owningModId, animationName, componentName, stateName, frameIndex, actingModId);
         });
 
+        // Set FlipX for the current mod
+        animationTable["SetFlipX"] = (Action<string, string, bool>)((animationName, componentName, value) =>
+        {
+            var actingModId = currentModId();
+            if (!string.IsNullOrWhiteSpace(actingModId))
+                AnimationDataManager.Instance.SetFlipX(actingModId, animationName, componentName, value, actingModId);
+        });
+
+        // Set FlipY for the current mod
+        animationTable["SetFlipY"] = (Action<string, string, bool>)((animationName, componentName, value) =>
+        {
+            var actingModId = currentModId();
+            if (!string.IsNullOrWhiteSpace(actingModId))
+                AnimationDataManager.Instance.SetFlipY(actingModId, animationName, componentName, value, actingModId);
+        });
+
+        // Set FlipX for a specific owning mod
+        animationTable["SetFlipXTo"] = (Action<string, string, string, bool>)((owningModId, animationName, componentName, value) =>
+        {
+            var actingModId = currentModId();
+            if (!string.IsNullOrWhiteSpace(owningModId))
+                AnimationDataManager.Instance.SetFlipX(owningModId, animationName, componentName, value, actingModId);
+        });
+
+        // Set FlipY for a specific owning mod
+        animationTable["SetFlipYTo"] = (Action<string, string, string, bool>)((owningModId, animationName, componentName, value) =>
+        {
+            var actingModId = currentModId();
+            if (!string.IsNullOrWhiteSpace(owningModId))
+                AnimationDataManager.Instance.SetFlipY(owningModId, animationName, componentName, value, actingModId);
+        });
+
+        animationTable["GetFlipX"] = (Func<string, string, DynValue>)((animationName, componentName) =>
+        {
+            var modId = currentModId();
+            if (string.IsNullOrWhiteSpace(modId))
+                return DynValue.Nil;
+
+            bool flipX = AnimationDataManager.Instance.GetFlipX(modId, animationName, componentName);
+            return DynValue.NewBoolean(flipX);
+        });
+
+        animationTable["GetFlipY"] = (Func<string, string, DynValue>)((animationName, componentName) =>
+        {
+            var modId = currentModId();
+            if (string.IsNullOrWhiteSpace(modId))
+                return DynValue.Nil;
+
+            bool flipY = AnimationDataManager.Instance.GetFlipY(modId, animationName, componentName);
+            return DynValue.NewBoolean(flipY);
+        });
+
+        animationTable["GetFlipXFrom"] = (Func<string, string, string, DynValue>)((owningModId, animationName, componentName) =>
+        {
+            if (string.IsNullOrWhiteSpace(owningModId))
+                return DynValue.Nil;
+
+            bool flipX = AnimationDataManager.Instance.GetFlipX(owningModId, animationName, componentName);
+            return DynValue.NewBoolean(flipX);
+        });
+
+        animationTable["GetFlipYFrom"] = (Func<string, string, string, DynValue>)((owningModId, animationName, componentName) =>
+        {
+            if (string.IsNullOrWhiteSpace(owningModId))
+                return DynValue.Nil;
+
+            bool flipY = AnimationDataManager.Instance.GetFlipY(owningModId, animationName, componentName);
+            return DynValue.NewBoolean(flipY);
+        });
+
+
         // Builds a Lua table containing all available frame properties
         DynValue BuildFrameTable
         (

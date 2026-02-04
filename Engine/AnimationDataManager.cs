@@ -253,6 +253,14 @@ public class AnimationDataManager : BaseManager
             result[processComponentCurrentStatePath] = defaultState;
             PropagateDerivedHistory(resolvedHistories, [], processComponentCurrentStatePath, defaultState, owningModId);
 
+            var processComponentFlipX = $"{compPrefix}.FlipX";
+            result[processComponentFlipX] = false;
+            PropagateDerivedHistory(resolvedHistories, [], processComponentFlipX, false, owningModId);
+
+            var processComponentFlipY = $"{compPrefix}.FlipY";
+            result[processComponentFlipY] = false;
+            PropagateDerivedHistory(resolvedHistories, [], processComponentFlipY, false, owningModId);
+
             resolvedComponents.Add(componentName);
             stateCount += resolvedStates.Count;
         }
@@ -386,7 +394,6 @@ public class AnimationDataManager : BaseManager
             AssignWithDerivedHistory(resolvedHistories, offsetYSources, $"{framePrefix}.OffsetY", offsetY, result, owningModId);
             AssignWithDerivedHistory(resolvedHistories, spriteOffsetXSources, $"{framePrefix}.SpriteOffsetX", spriteOffsetX, result, owningModId);
             AssignWithDerivedHistory(resolvedHistories, spriteOffsetYSources, $"{framePrefix}.SpriteOffsetY", spriteOffsetY, result, owningModId);
-
 
             return true;
         }
@@ -560,6 +567,66 @@ public class AnimationDataManager : BaseManager
 
         propertyValue = default!;
         return false;
+    }
+
+    public bool GetFlipX(string modId, string animationName, string componentName)
+    {
+        string flipXPath = CreateFullPath(animationName, componentName, "FlipX");
+
+        if (!DataManager.Instance.TryGetData(modId, flipXPath, out var value)
+            || value is not bool flipX)
+        {
+            throw new LocalizedErrorCore<InvalidOperationException>(
+                "system.animationDataManager.invalidAnimationOrComponent",
+                animationName, componentName);
+        }
+
+        return flipX;
+    }
+
+    public bool GetFlipY(string modId, string animationName, string componentName)
+    {
+        string flipYPath = CreateFullPath(animationName, componentName, "FlipY");
+
+        if (!DataManager.Instance.TryGetData(modId, flipYPath, out var value)
+            || value is not bool flipY)
+        {
+            throw new LocalizedErrorCore<InvalidOperationException>(
+                "system.animationDataManager.invalidAnimationOrComponent",
+                animationName, componentName);
+        }
+
+        return flipY;
+    }
+
+    public void SetFlipX(string modId, string animationName, string componentName, bool value, string actingModId)
+    {
+        string flipXPath = CreateFullPath(animationName, componentName, "FlipX");
+
+        // Validate path exists
+        if (!DataManager.Instance.TryGetData(modId, flipXPath, out _))
+        {
+            throw new LocalizedErrorCore<InvalidOperationException>(
+                "system.animationDataManager.invalidAnimationComponent",
+                componentName, animationName);
+        }
+
+        DataManager.Instance.SetData(modId, flipXPath, value, actingModId);
+    }
+
+    public void SetFlipY(string modId, string animationName, string componentName, bool value, string actingModId)
+    {
+        string flipYPath = CreateFullPath(animationName, componentName, "FlipY");
+
+        // Validate path exists
+        if (!DataManager.Instance.TryGetData(modId, flipYPath, out _))
+        {
+            throw new LocalizedErrorCore<InvalidOperationException>(
+                "system.animationDataManager.invalidAnimationComponent",
+                componentName, animationName);
+        }
+
+        DataManager.Instance.SetData(modId, flipYPath, value, actingModId);
     }
 
     public void SetCurrentState
