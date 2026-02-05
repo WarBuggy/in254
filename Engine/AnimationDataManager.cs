@@ -394,6 +394,8 @@ public class AnimationDataManager : BaseManager
             AssignWithDerivedHistory(resolvedHistories, offsetYSources, $"{framePrefix}.OffsetY", offsetY, result, owningModId);
             AssignWithDerivedHistory(resolvedHistories, spriteOffsetXSources, $"{framePrefix}.SpriteOffsetX", spriteOffsetX, result, owningModId);
             AssignWithDerivedHistory(resolvedHistories, spriteOffsetYSources, $"{framePrefix}.SpriteOffsetY", spriteOffsetY, result, owningModId);
+            AssignWithDerivedHistory(resolvedHistories, [], $"{framePrefix}.PosX", 0, result, owningModId);
+            AssignWithDerivedHistory(resolvedHistories, [], $"{framePrefix}.PosY", 0, result, owningModId);
 
             return true;
         }
@@ -567,6 +569,93 @@ public class AnimationDataManager : BaseManager
 
         propertyValue = default!;
         return false;
+    }
+
+    public void SetFramePosX
+    (
+        string modId,
+        string animationName,
+        string componentName,
+        string stateName,
+        int frameIndex,
+        float value,
+        string actingModId
+    )
+    {
+        SetFramePropertyInternal(
+            modId,
+            animationName,
+            componentName,
+            stateName,
+            frameIndex,
+            "PosX",
+            value,
+            actingModId);
+    }
+
+    public void SetFramePosY(
+        string modId,
+        string animationName,
+        string componentName,
+        string stateName,
+        int frameIndex,
+        float value,
+        string actingModId
+    )
+    {
+        SetFramePropertyInternal(
+            modId,
+            animationName,
+            componentName,
+            stateName,
+            frameIndex,
+            "PosY",
+            value,
+            actingModId);
+    }
+
+    private void SetFramePropertyInternal<T>
+    (
+        string owningModId,
+        string animationName,
+        string componentName,
+        string stateName,
+        int frameIndex,
+        string propertyName,
+        T value,
+        string actingModId
+    )
+    {
+        if (frameIndex < 1)
+            throw new LocalizedErrorCore<ArgumentOutOfRangeException>(
+                "system.animationDataManager.frameIndexOutOfRange",
+                frameIndex,
+                animationName,
+                componentName,
+                stateName);
+
+        string propertyPath = CreateFullPath(
+            animationName,
+            componentName,
+            stateName,
+            frameIndex.ToString(),
+            propertyName
+        );
+
+        // Validate that the property exists (or at least the frame exists)
+        if (!DataManager.Instance.TryGetData(owningModId, propertyPath, out _))
+        {
+            throw new LocalizedErrorCore<InvalidOperationException>(
+                "system.animationDataManager.frameMissingRequiredProperty",
+                animationName,
+                componentName,
+                stateName,
+                frameIndex,
+                propertyName
+            );
+        }
+
+        DataManager.Instance.SetData(owningModId, propertyPath, value, actingModId);
     }
 
     public bool GetFlipX(string modId, string animationName, string componentName)

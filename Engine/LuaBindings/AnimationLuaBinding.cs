@@ -77,8 +77,8 @@ public sealed class AnimationLuaBinding : LuaBindingBase
             return DynValue.Nil;
         });
 
-        // BaseComponentFor(modId, animationName)
-        animationTable["BaseComponentFor"] = (Func<string, string, DynValue>)((modId, animationName) =>
+        // BaseComponentFrom(modId, animationName)
+        animationTable["BaseComponentFrom"] = (Func<string, string, DynValue>)((modId, animationName) =>
         {
             if (string.IsNullOrWhiteSpace(modId))
                 return DynValue.Nil;
@@ -89,7 +89,7 @@ public sealed class AnimationLuaBinding : LuaBindingBase
             return DynValue.Nil;
         });
 
-        animationTable["ComponentsFor"] = (Func<string, string, DynValue>)((modId, animationName) =>
+        animationTable["ComponentsFrom"] = (Func<string, string, DynValue>)((modId, animationName) =>
         {
             if (string.IsNullOrWhiteSpace(modId))
                 return DynValue.Nil;
@@ -100,7 +100,7 @@ public sealed class AnimationLuaBinding : LuaBindingBase
             return DynValue.Nil;
         });
 
-        animationTable["DefaultStateFor"] = (Func<string, string, string, DynValue>)((modId, animationName, componentName) =>
+        animationTable["DefaultStateFrom"] = (Func<string, string, string, DynValue>)((modId, animationName, componentName) =>
         {
             if (string.IsNullOrWhiteSpace(modId))
                 return DynValue.Nil;
@@ -111,7 +111,7 @@ public sealed class AnimationLuaBinding : LuaBindingBase
             return DynValue.Nil;
         });
 
-        animationTable["StatesFor"] = (Func<string, string, string, DynValue>)((modId, animationName, componentName) =>
+        animationTable["StatesFrom"] = (Func<string, string, string, DynValue>)((modId, animationName, componentName) =>
         {
             if (string.IsNullOrWhiteSpace(modId))
                 return DynValue.Nil;
@@ -122,7 +122,7 @@ public sealed class AnimationLuaBinding : LuaBindingBase
             return DynValue.Nil;
         });
 
-        animationTable["FrameCountFor"] = (Func<string, string, string, string, DynValue>)((modId, anim, comp, state) =>
+        animationTable["FrameCountFrom"] = (Func<string, string, string, string, DynValue>)((modId, anim, comp, state) =>
         {
             if (string.IsNullOrWhiteSpace(modId))
                 return DynValue.Nil;
@@ -237,7 +237,7 @@ public sealed class AnimationLuaBinding : LuaBindingBase
             return DynValue.Nil;
         });
 
-        animationTable["FrameTextureIdFor"] = (Func<string, string, string, string, int, DynValue>)((modId, anim, comp, state, frame) =>
+        animationTable["FrameTextureIdFrom"] = (Func<string, string, string, string, int, DynValue>)((modId, anim, comp, state, frame) =>
         {
             if (string.IsNullOrWhiteSpace(modId))
                 return DynValue.Nil;
@@ -249,7 +249,7 @@ public sealed class AnimationLuaBinding : LuaBindingBase
             return DynValue.Nil;
         });
 
-        animationTable["FrameWidthFor"] = (Func<string, string, string, string, int, DynValue>)((modId, anim, comp, state, frame) =>
+        animationTable["FrameWidthFrom"] = (Func<string, string, string, string, int, DynValue>)((modId, anim, comp, state, frame) =>
         {
             if (string.IsNullOrWhiteSpace(modId))
                 return DynValue.Nil;
@@ -261,7 +261,7 @@ public sealed class AnimationLuaBinding : LuaBindingBase
             return DynValue.Nil;
         });
 
-        animationTable["FrameHeightFor"] = (Func<string, string, string, string, int, DynValue>)((modId, anim, comp, state, frame) =>
+        animationTable["FrameHeightFrom"] = (Func<string, string, string, string, int, DynValue>)((modId, anim, comp, state, frame) =>
         {
             if (string.IsNullOrWhiteSpace(modId))
                 return DynValue.Nil;
@@ -273,7 +273,7 @@ public sealed class AnimationLuaBinding : LuaBindingBase
             return DynValue.Nil;
         });
 
-        animationTable["FrameLayerFor"] = (Func<string, string, string, string, int, DynValue>)((modId, anim, comp, state, frame) =>
+        animationTable["FrameLayerFrom"] = (Func<string, string, string, string, int, DynValue>)((modId, anim, comp, state, frame) =>
         {
             if (string.IsNullOrWhiteSpace(modId))
                 return DynValue.Nil;
@@ -285,7 +285,7 @@ public sealed class AnimationLuaBinding : LuaBindingBase
             return DynValue.Nil;
         });
 
-        animationTable["FrameOffsetXFor"] = (Func<string, string, string, string, int, DynValue>)((modId, anim, comp, state, frame) =>
+        animationTable["FrameOffsetXFrom"] = (Func<string, string, string, string, int, DynValue>)((modId, anim, comp, state, frame) =>
         {
             if (string.IsNullOrWhiteSpace(modId))
                 return DynValue.Nil;
@@ -297,7 +297,7 @@ public sealed class AnimationLuaBinding : LuaBindingBase
             return DynValue.Nil;
         });
 
-        animationTable["FrameOffsetYFor"] = (Func<string, string, string, string, int, DynValue>)((modId, anim, comp, state, frame) =>
+        animationTable["FrameOffsetYFrom"] = (Func<string, string, string, string, int, DynValue>)((modId, anim, comp, state, frame) =>
         {
             if (string.IsNullOrWhiteSpace(modId))
                 return DynValue.Nil;
@@ -309,7 +309,7 @@ public sealed class AnimationLuaBinding : LuaBindingBase
             return DynValue.Nil;
         });
 
-        animationTable["FrameSpriteOffsetXFor"] = (Func<string, string, string, string, int, DynValue>)((modId, anim, comp, state, frame) =>
+        animationTable["FrameSpriteOffsetXFrom"] = (Func<string, string, string, string, int, DynValue>)((modId, anim, comp, state, frame) =>
         {
             if (string.IsNullOrWhiteSpace(modId))
                 return DynValue.Nil;
@@ -321,7 +321,7 @@ public sealed class AnimationLuaBinding : LuaBindingBase
             return DynValue.Nil;
         });
 
-        animationTable["FrameSpriteOffsetYFor"] = (Func<string, string, string, string, int, DynValue>)((modId, anim, comp, state, frame) =>
+        animationTable["FrameSpriteOffsetYFrom"] = (Func<string, string, string, string, int, DynValue>)((modId, anim, comp, state, frame) =>
         {
             if (string.IsNullOrWhiteSpace(modId))
                 return DynValue.Nil;
@@ -331,25 +331,6 @@ public sealed class AnimationLuaBinding : LuaBindingBase
                 return DynValue.NewNumber(value);
 
             return DynValue.Nil;
-        });
-
-
-        animationTable["Frame"] = (Func<string, string, string, int, DynValue>)((anim, comp, state, frameIndex) =>
-        {
-            var modId = currentModId();
-            if (string.IsNullOrWhiteSpace(modId))
-                return DynValue.Nil;
-
-            return BuildFrameTable(modId, anim, comp, state, frameIndex);
-        });
-
-
-        animationTable["FrameFor"] = (Func<string, string, string, string, int, DynValue>)((modId, anim, comp, state, frameIndex) =>
-        {
-            if (string.IsNullOrWhiteSpace(modId))
-                return DynValue.Nil;
-
-            return BuildFrameTable(modId, anim, comp, state, frameIndex);
         });
 
         animationTable["CurrentState"] = (Func<string, string, DynValue>)((animationName, componentName) =>
@@ -459,7 +440,7 @@ public sealed class AnimationLuaBinding : LuaBindingBase
                 AnimationDataManager.Instance.SetFlipY(owningModId, animationName, componentName, value, actingModId);
         });
 
-        animationTable["GetFlipX"] = (Func<string, string, DynValue>)((animationName, componentName) =>
+        animationTable["FlipX"] = (Func<string, string, DynValue>)((animationName, componentName) =>
         {
             var modId = currentModId();
             if (string.IsNullOrWhiteSpace(modId))
@@ -469,7 +450,7 @@ public sealed class AnimationLuaBinding : LuaBindingBase
             return DynValue.NewBoolean(flipX);
         });
 
-        animationTable["GetFlipY"] = (Func<string, string, DynValue>)((animationName, componentName) =>
+        animationTable["FlipY"] = (Func<string, string, DynValue>)((animationName, componentName) =>
         {
             var modId = currentModId();
             if (string.IsNullOrWhiteSpace(modId))
@@ -479,7 +460,7 @@ public sealed class AnimationLuaBinding : LuaBindingBase
             return DynValue.NewBoolean(flipY);
         });
 
-        animationTable["GetFlipXFrom"] = (Func<string, string, string, DynValue>)((owningModId, animationName, componentName) =>
+        animationTable["FlipXFrom"] = (Func<string, string, string, DynValue>)((owningModId, animationName, componentName) =>
         {
             if (string.IsNullOrWhiteSpace(owningModId))
                 return DynValue.Nil;
@@ -488,7 +469,7 @@ public sealed class AnimationLuaBinding : LuaBindingBase
             return DynValue.NewBoolean(flipX);
         });
 
-        animationTable["GetFlipYFrom"] = (Func<string, string, string, DynValue>)((owningModId, animationName, componentName) =>
+        animationTable["FlipYFrom"] = (Func<string, string, string, DynValue>)((owningModId, animationName, componentName) =>
         {
             if (string.IsNullOrWhiteSpace(owningModId))
                 return DynValue.Nil;
@@ -497,41 +478,160 @@ public sealed class AnimationLuaBinding : LuaBindingBase
             return DynValue.NewBoolean(flipY);
         });
 
-
-        // Builds a Lua table containing all available frame properties
-        DynValue BuildFrameTable
-        (
-            string modId,
-            string anim,
-            string comp,
-            string state,
-            int frameIndex
-        )
+        animationTable["FramePosX"] = (Func<string, string, string, int, DynValue>)((anim, comp, state, frame) =>
         {
-            var table = new Table(luaScript);
-            bool found = false;
+            var modId = currentModId();
+            if (string.IsNullOrWhiteSpace(modId))
+                return DynValue.Nil;
 
-            void tryAdd<T>(string key)
-            {
-                if (AnimationDataManager.Instance.TryGetFrameProperty<T>(
-                    modId, anim, comp, state, frameIndex, key, out var value))
-                {
-                    table[key] = DynValue.FromObject(luaScript, value);
-                    found = true;
-                }
-            }
+            if (AnimationDataManager.Instance.TryGetFrameProperty<float>(
+                modId, anim, comp, state, frame, "PosX", out var value))
+                return DynValue.NewNumber(value);
 
-            tryAdd<int>("TextureId");
-            tryAdd<string>("Layer");
-            tryAdd<int>("Width");
-            tryAdd<int>("Height");
-            tryAdd<int>("OffsetX");
-            tryAdd<int>("OffsetY");
-            tryAdd<int>("SpriteOffsetX");
-            tryAdd<int>("SpriteOffsetY");
+            return DynValue.Nil;
+        });
 
-            return found ? DynValue.NewTable(table) : DynValue.Nil;
-        }
+        animationTable["FramePosXFrom"] = (Func<string, string, string, string, int, DynValue>)((modId, anim, comp, state, frame) =>
+        {
+            if (string.IsNullOrWhiteSpace(modId))
+                return DynValue.Nil;
+
+            if (AnimationDataManager.Instance.TryGetFrameProperty<float>(
+                modId, anim, comp, state, frame, "PosX", out var value))
+                return DynValue.NewNumber(value);
+
+            return DynValue.Nil;
+        });
+
+        animationTable["FramePosY"] = (Func<string, string, string, int, DynValue>)((anim, comp, state, frame) =>
+        {
+            var modId = currentModId();
+            if (string.IsNullOrWhiteSpace(modId))
+                return DynValue.Nil;
+
+            if (AnimationDataManager.Instance.TryGetFrameProperty<float>(
+                modId, anim, comp, state, frame, "PosY", out var value))
+                return DynValue.NewNumber(value);
+
+            return DynValue.Nil;
+        });
+
+        animationTable["FramePosYFrom"] = (Func<string, string, string, string, int, DynValue>)((modId, anim, comp, state, frame) =>
+        {
+            if (string.IsNullOrWhiteSpace(modId))
+                return DynValue.Nil;
+
+            if (AnimationDataManager.Instance.TryGetFrameProperty<float>(
+                modId, anim, comp, state, frame, "PosY", out var value))
+                return DynValue.NewNumber(value);
+
+            return DynValue.Nil;
+        });
+
+        animationTable["SetFramePosX"] = (Action<string, string, string, int, float>)((anim, comp, state, frame, value) =>
+        {
+            var modId = currentModId();
+            if (string.IsNullOrWhiteSpace(modId))
+                return;
+
+            AnimationDataManager.Instance.SetFramePosX(
+                modId, anim, comp, state, frame, value, modId);
+        });
+
+        animationTable["SetFramePosY"] = (Action<string, string, string, int, float>)((anim, comp, state, frame, value) =>
+        {
+            var modId = currentModId();
+            if (string.IsNullOrWhiteSpace(modId))
+                return;
+
+            AnimationDataManager.Instance.SetFramePosY(
+                modId, anim, comp, state, frame, value, modId);
+        });
+
+        animationTable["SetFramePosXTo"] = (Action<string, string, string, string, int, float>)((owningModId, anim, comp, state, frame, value) =>
+        {
+            if (string.IsNullOrWhiteSpace(owningModId))
+                return;
+
+            var actingModId = currentModId();
+            if (string.IsNullOrWhiteSpace(actingModId))
+                return;
+
+            AnimationDataManager.Instance.SetFramePosX(
+                owningModId, anim, comp, state, frame, value, actingModId);
+        });
+
+        animationTable["SetFramePosYTo"] = (Action<string, string, string, string, int, float>)((owningModId, anim, comp, state, frame, value) =>
+        {
+            if (string.IsNullOrWhiteSpace(owningModId))
+                return;
+
+            var actingModId = currentModId();
+            if (string.IsNullOrWhiteSpace(actingModId))
+                return;
+
+            AnimationDataManager.Instance.SetFramePosY(
+                owningModId, anim, comp, state, frame, value, actingModId);
+        });
+
+        // animationTable["Frame"] = (Func<string, string, string, int, DynValue>)((anim, comp, state, frameIndex) =>
+        // {
+        //     var modId = currentModId();
+        //     if (string.IsNullOrWhiteSpace(modId))
+        //         return DynValue.Nil;
+
+        //     return BuildFrameTable(modId, anim, comp, state, frameIndex);
+        // });
+
+        // animationTable["FrameFrom"] = (Func<string, string, string, string, int, DynValue>)((modId, anim, comp, state, frameIndex) =>
+        // {
+        //     if (string.IsNullOrWhiteSpace(modId))
+        //         return DynValue.Nil;
+
+        //     return BuildFrameTable(modId, anim, comp, state, frameIndex);
+        // });
+
+        // // Builds a Lua table containing all available frame properties
+        // DynValue BuildFrameTable
+        // (
+        //     string modId,
+        //     string anim,
+        //     string comp,
+        //     string state,
+        //     int frameIndex
+        // )
+        // {
+        //     var table = new Table(luaScript);
+        //     bool found = false;
+
+        //     void tryAdd<T>(string key)
+        //     {
+        //         if (key == "PosX")
+        //         {
+        //             Console.WriteLine();
+        //         }
+        //         if (AnimationDataManager.Instance.TryGetFrameProperty<T>(
+        //             modId, anim, comp, state, frameIndex, key, out var value))
+        //         {
+        //             table[key] = DynValue.FromObject(luaScript, value);
+        //             found = true;
+        //             Console.WriteLine($"Build Frame Table: key {key}, value {value}");
+        //         }
+        //     }
+
+        //     tryAdd<int>("TextureId");
+        //     tryAdd<string>("Layer");
+        //     tryAdd<int>("Width");
+        //     tryAdd<int>("Height");
+        //     tryAdd<int>("OffsetX");
+        //     tryAdd<int>("OffsetY");
+        //     tryAdd<int>("SpriteOffsetX");
+        //     tryAdd<int>("SpriteOffsetY");
+        //     tryAdd<int>("PosX");
+        //     tryAdd<int>("PosY");
+
+        //     return found ? DynValue.NewTable(table) : DynValue.Nil;
+        // }
 
         luaScript.Globals["Animation"] = animationTable;
     }

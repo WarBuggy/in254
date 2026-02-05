@@ -5,12 +5,12 @@
             "layerIndexMap": null,
             "orderedListReady": false
         },
-        "animations": {
-            "queue": null
-        },
         "actions": {
             "list": null,
             "activeList": null
+        },
+        "gowi": {
+            "list": null
         }
     }
 }

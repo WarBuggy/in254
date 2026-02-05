@@ -11,7 +11,7 @@ public sealed class DrawManager : LoggerBaseCore
     private static readonly DrawManager _instance = new();
     public static DrawManager Instance => _instance;
 
-    private readonly List<DrawRequest> _drawQueue = [];
+    private readonly List<DrawRequest> _drawQueue = new();
 
     private DrawManager() { }
 
@@ -22,7 +22,8 @@ public sealed class DrawManager : LoggerBaseCore
                       float rotation = 0f, Vector2 scale = default,
                       Color? color = null, float layerDepth = 0f,
                       int width = 0, int height = 0,
-                      int spriteOffsetX = 0, int spriteOffsetY = 0)
+                      int spriteOffsetX = 0, int spriteOffsetY = 0,
+                      bool flipX = false, bool flipY = false)
     {
         if (texture == null)
             throw new LocalizedErrorCore<ArgumentNullException>("system.drawManager.textureNull");
@@ -31,7 +32,6 @@ public sealed class DrawManager : LoggerBaseCore
             scale = Vector2.One;
 
         var sourceRect = new Rectangle(spriteOffsetX, spriteOffsetY, width, height);
-
         _drawQueue.Add(new DrawRequest
         {
             Texture = texture,
@@ -41,6 +41,8 @@ public sealed class DrawManager : LoggerBaseCore
             Scale = scale,
             Color = color ?? Color.White,
             LayerDepth = layerDepth,
+            FlipX = flipX,
+            FlipY = flipY
         });
     }
 
@@ -52,6 +54,10 @@ public sealed class DrawManager : LoggerBaseCore
     {
         foreach (var req in _drawQueue)
         {
+            SpriteEffects effects = SpriteEffects.None;
+            if (req.FlipX) effects |= SpriteEffects.FlipHorizontally;
+            if (req.FlipY) effects |= SpriteEffects.FlipVertically;
+
             spriteBatch.Draw(
                 req.Texture,
                 req.Position,
@@ -60,7 +66,7 @@ public sealed class DrawManager : LoggerBaseCore
                 req.Rotation,
                 Vector2.Zero,   // origin: top-left
                 req.Scale,
-                SpriteEffects.None,
+                effects,        // use computed SpriteEffects
                 req.LayerDepth
             );
         }
@@ -80,5 +86,7 @@ public sealed class DrawManager : LoggerBaseCore
         public Vector2 Scale { get; set; } = Vector2.One;
         public Color Color { get; set; } = Color.White;
         public float LayerDepth { get; set; } = 0f;
+        public bool FlipX { get; set; } = false;  // new property
+        public bool FlipY { get; set; } = false;  // new property
     }
 }

@@ -44,6 +44,8 @@ public class EngineManager : Game
 
         DataManager.Instance.LoadAll(ModManager.Instance.FinalModList, managers);
 
+        InitRuntimeData();
+
         var queue = ScriptManager.Instance.LoadAll(ModManager.Instance.FinalModList);
         ScriptManager.Instance.ExecuteQueue(queue);
 
@@ -69,7 +71,7 @@ public class EngineManager : Game
             Exit();
             return;
         }
-
+        DataManager.Instance.SetData("Core", "gowi.list", new LedgerMap(), "Core");
         CreateActiveActionList(Keyboard.GetState(), GamePad.GetState(0), Mouse.GetState());
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
         float totalTime = (float)gameTime.TotalGameTime.TotalSeconds;
@@ -86,7 +88,6 @@ public class EngineManager : Game
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.Black);
-        DataManager.Instance.SetData("Core", "animations.queue", new LedgerMap(), "Core");
 
         // Begin the sprite batch
         _spriteBatch.Begin(
@@ -96,7 +97,6 @@ public class EngineManager : Game
             DepthStencilState.None,
             RasterizerState.CullCounterClockwise
         );
-
         ScriptManager.Instance.Fire(LuaGameEvents.OnDraw);
         DrawManager.Instance.RenderQueue(_spriteBatch);
 
@@ -232,6 +232,11 @@ public class EngineManager : Game
 
             _actionInputBindings[action] = actionInput;
         }
+    }
+
+    private static void InitRuntimeData()
+    {
+        DataManager.Instance.SetData("Core", "actions.list", new LedgerMap(), "Core");
     }
 
     private enum InputDeviceType

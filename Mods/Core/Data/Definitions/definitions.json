@@ -35,18 +35,18 @@
                 },
                 "type": "gameObject"
             },
-            "goLeft": {
+            "moveLeft": {
                 "type": "action",
                 "payload": {
                     "key": "a",
                     "defaultKey": "a"
                 }
             },
-            "testInput": {
+            "moveRight": {
                 "type": "action",
                 "payload": {
-                    "key": "leftmouse",
-                    "defaultKey": "leftmouse"
+                    "key": "d",
+                    "defaultKey": "d"
                 }
             }
         }
