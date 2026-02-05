@@ -48,7 +48,7 @@ local function processGowi()
                         local flipX         = Animation.FlipXFrom(modId, animationName, compName) or false  
                         local flipY         = Animation.FlipYFrom(modId, animationName, compName) or false  
 
-                        print(string.format("Frame found: TextureId=%s PosX=%s PosY=%s", tostring(textureId), tostring(posX), tostring(posY)))
+                        -- print(string.format("Frame found: TextureId=%s PosX=%s PosY=%s", tostring(textureId), tostring(posX), tostring(posY)))
                         local layerName = Animation.FrameLayerFrom(modId, animationName, compName, state, frameIndex)
                         local layerOrder = layerName and layerIndexMap[layerName]
                         if not layerOrder then
