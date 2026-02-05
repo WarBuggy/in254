@@ -18,9 +18,9 @@ namespace in254.Engine.LuaBindings
             Table screenTable = new(luaScript);
 
             // Functions for dynamic access (useful if screen can resize)
-            screenTable["GetScreenWidth"] = (Func<int>)(() =>
+            screenTable["Width"] = (Func<int>)(() =>
                 EngineManager.Instance.GraphicsDevice.Viewport.Width);
-            screenTable["GetScreenHeight"] = (Func<int>)(() =>
+            screenTable["Height"] = (Func<int>)(() =>
                 EngineManager.Instance.GraphicsDevice.Viewport.Height);
 
             // Register the table globally under "Screen"
