@@ -7,33 +7,6 @@ print(Mods.Ids())
 
 -- player = RE('Core', 'player')
 -- player:setModDataFor('Core', 'health', 80)
--- print("End of scriptJ.lua from ModJ. Nothing should be printed between these 2 messages.")
-
-Events.OnDefinitionCreated.Add(function(modId, defName, defType)
-    print("Definition created:")
-    print("  Mod:", modId)
-    print("  Name:", defName)
-    print("  Type:", defType)
-
-    -- Try reading some data
-    local typeName, exist = Definition:TryGetType(defName);
-    local health = Definition:TryGetPayload(defName, "health")
-    local maxHealth = Definition:TryGetPayload(defName, "maxHealth")
-    if exist then
-        print("  Type:", typeName)
-    end
-    print("  Health:", health)
-    print("  MaxHealth:", maxHealth)
-
-    if (defName ~= "drawLayers") then
-        if DrawLayers.Has("foreground") then
-            print("Foreground index:", DrawLayers.IndexOf("foreground"))
-        end
-
-        print("Layer 3 is:", DrawLayers.Name(3))
-    end
-end)
-
 -- Hook into DrawLayers ready event
 DrawLayers.Events.OnReady:Add(function()
     print("[ModJ] DrawLayers are ready!")
