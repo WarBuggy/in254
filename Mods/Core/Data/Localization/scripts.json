@@ -5,8 +5,11 @@
                 "animationUtils.lua.baseComponentMissing": "Base component not found for animation '{0}'",
                 "animationUtils.lua.baseFrameMissing": "Base frame missing for component '{0}' in state '{1}'",
                 "animationUtils.lua.componentsMissing": "No components found for animation '{0}'",
+                "drawLayer.lua.missingIndex": "Draw layer '{0}' is missing payload.index",
+                "drawLayer.lua.notInitialized": "DrawLayers orderedList or layerIndexMap not initialized before definitions were created",
                 "drawQueue.lua.frameLayerMissing": "Animation '{0}' component '{1}' state '{2}' frame '{3}' references unknown layer '{4}'",
-                "drawQueue.lua.drawLayersNotReady": "Draw layers are not initialized; draw queue cannot be built"
+                "drawQueue.lua.drawLayersNotReady": "Draw layers are not initialized; draw queue cannot be built",
+                "drawQueue.lua.noGowiLedgerFound": "No gowi ledger found"
             }
         }
     }

@@ -1,9 +1,7 @@
 {
     "data": {
         "drawLayers": {
-            "orderedList": null,
-            "layerIndexMap": null,
-            "orderedListReady": false
+            "layerIndexMap": null
         },
         "actions": {
             "list": null,

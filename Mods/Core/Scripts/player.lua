@@ -7,7 +7,7 @@ local frameTimer = 0
 local function updateAnimationPlayer(deltaTime, totalTime)
     local activeActionList, exists = GameData:TryGetFrom("Core", "actions.activeList")
     if not exists or not activeActionList then return end
-
+    
     local animationName = "player"
     local baseCompName = "base"
 
@@ -43,7 +43,7 @@ local function updateAnimationPlayer(deltaTime, totalTime)
 
     -- Update flipX
     Animation.SetFlipX(animationName, baseCompName, flipX)
-
+    
     -- Center and position
     local currentFrame = Animation.CurrentFrame(animationName, baseCompName, compBaseNewState)
     AnimationUtils.CenterCurrentFrameOnScreen(animationName, baseCompName, compBaseNewState, currentFrame)

@@ -1,199 +1,87 @@
--- Initialize ordered LedgerArray for drawLayers
-local function createDrawLayerOrderedList(modId, defName, type)
-    if defName ~= "drawLayers" then
+local function onDrawLayerCreated(modId, defName, defType)
+    if defType ~= "drawLayer" then
         return
     end
 
-    -- Collect all layer paths under "list"
-    local listPaths = Definition:PayloadPaths(defName, "list")
-    local layers = {}
+    -- Get declared index from Definition
+    local index, exists = Definition:TryGetPayloadFrom(modId, defName, "index")
+    if not exists or index == nil then
+        error(Localize("drawLayer.lua.missingIndex", defName))
+    end
 
-    for _, path in ipairs(listPaths) do
-        local index, exists = Definition:TryGetPayload(defName, path)
-        if exists and index ~= nil then
-            local layerName = path:match("^list%.([^%.]+)%.index$")
-            if layerName then
-                layers[layerName] = index
-            end
+    -- Get current layerIndexMap
+    local layerIndexMap, mapExists = GameData:TryGetFrom("Core", "drawLayers.layerIndexMap")
+    if not mapExists or not layerIndexMap then
+        error(LocalizeWithEnding("", "drawLayer.lua.notInitialized"))
+    end
+
+    -- Remove old entry if redefining
+    LedgerMap.TryRemove(layerIndexMap, defName)
+
+    -- Collect all current entries with their declared index and modId
+    local tempList = {}
+    for pair in LedgerMap.Iterator(layerIndexMap) do
+        if type(pair) == "table" then
+            local name = pair.Key
+            local info = pair.Value
+            local declared, _ = Definition:TryGetPayloadFrom(info.modId, name, "index")
+            table.insert(tempList, { name = name, index = declared or 0, modId = info.modId })
         end
     end
 
-    -- Sort layers by their index value
-    local sortable = {}
-    for name, idx in pairs(layers) do
-        table.insert(sortable, { name = name, index = idx })
-    end
-    table.sort(sortable, function(a, b) return a.index < b.index end)
+    -- Add the new layer
+    table.insert(tempList, { name = defName, index = index, modId = modId })
 
-    -- Build LedgerArray + reverse lookup map
-    local ordered = LedgerArray.Create()
-    local indexMap = {}
+    -- Sort by declared index ascending
+    table.sort(tempList, function(a, b) return a.index < b.index end)
 
-    for _, entry in ipairs(sortable) do
-        -- Insert at the end, LedgerArray will record the insertion
-        LedgerArray.InsertLast(ordered, entry.name)
-        -- 1-based map for Lua
-        indexMap[entry.name] = LedgerArray.Count(ordered)
+    -- Rebuild LedgerMap: key = layerName, value = { position, modId }
+    local newMap = LedgerMap.Create()
+    for i, entry in ipairs(tempList) do
+        LedgerMap.Set(newMap, entry.name, { position = i, modId = entry.modId })
     end
 
-    -- Store into Definition payloads
-    GameData:SetTo("Core", "drawLayers.orderedList", ordered)
-    GameData:SetTo("Core", "drawLayers.layerIndexMap", indexMap)
-    GameData:SetTo("Core", "drawLayers.orderedListReady", true)
-    
-    -- Fire the ready event
-    DrawLayers.Events.OnReady:Fire()
+    -- Save back to GameData
+    GameData:SetTo("Core", "drawLayers.layerIndexMap", newMap)
 end
 
-Events.OnDefinitionCreated.Add(createDrawLayerOrderedList)
+Events.OnDefinitionCreated.Add(onDrawLayerCreated)
 
--- Setup DrawLayers namespace
+
+-- DrawLayers read-only API
 DrawLayers = DrawLayers or {}
-DrawLayers.Events = DrawLayers.Events or {}
-DrawLayers.Events.OnReady = DrawLayers.Events.OnReady or CreateEvent()
 
--- Ensure drawLayers is ready
-local function ensureReady()
-    local ready, exists = GameData:TryGetFrom("Core", "drawLayers.orderedListReady")
-    if not exists or not ready then
-        print("[DrawLayers] Warning: DrawLayers not ready. Hook into DrawLayers.Events.OnReady.")
-        return false
+function DrawLayers.PrintAllWithIndex()
+    local layerIndexMap, exists = GameData:TryGetFrom("Core", "drawLayers.layerIndexMap")
+    if not exists or not layerIndexMap then
+        print("[DrawLayers] layerIndexMap not ready")
+        return
     end
-    return true
-end
 
--- Rebuild the index map from LedgerArray
-local function rebuildIndexMap(ordered)
-    local map = {}
-    local count = LedgerArray.Count(ordered)
-
-    for i = 1, count do
-        local value, exists = LedgerArray.TryGet(ordered, i)
-        if exists then
-            map[value] = i
+    -- Collect entries
+    local entries = {}
+    for pair in LedgerMap.Iterator(layerIndexMap) do
+        if type(pair) == "table" then
+            local layerName = pair.Key
+            local info      = pair.Value
+            local position  = info.position
+            local declaredIndex, idxExists = Definition:TryGetPayloadFrom(info.modId, layerName, "index")
+            declaredIndex = idxExists and declaredIndex or "nil"
+            table.insert(entries, {
+                layerName = layerName,
+                position  = position,
+                declaredIndex = declaredIndex
+            })
         end
     end
 
-    return map
-end
+    -- Sort by position (draw order)
+    table.sort(entries, function(a, b) return a.position < b.position end)
 
--- Get ordered LedgerArray and its index map
-local function getLayerData()
-    if not ensureReady() then return nil, nil end
-    local ordered, ok1 = GameData:TryGetFrom("Core", "drawLayers.orderedList")
-    local map, ok2 = GameData:TryGetFrom("Core", "drawLayers.layerIndexMap")
-    if not ok1 or not ok2 then return nil, nil end
-    return ordered, map
-end
-
--- Layer existence
-function DrawLayers.Has(layerName)
-    local _, map = getLayerData()
-    return map and map[layerName] ~= nil
-end
-
--- Get index of a layer (1-based)
-function DrawLayers.IndexOf(layerName)
-    local _, map = getLayerData()
-    return map and map[layerName] or nil
-end
-
--- Get layer name by index
-function DrawLayers.Name(index)
-    local ordered, _ = getLayerData()
-    if not ordered then return nil end
-
-    local value, exists = LedgerArray.TryGet(ordered, index)
-    if exists then
-        return value
+    -- Print nicely
+    print("===== DrawLayers (sorted) =====")
+    for i, entry in ipairs(entries) do
+        print(string.format("%d. %s (declared index: %s)", i, entry.layerName, tostring(entry.declaredIndex)))
     end
-
-    return nil
-end
-
--- Get full ordered list (read-only copy)
-function DrawLayers.All()
-    local ordered, _ = getLayerData()
-    if not ordered then return {} end
-
-    local result = {}
-    local count = LedgerArray.Count(ordered)
-
-    for i = 1, count do
-        local value, exists = LedgerArray.TryGet(ordered, i)
-        if exists then
-            result[i] = value
-        end
-    end
-
-    return result
-end
-
--- Add new layer at start
-function DrawLayers.AddFirst(layerName)
-    local ordered, _ = getLayerData()
-    if not ordered then return end
-    if LedgerArray.IndexOf(ordered, layerName) ~= 0 then
-        print("[DrawLayers] Layer already exists:", layerName)
-        return
-    end
-    LedgerArray.InsertFirst(ordered, layerName)
-    GameData:SetTo("Core", "drawLayers.layerIndexMap", rebuildIndexMap(ordered))
-end
-
--- Add new layer at end
-function DrawLayers.AddLast(layerName)
-    local ordered, _ = getLayerData()
-    if not ordered then return end
-    if LedgerArray.IndexOf(ordered, layerName) ~= 0 then
-        print("[DrawLayers] Layer already exists:", layerName)
-        return
-    end
-    LedgerArray.InsertLast(ordered, layerName)
-    GameData:SetTo("Core", "drawLayers.layerIndexMap", rebuildIndexMap(ordered))
-end
-
--- Add new layer before existing layer
-function DrawLayers.AddBefore(targetLayer, newLayer)
-    local ordered, _ = getLayerData()
-    if not ordered then return end
-    if LedgerArray.IndexOf(ordered, newLayer) ~= 0 then
-        print("[DrawLayers] Layer already exists:", newLayer)
-        return
-    end
-    local success = LedgerArray.TryInsertBeforeValue(ordered, targetLayer, newLayer) ~= nil
-    if not success then
-        print("[DrawLayers] Target layer not found:", targetLayer)
-        return
-    end
-    GameData:SetTo("Core", "drawLayers.layerIndexMap", rebuildIndexMap(ordered))
-end
-
--- Add new layer after existing layer
-function DrawLayers.AddAfter(targetLayer, newLayer)
-    local ordered, _ = getLayerData()
-    if not ordered then return end
-    if LedgerArray.IndexOf(ordered, newLayer) ~= 0 then
-        print("[DrawLayers] Layer already exists:", newLayer)
-        return
-    end
-    local success = LedgerArray.TryInsertAfterValue(ordered, targetLayer, newLayer) ~= nil
-    if not success then
-        print("[DrawLayers] Target layer not found:", targetLayer)
-        return
-    end
-    GameData:SetTo("Core", "drawLayers.layerIndexMap", rebuildIndexMap(ordered))
-end
-
--- Remove layer by name
-function DrawLayers.TryRemove(layerName)
-    local ordered, _ = getLayerData()
-    if not ordered then return end
-    local index = LedgerArray.IndexOf(ordered, layerName)
-    if index == 0 then
-        print("[DrawLayers] Layer not found:", layerName)
-        return
-    end
-    LedgerArray.TryRemove(ordered, index)
-    GameData:SetTo("Core", "drawLayers.layerIndexMap", rebuildIndexMap(ordered))
+    print("===============================")
 end

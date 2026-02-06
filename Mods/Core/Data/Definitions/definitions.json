@@ -1,31 +1,46 @@
 {
     "data": {
         "definition": {
-            "drawLayers": {
+            "wall": {
+                "type": "drawLayer",
                 "payload": {
-                    "list": {
-                        "wall": {
-                            "index": 0
-                        },
-                        "nearWall": {
-                            "index": 1
-                        },
-                        "bunkerMiddle": {
-                            "index": 2
-                        },
-                        "nearOutside": {
-                            "index": 3
-                        },
-                        "outside": {
-                            "index": 4
-                        },
-                        "middleOutside": {
-                            "index": 5
-                        },
-                        "foreground": {
-                            "index": 6
-                        }
-                    }
+                    "index": 1.3
+                }
+            },
+            "nearWall": {
+                "type": "drawLayer",
+                "payload": {
+                    "index": 2
+                }
+            },
+            "bunkerMiddle": {
+                "type": "drawLayer",
+                "payload": {
+                    "index": 3
+                }
+            },
+            "nearOutside": {
+                "type": "drawLayer",
+                "payload": {
+                    "index": 4
+                }
+            },
+            "outside": {
+                "type": "drawLayer",
+                "payload": {
+                    "index": 5
+                }
+            },
+            "middleOutside": {
+                "type": "drawLayer",
+                "payload": {
+                    "index": 6
+                }
+            },
+            "foreground": {
+                "type": "drawLayer",
+                "payload": {
+                    "index": 7
                 }
             },
             "player": {
@@ -47,6 +62,82 @@
                 "payload": {
                     "key": "d",
                     "defaultKey": "d"
+                }
+            },
+            "colony": {
+                "payload": {
+                    "general": {
+                        "outerWallPaddingLeft": 32,
+                        "outerWallPaddingRight": 32,
+                        "levelCeilingPaddingTop": 64,
+                        "levelFloorPaddingBottom": 0,
+                        "floorThickness": 64,
+                        "bunkerMarginLeft": 32,
+                        "bunkerMarginRight": 32,
+                        "bunkerWidth": 800,
+                        "bunkerHeight": 256,
+                        "cellStartingNum": 1,
+                        "cellPaddingTargetLength": 3,
+                        "cellPaddingCharacter": "0",
+                        "elevatorWidth": 256,
+                        "elevatorMarginLeft": 32,
+                        "elevatorMarginRight": 32,
+                        "elevatorSpeed": 1,
+                        "elevatorDelayDuration": 200,
+                        "elevatorSafetyMargin": 40
+                    },
+                    "level": {
+                        "one": {
+                            "bunkerList": {
+                                "1": "cell",
+                                "2": "cell",
+                                "3": "elevator",
+                                "4": "cell",
+                                "5": "cell"
+                            },
+                            "index": 1
+                        },
+                        "two": {
+                            "bunkerList": {
+                                "1": "cell",
+                                "2": "cell",
+                                "3": "elevator",
+                                "4": "cell",
+                                "5": "cell"
+                            },
+                            "index": 2
+                        },
+                        "three": {
+                            "bunkerList": {
+                                "1": "cell",
+                                "2": "controlRoom",
+                                "3": "elevator",
+                                "4": "cell",
+                                "5": "cell"
+                            },
+                            "index": 3
+                        },
+                        "four": {
+                            "bunkerList": {
+                                "1": "cell",
+                                "2": "cell",
+                                "3": "elevator",
+                                "4": "cell",
+                                "5": "cell"
+                            },
+                            "index": 4
+                        },
+                        "five": {
+                            "bunkerList": {
+                                "1": "cell",
+                                "2": "cell",
+                                "3": "elevator",
+                                "4": "cell",
+                                "5": "cell"
+                            },
+                            "index": 5
+                        }
+                    }
                 }
             }
         }

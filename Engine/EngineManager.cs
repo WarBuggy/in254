@@ -237,6 +237,7 @@ public class EngineManager : Game
     private static void InitRuntimeData()
     {
         DataManager.Instance.SetData("Core", "actions.list", new LedgerMap(), "Core");
+        DataManager.Instance.SetData("Core", "drawLayers.layerIndexMap", new LedgerMap(), "Core");
     }
 
     private enum InputDeviceType
