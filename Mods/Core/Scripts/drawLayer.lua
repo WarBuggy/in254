@@ -10,9 +10,9 @@ local function onDrawLayerCreated(modId, defName, defType)
     end
 
     -- Get current layerIndexMap
-    local layerIndexMap, mapExists = GameData:TryGetFrom("Core", "drawLayers.layerIndexMap")
+    local layerIndexMap, mapExists = GameData:TryGetFrom("Core", "drawLayers.layerIndexMap1")
     if not mapExists or not layerIndexMap then
-        error(LocalizeWithEnding("", "drawLayer.lua.notInitialized"))
+        error(Localize("drawLayer.lua.notInitialized"))
     end
 
     -- Remove old entry if redefining
