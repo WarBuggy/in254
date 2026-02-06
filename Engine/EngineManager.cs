@@ -44,10 +44,10 @@ public class EngineManager : Game
 
         DataManager.Instance.LoadAll(ModManager.Instance.FinalModList, managers);
 
-        InitRuntimeData();
-
         var queue = ScriptManager.Instance.LoadAll(ModManager.Instance.FinalModList);
         ScriptManager.Instance.ExecuteQueue(queue);
+
+        ScriptManager.Instance.Fire(LuaGameEvents.OnDataInit, DynValue.Nil);
 
         foreach (var manager in managers)
         {
@@ -232,12 +232,6 @@ public class EngineManager : Game
 
             _actionInputBindings[action] = actionInput;
         }
-    }
-
-    private static void InitRuntimeData()
-    {
-        DataManager.Instance.SetData("Core", "actions.list", new LedgerMap(), "Core");
-        DataManager.Instance.SetData("Core", "drawLayers.layerIndexMap", new LedgerMap(), "Core");
     }
 
     private enum InputDeviceType

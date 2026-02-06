@@ -1,3 +1,9 @@
+Events.OnDataInit = {
+    Add = function(fn)
+        Events.Register("OnDataInit", fn)
+    end
+}
+
 Events.OnAnimationCreated = {
     Add = function(fn)
         Events.Register("OnAnimationCreated", fn)
