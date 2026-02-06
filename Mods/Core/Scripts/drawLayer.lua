@@ -15,34 +15,26 @@ local function onDrawLayerCreated(modId, defName, defType)
         error(LocalizeWithEnding("", "drawLayer.lua.notInitialized"))
     end
 
-    -- Remove old entry if redefining
-    LedgerMap.TryRemove(layerIndexMap, defName)
+    -- insert or redefine
+    layerIndexMap[defName] = {
+        position      = 0,       -- will compute below
+        modId         = modId,
+        declaredIndex = index
+    }
 
-    -- Collect all current entries with their declared index and modId
+    -- collect all layers, sort by declaredIndex, assign position
     local tempList = {}
-    for pair in LedgerMap.Iterator(layerIndexMap) do
-        if type(pair) == "table" then
-            local name = pair.Key
-            local info = pair.Value
-            local declared, _ = Definition:TryGetPayloadFrom(info.modId, name, "index")
-            table.insert(tempList, { name = name, index = declared or 0, modId = info.modId })
-        end
+    for name, info in pairs(layerIndexMap) do
+        table.insert(tempList, { name = name, index = info.declaredIndex, modId = info.modId })
     end
-
-    -- Add the new layer
-    table.insert(tempList, { name = defName, index = index, modId = modId })
-
-    -- Sort by declared index ascending
     table.sort(tempList, function(a, b) return a.index < b.index end)
 
-    -- Rebuild LedgerMap: key = layerName, value = { position, modId }
-    local newMap = LedgerMap.Create()
-    for i, entry in ipairs(tempList) do
-        LedgerMap.Set(newMap, entry.name, { position = i, modId = entry.modId })
+    for pos, entry in ipairs(tempList) do
+        layerIndexMap[entry.name].position = pos
     end
 
-    -- Save back to GameData
-    GameData:SetTo("Core", "drawLayers.layerIndexMap", newMap)
+    -- save back
+    GameData:SetTo("Core", "drawLayers.layerIndexMap", layerIndexMap)
 end
 
 Events.OnDefinitionCreated.Add(onDrawLayerCreated)
@@ -52,33 +44,19 @@ Events.OnDefinitionCreated.Add(onDrawLayerCreated)
 DrawLayers = DrawLayers or {}
 
 function DrawLayers.PrintAllWithIndex()
-    local layerIndexMap, exists = GameData:TryGetFrom("Core", "drawLayers.layerIndexMap")
-    if not exists or not layerIndexMap then
-        print("[DrawLayers] layerIndexMap not ready")
-        return
-    end
+    local layerIndexMap = GameData:TryGetFrom("Core", "drawLayers.layerIndexMap") or {}
 
-    -- Collect entries
     local entries = {}
-    for pair in LedgerMap.Iterator(layerIndexMap) do
-        if type(pair) == "table" then
-            local layerName = pair.Key
-            local info      = pair.Value
-            local position  = info.position
-            local declaredIndex, idxExists = Definition:TryGetPayloadFrom(info.modId, layerName, "index")
-            declaredIndex = idxExists and declaredIndex or "nil"
-            table.insert(entries, {
-                layerName = layerName,
-                position  = position,
-                declaredIndex = declaredIndex
-            })
-        end
+    for layerName, info in pairs(layerIndexMap) do
+        table.insert(entries, {
+            layerName     = layerName,
+            position      = info.position,
+            declaredIndex = info.declaredIndex
+        })
     end
 
-    -- Sort by position (draw order)
     table.sort(entries, function(a, b) return a.position < b.position end)
 
-    -- Print nicely
     print("===== DrawLayers (sorted) =====")
     for i, entry in ipairs(entries) do
         print(string.format("%d. %s (declared index: %s)", i, entry.layerName, tostring(entry.declaredIndex)))
