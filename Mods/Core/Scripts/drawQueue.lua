@@ -20,7 +20,7 @@ local function collectFramesForAnimation(modId, animationName, layerIndexMap)
             local flipY         = Animation.FlipYFrom(modId, animationName, compName) or false
 
             local layerName     = Animation.FrameLayerFrom(modId, animationName, compName, state, frameIndex)
-            local layerInfo  = layerName and layerIndexMap[layerName]
+            local layerInfo = layerName and LedgerMap.TryGet(layerIndexMap, layerName)
             local layerOrder = layerInfo and layerInfo.position
 
             if layerOrder then
