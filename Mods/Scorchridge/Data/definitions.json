@@ -1,0 +1,18 @@
+{
+    "data": {
+        "definition": {
+            "interact": {
+                "type": "action",
+                "payload": { "key": "e", "defaultKey": "e" }
+            },
+            "advancePhase": {
+                "type": "action",
+                "payload": { "key": "enter", "defaultKey": "enter" }
+            },
+            "controlPanel": {
+                "type": "action",
+                "payload": { "key": "c", "defaultKey": "c" }
+            }
+        }
+    }
+}

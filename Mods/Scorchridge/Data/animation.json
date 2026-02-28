@@ -1,0 +1,210 @@
+{
+    "data": {
+        "animationData": {
+            "scrInmate": {
+                "baseComponent": "base",
+                "components": {
+                    "base": {
+                        "folder": "",
+                        "layer": "foreground",
+                        "defaultState": "idle",
+                        "width": 16,
+                        "height": 24,
+                        "states": {
+                            "idle": {
+                                "frames": { "0": { "file": "inmate.png" } }
+                            }
+                        }
+                    }
+                }
+            },
+            "scrInmateWork": {
+                "baseComponent": "base",
+                "components": {
+                    "base": {
+                        "folder": "",
+                        "layer": "foreground",
+                        "defaultState": "idle",
+                        "width": 16,
+                        "height": 24,
+                        "states": {
+                            "idle": {
+                                "frames": { "0": { "file": "inmate_work.png" } }
+                            }
+                        }
+                    }
+                }
+            },
+            "scrInmateEat": {
+                "baseComponent": "base",
+                "components": {
+                    "base": {
+                        "folder": "",
+                        "layer": "foreground",
+                        "defaultState": "idle",
+                        "width": 16,
+                        "height": 24,
+                        "states": {
+                            "idle": {
+                                "frames": { "0": { "file": "inmate_eat.png" } }
+                            }
+                        }
+                    }
+                }
+            },
+            "scrInmateRest": {
+                "baseComponent": "base",
+                "components": {
+                    "base": {
+                        "folder": "",
+                        "layer": "foreground",
+                        "defaultState": "idle",
+                        "width": 24,
+                        "height": 12,
+                        "states": {
+                            "idle": {
+                                "frames": { "0": { "file": "inmate_rest.png" } }
+                            }
+                        }
+                    }
+                }
+            },
+            "scrPickaxe": {
+                "baseComponent": "base",
+                "components": {
+                    "base": {
+                        "folder": "",
+                        "layer": "foreground",
+                        "defaultState": "idle",
+                        "width": 12,
+                        "height": 12,
+                        "states": {
+                            "idle": {
+                                "frames": { "0": { "file": "pickaxe.png" } }
+                            }
+                        }
+                    }
+                }
+            },
+            "scrFoodBowl": {
+                "baseComponent": "base",
+                "components": {
+                    "base": {
+                        "folder": "",
+                        "layer": "foreground",
+                        "defaultState": "idle",
+                        "width": 12,
+                        "height": 8,
+                        "states": {
+                            "idle": {
+                                "frames": { "0": { "file": "food_bowl.png" } }
+                            }
+                        }
+                    }
+                }
+            },
+            "scrBed": {
+                "baseComponent": "base",
+                "components": {
+                    "base": {
+                        "folder": "",
+                        "layer": "foreground",
+                        "defaultState": "idle",
+                        "width": 32,
+                        "height": 12,
+                        "states": {
+                            "idle": {
+                                "frames": { "0": { "file": "bed.png" } }
+                            }
+                        }
+                    }
+                }
+            },
+            "scrTable": {
+                "baseComponent": "base",
+                "components": {
+                    "base": {
+                        "folder": "",
+                        "layer": "foreground",
+                        "defaultState": "idle",
+                        "width": 40,
+                        "height": 16,
+                        "states": {
+                            "idle": {
+                                "frames": { "0": { "file": "table.png" } }
+                            }
+                        }
+                    }
+                }
+            },
+            "scrOre": {
+                "baseComponent": "base",
+                "components": {
+                    "base": {
+                        "folder": "",
+                        "layer": "foreground",
+                        "defaultState": "idle",
+                        "width": 20,
+                        "height": 16,
+                        "states": {
+                            "idle": {
+                                "frames": { "0": { "file": "ore.png" } }
+                            }
+                        }
+                    }
+                }
+            },
+            "scrPcho": {
+                "baseComponent": "base",
+                "components": {
+                    "base": {
+                        "folder": "",
+                        "layer": "foreground",
+                        "defaultState": "idle",
+                        "width": 16,
+                        "height": 16,
+                        "states": {
+                            "idle": {
+                                "frames": { "0": { "file": "pcho.png" } }
+                            }
+                        }
+                    }
+                }
+            },
+            "scrSky": {
+                "baseComponent": "base",
+                "components": {
+                    "base": {
+                        "folder": "",
+                        "layer": "foreground",
+                        "defaultState": "idle",
+                        "width": 64,
+                        "height": 64,
+                        "states": {
+                            "idle": {
+                                "frames": { "0": { "file": "sky.png" } }
+                            }
+                        }
+                    }
+                }
+            },
+            "scrPixel": {
+                "baseComponent": "base",
+                "components": {
+                    "base": {
+                        "folder": "",
+                        "layer": "foreground",
+                        "defaultState": "idle",
+                        "width": 1,
+                        "height": 1,
+                        "states": {
+                            "idle": {
+                                "frames": { "0": { "file": "pixel.png" } }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

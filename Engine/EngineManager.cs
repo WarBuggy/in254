@@ -25,8 +25,11 @@ public class EngineManager : Game
     private EngineManager()
     {
         _graphics = new GraphicsDeviceManager(this);
+        _graphics.PreferredBackBufferWidth = 1280;
+        _graphics.PreferredBackBufferHeight = 800;
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
+        Window.AllowUserResizing = true;
     }
 
     protected override void Initialize()
@@ -43,6 +46,8 @@ public class EngineManager : Game
         var managers = BaseManager.DiscoverManagers();
 
         DataManager.Instance.LoadAll(ModManager.Instance.FinalModList, managers);
+
+        FontManager.Instance.Initialize();
 
         var queue = ScriptManager.Instance.LoadAll(ModManager.Instance.FinalModList);
         ScriptManager.Instance.ExecuteQueue(queue);
@@ -63,21 +68,31 @@ public class EngineManager : Game
 
     protected override void Update(GameTime gameTime)
     {
-        var keyboard = Keyboard.GetState();
+        // Snapshot input state for the frame — everything reads from InputManager after this
+        InputManager.Instance.UpdateState();
 
-        if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
-            keyboard.IsKeyDown(Keys.Escape))
+        if (InputManager.Instance.IsButtonDown(Buttons.Back) ||
+            InputManager.Instance.IsKeyDown(Keys.Escape))
         {
             Exit();
             return;
         }
         DataManager.Instance.SetData("Core", "gowi.list", new LedgerMap(), "Core");
-        CreateActiveActionList(Keyboard.GetState(), GamePad.GetState(0), Mouse.GetState());
+        CreateActiveActionList();
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
         float totalTime = (float)gameTime.TotalGameTime.TotalSeconds;
 
+        SoundManager.Instance.Update();
+
+        ScriptManager.Instance.TickEngineCore(deltaTime, totalTime);
+
         ScriptManager.Instance.Fire(
             LuaGameEvents.OnUpdate,
+            DynValue.NewNumber(deltaTime),
+            DynValue.NewNumber(totalTime)
+        );
+
+        SceneManager.Instance.FireSceneUpdates(
             DynValue.NewNumber(deltaTime),
             DynValue.NewNumber(totalTime)
         );
@@ -98,6 +113,7 @@ public class EngineManager : Game
             RasterizerState.CullCounterClockwise
         );
         ScriptManager.Instance.Fire(LuaGameEvents.OnDraw);
+        SceneManager.Instance.FireSceneDraws();
         DrawManager.Instance.RenderQueue(_spriteBatch);
 
         _spriteBatch.End();
@@ -105,13 +121,10 @@ public class EngineManager : Game
         base.Draw(gameTime);
     }
 
-    private void CreateActiveActionList(
-     KeyboardState keyboard,
-     GamePadState gamePad,
-     MouseState mouse
- )
+    private void CreateActiveActionList()
     {
         var ledgerMap = new LedgerMap();
+        var im = InputManager.Instance;
 
         foreach (var kvp in _actionInputBindings)
         {
@@ -124,41 +137,28 @@ public class EngineManager : Game
             {
                 case InputDeviceType.Keyboard:
                     if (input.KeyboardKey.HasValue)
-                        isActive = keyboard.IsKeyDown(input.KeyboardKey.Value);
+                        isActive = im.IsKeyDown(input.KeyboardKey.Value);
                     break;
 
                 case InputDeviceType.Mouse:
                     if (input.MouseButton != null)
                     {
-                        switch (input.MouseButton)
-                        {
-                            case "Left":
-                                isActive = mouse.LeftButton == ButtonState.Pressed;
-                                break;
-                            case "Right":
-                                isActive = mouse.RightButton == ButtonState.Pressed;
-                                break;
-                            case "Middle":
-                                isActive = mouse.MiddleButton == ButtonState.Pressed;
-                                break;
-                        }
+                        isActive = im.IsMouseDown(input.MouseButton);
                     }
                     break;
 
                 case InputDeviceType.GamePad:
                     if (input.GamePadButton.HasValue)
-                        isActive = gamePad.IsButtonDown(input.GamePadButton.Value);
+                        isActive = im.IsButtonDown(input.GamePadButton.Value);
                     break;
             }
 
             if (isActive)
             {
-                // Set the ModId in the LedgerMap, actorId is "Core"
                 ledgerMap.Set(action, input.ModId, "Core");
             }
         }
 
-        // Save the LedgerMap instead of a Lua table
         DataManager.Instance.SetData("Core", "actions.activeList", ledgerMap, "Core");
     }
 

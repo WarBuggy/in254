@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using in254.Core;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -19,6 +20,8 @@ public sealed class TextureManager
     private readonly Dictionary<string, Dictionary<string, int>> _pathToId = new(StringComparer.OrdinalIgnoreCase);
     // Incremental ID generator per mod
     private readonly Dictionary<string, int> _nextId = new(StringComparer.OrdinalIgnoreCase);
+    // Reference counting: modId → (textureId → refCount)
+    private readonly Dictionary<string, Dictionary<int, int>> _refCounts = new(StringComparer.OrdinalIgnoreCase);
 
     private TextureManager() { }
 
@@ -48,9 +51,16 @@ public sealed class TextureManager
             _nextId[modId] = nextId;
         }
 
+        if (!_refCounts.TryGetValue(modId, out var modRefs))
+        {
+            modRefs = [];
+            _refCounts[modId] = modRefs;
+        }
+
         // Check if path already loaded
         if (modPathToId.TryGetValue(path, out var existingId))
         {
+            modRefs[existingId] = modRefs.GetValueOrDefault(existingId) + 1;
             return existingId;
         }
 
@@ -69,9 +79,64 @@ public sealed class TextureManager
         // Store in dictionaries
         modTextures[textureId] = (path, texture);
         modPathToId[path] = textureId;
+        modRefs[textureId] = 1;
 
         _logger.Log("system.textureManager.registered", modId, path, textureId);
         return textureId;
+    }
+
+    /// <summary>
+    /// Decrement refCount for a texture. Disposes when refCount reaches 0.
+    /// </summary>
+    public void Release(string modId, int textureId)
+    {
+        if (!_refCounts.TryGetValue(modId, out var modRefs) ||
+            !modRefs.TryGetValue(textureId, out var count))
+            return;
+
+        count--;
+        if (count <= 0)
+        {
+            if (_textures.TryGetValue(modId, out var modTextures) &&
+                modTextures.TryGetValue(textureId, out var tuple))
+            {
+                tuple.texture?.Dispose();
+                modTextures.Remove(textureId);
+            }
+            if (_pathToId.TryGetValue(modId, out var pathMap))
+            {
+                var key = pathMap.FirstOrDefault(kvp => kvp.Value == textureId).Key;
+                if (key != null) pathMap.Remove(key);
+            }
+            modRefs.Remove(textureId);
+            _logger.Log("system.textureManager.unloaded", modId, textureId);
+        }
+        else
+        {
+            modRefs[textureId] = count;
+        }
+    }
+
+    /// <summary>Backward-compat alias for Release.</summary>
+    public void UnloadTexture(string modId, int textureId) => Release(modId, textureId);
+
+    /// <summary>
+    /// Nuclear option: zero all refCounts and dispose everything for a mod.
+    /// </summary>
+    public void UnloadAllForMod(string modId)
+    {
+        if (_textures.TryGetValue(modId, out var modTextures))
+        {
+            foreach (var kvp in modTextures) kvp.Value.texture?.Dispose();
+            modTextures.Clear();
+        }
+        if (_pathToId.TryGetValue(modId, out var pathMap))
+            pathMap.Clear();
+        if (_refCounts.TryGetValue(modId, out var modRefs))
+            modRefs.Clear();
+        if (_nextId.ContainsKey(modId))
+            _nextId[modId] = 1;
+        Console.WriteLine($"[TextureManager] Unloaded all textures for mod '{modId}'.");
     }
 
     /// <summary>

@@ -1,0 +1,49 @@
+{
+    "data": {
+        "localization": {
+            "en-US": {
+                "scorchridge.welcome": "=== Scorchridge Penal Colony Online ===",
+                "scorchridge.initialized": "Colony initialized. Cycle {0}, Quadrant {1}.",
+
+                "scorchridge.phase.preparation": "PREPARATION",
+                "scorchridge.phase.work": "WORK SHIFT",
+                "scorchridge.phase.preMeal": "PRE-MEAL",
+                "scorchridge.phase.meal": "MEAL TIME",
+                "scorchridge.phase.postMeal": "POST-MEAL",
+                "scorchridge.phase.downtime": "DOWNTIME",
+                "scorchridge.phase.rest": "REST",
+
+                "scorchridge.hud.cycle": "Cycle {0}",
+                "scorchridge.hud.quadrant": "Q{0}/4",
+                "scorchridge.hud.pcho": "PCHO: {0}",
+                "scorchridge.hud.credits": "Credits: {0}",
+                "scorchridge.hud.merits": "Merits: {0}",
+                "scorchridge.hud.drugs": "Drugs: {0}",
+
+                "scorchridge.work.output": "{0} mined {1} ore (tier {2}) -> {3} credits",
+                "scorchridge.work.summary": "Shift complete. Total mined: {0} credits.",
+                "scorchridge.meal.consumed": "Meal served. PCHO consumed: {0}. Stamina recovered.",
+                "scorchridge.rest.summary": "Rest complete. Morale adjusted.",
+
+                "scorchridge.inmate.status": "{0}: STA {1} | MOR {2} | CRD {3}",
+                "scorchridge.inmate.exhausted": "{0} is exhausted and cannot work.",
+
+                "scorchridge.quota.met": "Cycle {0} quota MET! ({1}/{2})",
+                "scorchridge.quota.failed": "Cycle {0} quota FAILED. ({1}/{2})",
+                "scorchridge.quota.warning": "WARNING: Quota progress {0}/{1}",
+
+                "scorchridge.gameover": "=== GAME OVER === Colony shut down.",
+                "scorchridge.cycle.complete": "=== Cycle {0} Complete ===",
+
+                "scorchridge.event.dismiss": "Acknowledge",
+                "scorchridge.drug.administered": "Drug administered to {0}.",
+                "scorchridge.drug.withdrawal": "{0} suffers withdrawal effects.",
+                "scorchridge.drug.addiction": "{0} has become addicted.",
+                "scorchridge.drug.recovery": "{0} has recovered from addiction.",
+
+                "scorchridge.merits.purchased": "Purchased: {0}",
+                "scorchridge.merits.insufficient": "Not enough merits."
+            }
+        }
+    }
+}

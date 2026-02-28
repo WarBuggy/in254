@@ -58,7 +58,17 @@ namespace in254.Engine.LuaBindings
             Vector2 scale = scaleDyn.Type == DataType.Table
                 ? new Vector2((float)scaleDyn.Table.Get(1).Number, (float)scaleDyn.Table.Get(2).Number)
                 : Vector2.One;
-            Color? color = colorDyn.IsNil() ? null : (Color?)colorDyn.ToObject();
+            Color? color = null;
+            // There issue with computation sometimes which require to normalize it or it will render weird color, wink, wink
+            if (colorDyn != null && colorDyn.Type == DataType.Table)
+            {
+                var t = colorDyn.Table;
+                int r = (int)(t.Get(1).IsNil() ? 255 : t.Get(1).Number);
+                int g = (int)(t.Get(2).IsNil() ? 255 : t.Get(2).Number);
+                int b = (int)(t.Get(3).IsNil() ? 255 : t.Get(3).Number);
+                int a = (int)(t.Get(4).IsNil() ? 255 : t.Get(4).Number);
+                color = Color.FromNonPremultiplied(r, g, b, a);
+            }
             float layerDepth = (float)(layerDepthDyn.IsNil() ? 0f : layerDepthDyn.Number);
             int width = (int)(widthDyn.IsNil() ? 0 : widthDyn.Number);
             int height = (int)(heightDyn.IsNil() ? 0 : heightDyn.Number);

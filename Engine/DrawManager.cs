@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using FontStashSharp;
 using in254.Core;
 
 namespace in254.Engine;
@@ -12,6 +13,7 @@ public sealed class DrawManager : LoggerBaseCore
     public static DrawManager Instance => _instance;
 
     private readonly List<DrawRequest> _drawQueue = new();
+    private readonly List<TextDrawRequest> _textQueue = new();
 
     private DrawManager() { }
 
@@ -47,6 +49,21 @@ public sealed class DrawManager : LoggerBaseCore
     }
 
     /// <summary>
+    /// Adds a text draw request to the queue.
+    /// </summary>
+    public void AddTextRequest(string text, Vector2 position, int fontSize, Color? color = null, string fontName = null)
+    {
+        _textQueue.Add(new TextDrawRequest
+        {
+            Text = text,
+            Position = position,
+            FontSize = fontSize,
+            Color = color ?? Color.White,
+            FontName = fontName
+        });
+    }
+
+    /// <summary>
     /// Render all draw requests in the queue and clear it.
     /// Call this from EngineManager.Draw().
     /// </summary>
@@ -71,7 +88,26 @@ public sealed class DrawManager : LoggerBaseCore
             );
         }
 
+        foreach (var req in _textQueue)
+        {
+            var font = FontManager.Instance.GetFont(req.FontSize, req.FontName);
+            spriteBatch.DrawString(font, req.Text, req.Position, req.Color);
+        }
+
         _drawQueue.Clear();
+        _textQueue.Clear();
+    }
+
+    /// <summary>
+    /// A single text draw request.
+    /// </summary>
+    public class TextDrawRequest
+    {
+        public string Text { get; set; } = "";
+        public Vector2 Position { get; set; }
+        public int FontSize { get; set; } = 16;
+        public Color Color { get; set; } = Color.White;
+        public string FontName { get; set; }
     }
 
     /// <summary>

@@ -1,0 +1,10 @@
+{
+    "data": {
+        "colony": {
+            "state": null,
+            "inmates": null,
+            "resources": null,
+            "production": null
+        }
+    }
+}
