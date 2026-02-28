@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "modOrder": [
+    "Core",
+    "CoolMod",
+    "FunMod",
+    "GoodMod",
+    "ModA",
+    "ModB",
+    "ModC",
+    "CoolMod",
+    "ModD",
+    "ModE",
+    "ModF",
+    "ModG",
+    "ModH",
+    "ModI",
+    "ModJ",
+    "Pong"
+  ],
+  "mods": {
+    "Core": {
+      "enabled": true
+    },
+    "CoolMod": {
+      "enabled": true
+    },
+    "FunMod": {
+      "enabled": true
+    },
+    "GoodMod": {
+      "enabled": true
+    },
+    "ModA": {
+      "enabled": true
+    },
+    "ModB": {
+      "enabled": true
+    },
+    "ModC": {
+      "enabled": true
+    },
+    "ModD": {
+      "enabled": true
+    },
+    "ModE": {
+      "enabled": true
+    },
+    "ModF": {
+      "enabled": true
+    },
+    "ModG": {
+      "enabled": false
+    },
+    "ModH": {
+      "enabled": false
+    },
+    "ModI": {
+      "enabled": false
+    },
+    "ModJ": {
+      "enabled": false
+    },
+    "Pong": {
+      "enabled": false
+    }
+  }
+}
