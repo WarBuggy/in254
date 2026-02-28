@@ -1,0 +1,26 @@
+{
+    "data": {
+        "definition": {
+            "p1Up": {
+                "type": "action",
+                "payload": { "key": "w", "defaultKey": "w" }
+            },
+            "p1Down": {
+                "type": "action",
+                "payload": { "key": "s", "defaultKey": "s" }
+            },
+            "p2Up": {
+                "type": "action",
+                "payload": { "key": "up", "defaultKey": "up" }
+            },
+            "p2Down": {
+                "type": "action",
+                "payload": { "key": "down", "defaultKey": "down" }
+            },
+            "pongServe": {
+                "type": "action",
+                "payload": { "key": "space", "defaultKey": "space" }
+            }
+        }
+    }
+}
