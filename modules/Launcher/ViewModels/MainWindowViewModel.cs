@@ -12,10 +12,14 @@ public enum GameState { Ready, Launching, Running, Error }
 public partial class MainWindowViewModel : ObservableObject
 {
     public ObservableCollection<ModEntryViewModel> Mods { get; } = [];
+    public ObservableCollection<ModEntryViewModel> EnabledMods { get; } = [];
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsDetailVisible))]
     private ModEntryViewModel? _selectedMod;
+
+    [ObservableProperty]
+    private ModEntryViewModel? _selectedEnabledMod;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanLaunch))]
@@ -70,33 +74,47 @@ public partial class MainWindowViewModel : ObservableObject
             entries.Add(new ModEntryViewModel(mod.ModId, mod.DisplayName, isReserved, isEnabled, source, folderPath));
         }
 
-        // Apply saved order if available
-        if (config.ModOrder.Count > 0)
-        {
-            var ordered = new List<ModEntryViewModel>();
-            foreach (var modId in config.ModOrder)
-            {
-                var match = entries.Find(e => string.Equals(e.ModId, modId, StringComparison.OrdinalIgnoreCase));
-                if (match != null)
-                {
-                    ordered.Add(match);
-                    entries.Remove(match);
-                }
-            }
-            // Append any mods not in the saved order
-            ordered.AddRange(entries);
-            entries = ordered;
-        }
-
+        // Left list: alphabetical (entries already sorted by display name)
         foreach (var e in entries)
         {
             e.PropertyChanged += (_, args) =>
             {
                 if (args.PropertyName == nameof(ModEntryViewModel.IsEnabled))
-                    UpdateCounts();
+                    OnModEnabledChanged(e);
             };
             Mods.Add(e);
         }
+
+        // Right list: enabled mods in saved order
+        if (config.ModOrder.Count > 0)
+        {
+            foreach (var modId in config.ModOrder)
+            {
+                var match = entries.Find(e => string.Equals(e.ModId, modId, StringComparison.OrdinalIgnoreCase));
+                if (match is { IsEnabled: true })
+                    EnabledMods.Add(match);
+            }
+        }
+        // Append any enabled mods not in saved order
+        foreach (var e in entries)
+        {
+            if (e.IsEnabled && !EnabledMods.Contains(e))
+                EnabledMods.Add(e);
+        }
+    }
+
+    private void OnModEnabledChanged(ModEntryViewModel mod)
+    {
+        if (mod.IsEnabled && !EnabledMods.Contains(mod))
+        {
+            EnabledMods.Add(mod);
+        }
+        else if (!mod.IsEnabled)
+        {
+            EnabledMods.Remove(mod);
+            if (SelectedEnabledMod == mod) SelectedEnabledMod = null;
+        }
+        UpdateCounts();
     }
 
     private void UpdateCounts()
@@ -109,25 +127,24 @@ public partial class MainWindowViewModel : ObservableObject
     [RelayCommand]
     private void MoveUp()
     {
-        if (SelectedMod == null) return;
-        int index = Mods.IndexOf(SelectedMod);
+        if (SelectedEnabledMod == null) return;
+        int index = EnabledMods.IndexOf(SelectedEnabledMod);
         if (index <= 0) return;
-        // Don't move above reserved mods
-        if (Mods[index - 1].IsReserved) return;
-        var mod = SelectedMod;
-        Mods.Move(index, index - 1);
-        SelectedMod = mod;
+        if (EnabledMods[index - 1].IsReserved) return;
+        var mod = SelectedEnabledMod;
+        EnabledMods.Move(index, index - 1);
+        SelectedEnabledMod = mod;
     }
 
     [RelayCommand]
     private void MoveDown()
     {
-        if (SelectedMod == null) return;
-        int index = Mods.IndexOf(SelectedMod);
-        if (index < 0 || index >= Mods.Count - 1) return;
-        var mod = SelectedMod;
-        Mods.Move(index, index + 1);
-        SelectedMod = mod;
+        if (SelectedEnabledMod == null) return;
+        int index = EnabledMods.IndexOf(SelectedEnabledMod);
+        if (index < 0 || index >= EnabledMods.Count - 1) return;
+        var mod = SelectedEnabledMod;
+        EnabledMods.Move(index, index + 1);
+        SelectedEnabledMod = mod;
     }
 
     [RelayCommand]
@@ -152,7 +169,7 @@ public partial class MainWindowViewModel : ObservableObject
     private void Save()
     {
         var config = new ModsConfig();
-        config.ModOrder = Mods.Select(m => m.ModId).ToList();
+        config.ModOrder = EnabledMods.Select(m => m.ModId).ToList();
         foreach (var mod in Mods)
         {
             config.Mods[mod.ModId] = new ModConfigEntry { Enabled = mod.IsEnabled };

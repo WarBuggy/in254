@@ -1,0 +1,16 @@
+"workshopitem"
+{
+    "appid"             "0"
+    "publishedfileid"   "0"
+    "contentfolder"     "."
+    "previewfile"       "preview.png"
+    "visibility"        "0"
+    "title"             "Core"
+    "description"       "Core game framework providing essential systems including events, draw layers, animation utilities, data initialization, and player management. Required by all mods."
+    "changenote"        ""
+    "tags"
+    {
+        "0"     "framework"
+        "1"     "core"
+    }
+}

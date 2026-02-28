@@ -5,8 +5,8 @@
         x:Class="Launcher.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Title="in254 Mod Launcher"
-        Width="780" Height="600"
-        MinWidth="600" MinHeight="400"
+        Width="960" Height="720"
+        MinWidth="800" MinHeight="500"
         WindowStartupLocation="CenterScreen"
         Icon="avares://Launcher/Assets/Icon.ico"
         Background="#1A1A2E">
@@ -45,14 +45,32 @@
             <Setter Property="Background" Value="#2A2A40" />
             <Setter Property="Foreground" Value="#BBBBBB" />
             <Setter Property="CornerRadius" Value="6" />
-            <Setter Property="Padding" Value="10,6" />
+            <Setter Property="Padding" Value="10,8" />
             <Setter Property="BorderBrush" Value="#3A3A55" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="FontSize" Value="12" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="MinWidth" Value="36" />
         </Style>
         <Style Selector="Button.toolBtn:pointerover /template/ ContentPresenter">
             <Setter Property="Background" Value="#363655" />
             <Setter Property="Foreground" Value="White" />
+        </Style>
+
+        <!-- Remove button (per item) -->
+        <Style Selector="Button.removeBtn">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="6,4" />
+            <Setter Property="Opacity" Value="0.3" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+        <Style Selector="Button.removeBtn:pointerover">
+            <Setter Property="Opacity" Value="1" />
+        </Style>
+        <Style Selector="Button.removeBtn:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#3A1A1A" />
         </Style>
 
         <!-- Tab styling -->
@@ -105,6 +123,22 @@
             <Setter Property="FontSize" Value="15" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="Foreground" Value="#EEEEFF" />
+        </Style>
+
+        <!-- ListBox item base style (shared) -->
+        <Style Selector="ListBox.modList ListBoxItem">
+            <Setter Property="Padding" Value="6,4" />
+            <Setter Property="Margin" Value="4,1" />
+            <Setter Property="CornerRadius" Value="6" />
+        </Style>
+        <Style Selector="ListBox.modList ListBoxItem:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#28284A" />
+        </Style>
+        <Style Selector="ListBox.modList ListBoxItem:selected /template/ ContentPresenter">
+            <Setter Property="Background" Value="#24243E" />
+        </Style>
+        <Style Selector="ListBox.modList ListBoxItem:selected:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#2A2A4A" />
         </Style>
     </Window.Styles>
 
@@ -209,151 +243,32 @@
 
             <!-- ===== MODS TAB ===== -->
             <TabItem Header="Mods">
-                <DockPanel Margin="0,12,0,0">
-                    <!-- Toolbar (spans full width) -->
-                    <Border DockPanel.Dock="Top"
-                            Background="#1E1E36"
-                            CornerRadius="8"
-                            Padding="8,6"
-                            Margin="0,0,0,10">
-                        <StackPanel Orientation="Horizontal" Spacing="6">
-                            <Button Classes="toolBtn"
-                                    Command="{Binding MoveUpCommand}"
-                                    ToolTip.Tip="Move Up">
-                                <StackPanel Orientation="Horizontal" Spacing="4">
-                                    <TextBlock Text="&#x25B2;" FontSize="10" VerticalAlignment="Center" />
-                                    <TextBlock Text="Up" VerticalAlignment="Center" />
-                                </StackPanel>
-                            </Button>
-                            <Button Classes="toolBtn"
-                                    Command="{Binding MoveDownCommand}"
-                                    ToolTip.Tip="Move Down">
-                                <StackPanel Orientation="Horizontal" Spacing="4">
-                                    <TextBlock Text="&#x25BC;" FontSize="10" VerticalAlignment="Center" />
-                                    <TextBlock Text="Down" VerticalAlignment="Center" />
-                                </StackPanel>
-                            </Button>
-                            <Border Width="1" Background="#3A3A55" Margin="4,2" />
-                            <Button Classes="toolBtn"
-                                    Command="{Binding AutoReOrderCommand}"
-                                    ToolTip.Tip="Automatically sort mods">
-                                <TextBlock Text="Auto Sort" VerticalAlignment="Center" />
-                            </Button>
-                            <Border Width="1" Background="#3A3A55" Margin="4,2" />
-                            <Button Classes="toolBtn"
-                                    Command="{Binding AddModCommand}"
-                                    ToolTip.Tip="Add a mod">
-                                <StackPanel Orientation="Horizontal" Spacing="4">
-                                    <TextBlock Text="+" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" />
-                                    <TextBlock Text="Add" VerticalAlignment="Center" />
-                                </StackPanel>
-                            </Button>
-                            <Button Classes="toolBtn"
-                                    Command="{Binding DeleteModCommand}"
-                                    ToolTip.Tip="Delete selected mod"
-                                    Foreground="#FF6B6B">
-                                <StackPanel Orientation="Horizontal" Spacing="4">
-                                    <TextBlock Text="&#x2715;" FontSize="10" VerticalAlignment="Center" />
-                                    <TextBlock Text="Delete" VerticalAlignment="Center" />
-                                </StackPanel>
-                            </Button>
-                        </StackPanel>
-                    </Border>
+                <Grid RowDefinitions="*,Auto" Margin="0,12,0,0">
 
-                    <!-- Content: List + Detail side by side -->
-                    <Grid ColumnDefinitions="*,Auto,*">
+                    <!-- Top: Two lists side by side -->
+                    <Grid Grid.Row="0" ColumnDefinitions="*,12,*,Auto">
 
-                    <!-- Mod list -->
-                    <Border Grid.Column="0"
-                            CornerRadius="8"
-                                Background="#1E1E36"
-                                BorderBrush="#2E2E48"
-                                BorderThickness="1"
-                                ClipToBounds="True">
-                            <controls:DragReorderListBox x:Name="ModListBox"
-                                     ItemsSource="{Binding Mods}"
-                                     SelectedItem="{Binding SelectedMod}"
-                                     SelectionMode="Toggle"
-                                     Background="Transparent"
-                                     BorderThickness="0">
-                                <controls:DragReorderListBox.Styles>
-                                    <Style Selector="ListBoxItem">
-                                        <Setter Property="Padding" Value="10,6" />
-                                        <Setter Property="Margin" Value="4,1" />
-                                        <Setter Property="CornerRadius" Value="6" />
-                                    </Style>
-                                    <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
-                                        <Setter Property="Background" Value="#28284A" />
-                                    </Style>
-                                    <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
-                                        <Setter Property="Background" Value="#24243E" />
-                                    </Style>
-                                    <Style Selector="ListBoxItem:selected:pointerover /template/ ContentPresenter">
-                                        <Setter Property="Background" Value="#2A2A4A" />
-                                    </Style>
-                                    <!-- Show dot on selected -->
-                                    <Style Selector="ListBoxItem Ellipse.selectDot">
-                                        <Setter Property="IsVisible" Value="False" />
-                                    </Style>
-                                    <Style Selector="ListBoxItem:selected Ellipse.selectDot">
-                                        <Setter Property="IsVisible" Value="True" />
-                                    </Style>
-                                    <Style Selector="ListBoxItem.dragSource">
-                                        <Setter Property="Opacity" Value="0.4" />
-                                    </Style>
-                                    <!-- Grip handle hover -->
-                                    <Style Selector="ListBoxItem Border[Tag=GripHandle]:pointerover">
-                                        <Setter Property="Background" Value="#2A2A4A" />
-                                    </Style>
-                                    <Style Selector="ListBoxItem Border[Tag=GripHandle]:pointerover Ellipse">
-                                        <Setter Property="Fill" Value="#8888AA" />
-                                    </Style>
-                                </controls:DragReorderListBox.Styles>
-
-                                <controls:DragReorderListBox.ItemTemplate>
-                                    <DataTemplate x:DataType="vm:ModEntryViewModel">
-                                        <Panel>
-                                            <Border x:Name="DropIndicator"
-                                                    Height="2"
-                                                    Background="#0078D4"
-                                                    VerticalAlignment="Top"
-                                                    Margin="-10,-6"
-                                                    IsVisible="False" />
+                        <!-- ===== LEFT: All Mods ===== -->
+                        <DockPanel Grid.Column="0">
+                            <TextBlock DockPanel.Dock="Top"
+                                       Text="All Mods"
+                                       Classes="sectionTitle"
+                                       Margin="0,0,0,8" />
+                            <Border CornerRadius="8"
+                                    Background="#1E1E36"
+                                    BorderBrush="#2E2E48"
+                                    BorderThickness="1"
+                                    ClipToBounds="True">
+                                <ListBox Classes="modList"
+                                         ItemsSource="{Binding Mods}"
+                                         SelectedItem="{Binding SelectedMod}"
+                                         SelectionMode="Toggle"
+                                         Background="Transparent"
+                                         BorderThickness="0">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:ModEntryViewModel">
                                             <DockPanel>
-                                                <!-- Grip handle: 2x3 dot grid -->
-                                                <Border Tag="GripHandle"
-                                                        DockPanel.Dock="Left"
-                                                        Cursor="Hand"
-                                                        Margin="2,0,10,0"
-                                                        Padding="3,2"
-                                                        CornerRadius="4"
-                                                        Background="Transparent"
-                                                        VerticalAlignment="Center"
-                                                        IsVisible="{Binding !IsReserved}">
-                                                    <Grid RowDefinitions="Auto,Auto,Auto"
-                                                          ColumnDefinitions="Auto,Auto"
-                                                          Tag="GripHandle">
-                                                        <Ellipse Grid.Row="0" Grid.Column="0" Width="3" Height="3" Fill="#555570" Margin="1" />
-                                                        <Ellipse Grid.Row="0" Grid.Column="1" Width="3" Height="3" Fill="#555570" Margin="1" />
-                                                        <Ellipse Grid.Row="1" Grid.Column="0" Width="3" Height="3" Fill="#555570" Margin="1" />
-                                                        <Ellipse Grid.Row="1" Grid.Column="1" Width="3" Height="3" Fill="#555570" Margin="1" />
-                                                        <Ellipse Grid.Row="2" Grid.Column="0" Width="3" Height="3" Fill="#555570" Margin="1" />
-                                                        <Ellipse Grid.Row="2" Grid.Column="1" Width="3" Height="3" Fill="#555570" Margin="1" />
-                                                    </Grid>
-                                                </Border>
-                                                <Border Width="22"
-                                                        DockPanel.Dock="Left"
-                                                        IsVisible="{Binding IsReserved}" />
-
-                                                <!-- Selection dot -->
-                                                <Ellipse Classes="selectDot"
-                                                         Width="6" Height="6"
-                                                         Fill="#0078D4"
-                                                         VerticalAlignment="Center"
-                                                         DockPanel.Dock="Right"
-                                                         Margin="8,0,0,0" />
-
-                                                <!-- Source badge -->
+                                                <!-- Source badge (right) -->
                                                 <Border DockPanel.Dock="Right"
                                                         CornerRadius="4"
                                                         Padding="6,2"
@@ -363,6 +278,27 @@
                                                     <TextBlock Text="{Binding Source}"
                                                                FontSize="10"
                                                                Foreground="#888899" />
+                                                </Border>
+
+                                                <!-- Thumbnail (left) -->
+                                                <Border DockPanel.Dock="Left"
+                                                        Width="40" Height="40"
+                                                        CornerRadius="4"
+                                                        ClipToBounds="True"
+                                                        Background="#2A2A40"
+                                                        VerticalAlignment="Center"
+                                                        Margin="0,0,10,0">
+                                                    <Panel>
+                                                        <Image Source="{Binding Thumbnail}"
+                                                               Stretch="UniformToFill"
+                                                               IsVisible="{Binding HasThumbnail}" />
+                                                        <TextBlock Text="&#x2B22;"
+                                                                   FontSize="18"
+                                                                   Foreground="#555570"
+                                                                   HorizontalAlignment="Center"
+                                                                   VerticalAlignment="Center"
+                                                                   IsVisible="{Binding !HasThumbnail}" />
+                                                    </Panel>
                                                 </Border>
 
                                                 <!-- Checkbox + name -->
@@ -375,66 +311,219 @@
                                                                VerticalAlignment="Center" />
                                                 </CheckBox>
                                             </DockPanel>
-                                        </Panel>
-                                    </DataTemplate>
-                                </controls:DragReorderListBox.ItemTemplate>
-                            </controls:DragReorderListBox>
-                        </Border>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </Border>
+                        </DockPanel>
 
-                    <!-- Splitter -->
-                    <GridSplitter Grid.Column="1"
-                                  Width="6"
-                                  Background="Transparent"
-                                  ResizeBehavior="PreviousAndNext" />
+                        <!-- ===== RIGHT: Load Order ===== -->
+                        <DockPanel Grid.Column="2">
+                            <TextBlock DockPanel.Dock="Top"
+                                       Text="Load Order"
+                                       Classes="sectionTitle"
+                                       Margin="0,0,0,8" />
+                            <Border CornerRadius="8"
+                                    Background="#1E1E36"
+                                    BorderBrush="#2E2E48"
+                                    BorderThickness="1"
+                                    ClipToBounds="True">
+                                <controls:DragReorderListBox
+                                         Classes="modList"
+                                         ItemsSource="{Binding EnabledMods}"
+                                         SelectedItem="{Binding SelectedEnabledMod}"
+                                         Background="Transparent"
+                                         BorderThickness="0">
+                                    <controls:DragReorderListBox.Styles>
+                                        <Style Selector="ListBoxItem.dragSource">
+                                            <Setter Property="Opacity" Value="0.4" />
+                                        </Style>
+                                        <Style Selector="ListBoxItem Border[Tag=GripHandle]:pointerover">
+                                            <Setter Property="Background" Value="#2A2A4A" />
+                                        </Style>
+                                        <Style Selector="ListBoxItem Border[Tag=GripHandle]:pointerover Ellipse">
+                                            <Setter Property="Fill" Value="#8888AA" />
+                                        </Style>
+                                    </controls:DragReorderListBox.Styles>
 
-                    <!-- Right: Detail Panel -->
-                    <Border Grid.Column="2"
+                                    <controls:DragReorderListBox.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:ModEntryViewModel">
+                                            <Panel>
+                                                <Border x:Name="DropIndicator"
+                                                        Height="2"
+                                                        Background="#0078D4"
+                                                        VerticalAlignment="Top"
+                                                        Margin="-10,-8"
+                                                        IsVisible="False" />
+                                                <DockPanel>
+                                                    <!-- Grip handle (left) -->
+                                                    <Border Tag="GripHandle"
+                                                            DockPanel.Dock="Left"
+                                                            Cursor="Hand"
+                                                            Margin="0,0,8,0"
+                                                            Padding="3,2"
+                                                            CornerRadius="4"
+                                                            Background="Transparent"
+                                                            VerticalAlignment="Center"
+                                                            IsVisible="{Binding !IsReserved}">
+                                                        <Grid RowDefinitions="Auto,Auto,Auto"
+                                                              ColumnDefinitions="Auto,Auto"
+                                                              Tag="GripHandle">
+                                                            <Ellipse Grid.Row="0" Grid.Column="0" Width="3" Height="3" Fill="#555570" Margin="1" />
+                                                            <Ellipse Grid.Row="0" Grid.Column="1" Width="3" Height="3" Fill="#555570" Margin="1" />
+                                                            <Ellipse Grid.Row="1" Grid.Column="0" Width="3" Height="3" Fill="#555570" Margin="1" />
+                                                            <Ellipse Grid.Row="1" Grid.Column="1" Width="3" Height="3" Fill="#555570" Margin="1" />
+                                                            <Ellipse Grid.Row="2" Grid.Column="0" Width="3" Height="3" Fill="#555570" Margin="1" />
+                                                            <Ellipse Grid.Row="2" Grid.Column="1" Width="3" Height="3" Fill="#555570" Margin="1" />
+                                                        </Grid>
+                                                    </Border>
+                                                    <!-- Spacer for reserved mods (no grip) -->
+                                                    <Border DockPanel.Dock="Left"
+                                                            Width="18"
+                                                            IsVisible="{Binding IsReserved}" />
+
+                                                    <!-- Remove from order (right) -->
+                                                    <Button Classes="removeBtn"
+                                                            DockPanel.Dock="Right"
+                                                            Command="{Binding DisableCommand}"
+                                                            ToolTip.Tip="Remove from load order"
+                                                            IsVisible="{Binding !IsReserved}"
+                                                            VerticalAlignment="Center"
+                                                            Margin="4,0,0,0">
+                                                        <TextBlock Text="&#x2715;" FontSize="11" Foreground="#FF6B6B" />
+                                                    </Button>
+
+                                                    <!-- Thumbnail -->
+                                                    <Border DockPanel.Dock="Left"
+                                                            Width="32" Height="32"
+                                                            CornerRadius="4"
+                                                            ClipToBounds="True"
+                                                            Background="#2A2A40"
+                                                            VerticalAlignment="Center"
+                                                            Margin="0,0,8,0">
+                                                        <Panel>
+                                                            <Image Source="{Binding Thumbnail}"
+                                                                   Stretch="UniformToFill"
+                                                                   IsVisible="{Binding HasThumbnail}" />
+                                                            <TextBlock Text="&#x2B22;"
+                                                                       FontSize="16"
+                                                                       Foreground="#555570"
+                                                                       HorizontalAlignment="Center"
+                                                                       VerticalAlignment="Center"
+                                                                       IsVisible="{Binding !HasThumbnail}" />
+                                                        </Panel>
+                                                    </Border>
+
+                                                    <!-- Name -->
+                                                    <TextBlock Text="{Binding DisplayName}"
+                                                               FontSize="12"
+                                                               Foreground="#DDDDEE"
+                                                               VerticalAlignment="Center"
+                                                               TextTrimming="CharacterEllipsis" />
+                                                </DockPanel>
+                                            </Panel>
+                                        </DataTemplate>
+                                    </controls:DragReorderListBox.ItemTemplate>
+                                </controls:DragReorderListBox>
+                            </Border>
+                        </DockPanel>
+
+                        <!-- Reorder buttons (far right) -->
+                        <StackPanel Grid.Column="3"
+                                    Spacing="6"
+                                    Margin="8,26,0,0"
+                                    VerticalAlignment="Top">
+                            <Button Classes="toolBtn"
+                                    Command="{Binding MoveUpCommand}"
+                                    ToolTip.Tip="Move Up">
+                                <TextBlock Text="&#x25B2;" FontSize="11" />
+                            </Button>
+                            <Button Classes="toolBtn"
+                                    Command="{Binding MoveDownCommand}"
+                                    ToolTip.Tip="Move Down">
+                                <TextBlock Text="&#x25BC;" FontSize="11" />
+                            </Button>
+                            <Border Height="1" Background="#3A3A55" Margin="0,2" />
+                            <Button Classes="toolBtn"
+                                    Command="{Binding AutoReOrderCommand}"
+                                    ToolTip.Tip="Auto sort mods">
+                                <TextBlock Text="&#x21C5;" FontSize="13" />
+                            </Button>
+                            <Button Classes="toolBtn"
+                                    Command="{Binding AddModCommand}"
+                                    ToolTip.Tip="Add mod">
+                                <TextBlock Text="+" FontSize="14" FontWeight="Bold" />
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Detail panel (bottom) -->
+                    <Border Grid.Row="1"
                             Classes="detailCard"
-                            Margin="4,0,0,0"
+                            Margin="0,10,0,0"
                             IsVisible="{Binding IsDetailVisible}">
-                        <ScrollViewer>
-                            <StackPanel Spacing="16" DataContext="{Binding SelectedMod}">
-                                <TextBlock Text="Mod Details" Classes="sectionTitle" />
-
-                                <Border Background="#1A1A2E" CornerRadius="6" Padding="12">
-                                    <StackPanel Spacing="10">
-                                        <StackPanel Spacing="2">
-                                            <TextBlock Text="NAME" Classes="fieldLabel" />
-                                            <TextBlock Text="{Binding DisplayName}" Classes="fieldValue"
-                                                       FontWeight="SemiBold" FontSize="15" />
-                                        </StackPanel>
-
-                                        <Border Height="1" Background="#2E2E48" Margin="0,2" />
-
-                                        <StackPanel Spacing="2">
-                                            <TextBlock Text="MOD ID" Classes="fieldLabel" />
-                                            <TextBlock Text="{Binding ModId}" Classes="fieldValue"
-                                                       FontFamily="Consolas,Menlo,monospace" />
-                                        </StackPanel>
-
-                                        <Border Height="1" Background="#2E2E48" Margin="0,2" />
-
-                                        <StackPanel Spacing="2">
-                                            <TextBlock Text="SOURCE" Classes="fieldLabel" />
-                                            <TextBlock Text="{Binding Source}" Classes="fieldValue" />
-                                        </StackPanel>
-
-                                        <Border Height="1" Background="#2E2E48" Margin="0,2" />
-
-                                        <StackPanel Spacing="2">
-                                            <TextBlock Text="PATH" Classes="fieldLabel" />
-                                            <TextBlock Text="{Binding FolderPath}" Classes="fieldValue"
-                                                       TextWrapping="Wrap"
-                                                       FontFamily="Consolas,Menlo,monospace"
-                                                       FontSize="11" />
-                                        </StackPanel>
-                                    </StackPanel>
+                        <StackPanel Spacing="10" DataContext="{Binding SelectedMod}">
+                            <DockPanel>
+                                <Border DockPanel.Dock="Left"
+                                        Width="48" Height="48"
+                                        CornerRadius="6"
+                                        ClipToBounds="True"
+                                        Background="#2A2A40"
+                                        VerticalAlignment="Center"
+                                        Margin="0,0,12,0">
+                                    <Panel>
+                                        <Image Source="{Binding Thumbnail}"
+                                               Stretch="UniformToFill"
+                                               IsVisible="{Binding HasThumbnail}" />
+                                        <TextBlock Text="&#x2B22;"
+                                                   FontSize="24"
+                                                   Foreground="#555570"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"
+                                                   IsVisible="{Binding !HasThumbnail}" />
+                                    </Panel>
                                 </Border>
-                            </StackPanel>
-                        </ScrollViewer>
+                                <TextBlock Text="Mod Details" Classes="sectionTitle"
+                                           VerticalAlignment="Center" />
+                                <Button DockPanel.Dock="Right"
+                                        HorizontalAlignment="Right"
+                                        Background="#2A2A40"
+                                        BorderBrush="#3A3A55"
+                                        BorderThickness="1"
+                                        CornerRadius="6"
+                                        Padding="10,6"
+                                        Cursor="Hand"
+                                        ToolTip.Tip="View full mod details"
+                                        Click="OnShowModDetail">
+                                    <TextBlock Text="&#x2139;" FontSize="14" Foreground="#8899BB" />
+                                </Button>
+                            </DockPanel>
+                            <UniformGrid Columns="4">
+                                <StackPanel Spacing="2" Margin="0,0,16,0">
+                                    <TextBlock Text="NAME" Classes="fieldLabel" />
+                                    <TextBlock Text="{Binding DisplayName}" Classes="fieldValue"
+                                               FontWeight="SemiBold" />
+                                </StackPanel>
+                                <StackPanel Spacing="2" Margin="0,0,16,0">
+                                    <TextBlock Text="MOD ID" Classes="fieldLabel" />
+                                    <TextBlock Text="{Binding ModId}" Classes="fieldValue"
+                                               FontFamily="Consolas,Menlo,monospace" />
+                                </StackPanel>
+                                <StackPanel Spacing="2" Margin="0,0,16,0">
+                                    <TextBlock Text="SOURCE" Classes="fieldLabel" />
+                                    <TextBlock Text="{Binding Source}" Classes="fieldValue" />
+                                </StackPanel>
+                                <StackPanel Spacing="2">
+                                    <TextBlock Text="PATH" Classes="fieldLabel" />
+                                    <TextBlock Text="{Binding FolderPath}" Classes="fieldValue"
+                                               TextWrapping="Wrap"
+                                               FontFamily="Consolas,Menlo,monospace"
+                                               FontSize="11" />
+                                </StackPanel>
+                            </UniformGrid>
+                        </StackPanel>
                     </Border>
                 </Grid>
-                </DockPanel>
             </TabItem>
         </TabControl>
     </DockPanel>

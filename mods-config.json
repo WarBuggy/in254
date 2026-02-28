@@ -2,22 +2,9 @@
   "version": 1,
   "modOrder": [
     "Core",
-    "CoolMod",
-    "GoodMod",
+    "Scorchridge",
     "FunMod",
-    "ModA",
-    "ModB",
-    "ModC",
-    "CoolMod",
-    "ModD",
-    "ModE",
-    "ModF",
-    "ModG",
-    "ModH",
-    "ModI",
-    "ModJ",
-    "Pong",
-    "Scorchridge"
+    "ModC"
   ],
   "mods": {
     "Core": {
@@ -26,10 +13,10 @@
     "CoolMod": {
       "enabled": false
     },
-    "GoodMod": {
-      "enabled": false
-    },
     "FunMod": {
+      "enabled": true
+    },
+    "GoodMod": {
       "enabled": false
     },
     "ModA": {
@@ -39,7 +26,7 @@
       "enabled": false
     },
     "ModC": {
-      "enabled": false
+      "enabled": true
     },
     "ModD": {
       "enabled": false
@@ -60,9 +47,6 @@
       "enabled": false
     },
     "ModJ": {
-      "enabled": false
-    },
-    "Pong": {
       "enabled": false
     },
     "Scorchridge": {
