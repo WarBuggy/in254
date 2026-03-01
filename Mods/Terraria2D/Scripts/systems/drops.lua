@@ -38,9 +38,14 @@ function Drops.UpdateAll(shared, dt)
     local p = shared.player
     local inv = shared.inventory
     local Inventory = require("systems/inventory")
-    local toRemove = {}
+    local drops = shared.drops
+    local n = #drops
+    local i = 1
 
-    for i, drop in ipairs(shared.drops) do
+    while i <= n do
+        local drop = drops[i]
+        local remove = false
+
         drop.lifetime = drop.lifetime + dt
 
         -- Gravity and movement
@@ -62,16 +67,14 @@ function Drops.UpdateAll(shared, dt)
             local magnetSq = Config.PICKUP_MAGNET * Config.PICKUP_MAGNET
 
             if distSq < pickupSq then
-                -- Pick up
                 local remaining = Inventory.Add(inv, drop.itemId, drop.count)
                 if remaining < drop.count then
                     drop.count = remaining
                     if drop.count <= 0 then
-                        table.insert(toRemove, i)
+                        remove = true
                     end
                 end
             elseif distSq < magnetSq then
-                -- Magnet pull (only sqrt here, when actually needed)
                 local dist = math.sqrt(distSq)
                 local speed = 200
                 drop.vx = (dx / dist) * speed
@@ -81,13 +84,16 @@ function Drops.UpdateAll(shared, dt)
 
         -- Despawn after 60 seconds
         if drop.lifetime > 60 then
-            table.insert(toRemove, i)
+            remove = true
         end
-    end
 
-    -- Remove collected drops (reverse order)
-    for i = #toRemove, 1, -1 do
-        table.remove(shared.drops, toRemove[i])
+        if remove then
+            drops[i] = drops[n]
+            drops[n] = nil
+            n = n - 1
+        else
+            i = i + 1
+        end
     end
 end
 

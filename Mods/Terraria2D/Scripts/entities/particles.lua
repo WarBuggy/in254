@@ -51,9 +51,12 @@ function Particles.DamageNumber(shared, x, y, amount, color)
 end
 
 function Particles.UpdateAll(shared, dt)
-    local toRemove = {}
+    local particles = shared.particles
+    local n = #particles
+    local i = 1
 
-    for i, p in ipairs(shared.particles) do
+    while i <= n do
+        local p = particles[i]
         p.lifetime = p.lifetime + dt
 
         if p.type == "block" then
@@ -66,12 +69,12 @@ function Particles.UpdateAll(shared, dt)
         end
 
         if p.lifetime >= p.maxLife then
-            table.insert(toRemove, i)
+            particles[i] = particles[n]
+            particles[n] = nil
+            n = n - 1
+        else
+            i = i + 1
         end
-    end
-
-    for i = #toRemove, 1, -1 do
-        table.remove(shared.particles, toRemove[i])
     end
 end
 

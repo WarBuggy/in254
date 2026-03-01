@@ -468,22 +468,48 @@ public sealed class DrawManager : LoggerBaseCore
         for (int i = 0; i < _layerCount; i++) _layerOrder[i] = i;
         Array.Sort(_layerOrder, 0, _layerCount, _layerComparer);
 
-        // One Begin/End per layer
-        for (int li = 0; li < _layerCount; li++)
+        // Merge consecutive layers with identical render state into one Begin/End.
+        // Reduces GPU pipeline flushes (e.g. world+entities share alpha blend → 1 flush).
+        int li = 0;
+        while (li < _layerCount)
         {
             int layerIdx = _layerOrder[li];
-            int count = counts[layerIdx];
-            if (count == 0 && li != _layerCount - 1)
-                continue;
-
             ref var layer = ref _layers[layerIdx];
+
+            // Skip empty non-last layers that share state with the next (will be merged)
+            if (counts[layerIdx] == 0 && li != _layerCount - 1)
+            {
+                li++;
+                continue;
+            }
+
             spriteBatch.Begin(layer.SortMode, layer.BlendState, layer.SamplerState,
                 DepthStencilState.None, RasterizerState.CullCounterClockwise);
 
-            if (count > 0)
-                DrawBatch(spriteBatch, _sortScratch, offsets[layerIdx], count);
+            // Draw this layer and all consecutive layers with matching render state
+            while (li < _layerCount)
+            {
+                layerIdx = _layerOrder[li];
+                bool isLast = (li == _layerCount - 1);
 
-            if (li == _layerCount - 1) DrawText(spriteBatch);
+                if (counts[layerIdx] > 0)
+                    DrawBatch(spriteBatch, _sortScratch, offsets[layerIdx], counts[layerIdx]);
+
+                if (isLast) DrawText(spriteBatch);
+
+                li++;
+
+                // Check if next layer has a different render state → must break
+                if (li < _layerCount)
+                {
+                    ref var next = ref _layers[_layerOrder[li]];
+                    if (next.BlendState != layer.BlendState ||
+                        next.SortMode != layer.SortMode ||
+                        next.SamplerState != layer.SamplerState)
+                        break;
+                }
+            }
+
             spriteBatch.End();
         }
     }

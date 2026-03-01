@@ -76,11 +76,16 @@ end
 
 function Enemy.UpdateAll(shared, dt)
     local p = shared.player
-    local toRemove = {}
+    local enemies = shared.enemies
+    local n = #enemies
+    local i = 1
 
-    for i, e in ipairs(shared.enemies) do
+    while i <= n do
+        local e = enemies[i]
+        local remove = false
+
         if not e.alive then
-            table.insert(toRemove, i)
+            remove = true
         else
             -- Invincibility
             if e.invTimer > 0 then
@@ -105,14 +110,17 @@ function Enemy.UpdateAll(shared, dt)
             local dy = e.y - p.y
             local despawn = Config.DESPAWN_RANGE
             if dx > despawn or dx < -despawn or dy > despawn or dy < -despawn then
-                table.insert(toRemove, i)
+                remove = true
             end
         end
-    end
 
-    -- Remove dead/despawned
-    for i = #toRemove, 1, -1 do
-        table.remove(shared.enemies, toRemove[i])
+        if remove then
+            enemies[i] = enemies[n]
+            enemies[n] = nil
+            n = n - 1
+        else
+            i = i + 1
+        end
     end
 
     -- Check collisions with player

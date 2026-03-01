@@ -35,11 +35,16 @@ end
 
 function Projectile.UpdateAll(shared, dt)
     local TS = Config.TILE_SIZE
-    local toRemove = {}
+    local projectiles = shared.projectiles
+    local n = #projectiles
+    local i = 1
 
-    for i, proj in ipairs(shared.projectiles) do
+    while i <= n do
+        local proj = projectiles[i]
+        local remove = false
+
         if not proj.alive then
-            table.insert(toRemove, i)
+            remove = true
         else
             proj.lifetime = proj.lifetime + dt
 
@@ -57,12 +62,11 @@ function Projectile.UpdateAll(shared, dt)
             local ty = math.floor(proj.y / TS)
             if WorldData.IsSolid(tx, ty) then
                 proj.alive = false
-                table.insert(toRemove, i)
-                goto continue
+                remove = true
             end
 
             -- Check entity collision
-            if proj.friendly then
+            if not remove and proj.friendly then
                 -- Hit enemies
                 for _, enemy in ipairs(shared.enemies) do
                     if enemy.alive and enemy.invTimer <= 0 then
@@ -71,21 +75,21 @@ function Projectile.UpdateAll(shared, dt)
                             local fromRight = proj.vx > 0
                             Combat.DamageEnemy(shared, enemy, proj.damage, 3, fromRight)
                             proj.alive = false
-                            table.insert(toRemove, i)
+                            remove = true
                             break
                         end
                     end
                 end
                 -- Hit boss
-                if proj.alive and shared.boss and shared.boss.alive then
+                if not remove and shared.boss and shared.boss.alive then
                     if Physics.Overlaps(proj, shared.boss) then
                         local Combat = require("systems/combat")
                         Combat.DamageBoss(shared, proj.damage, 2, proj.vx > 0)
                         proj.alive = false
-                        table.insert(toRemove, i)
+                        remove = true
                     end
                 end
-            else
+            elseif not remove and not proj.friendly then
                 -- Hit player
                 local p = shared.player
                 if p.alive and p.invTimer <= 0 then
@@ -94,23 +98,25 @@ function Projectile.UpdateAll(shared, dt)
                         local dir = proj.vx > 0 and 1 or -1
                         Player.TakeDamage(p, proj.damage, shared, dir)
                         proj.alive = false
-                        table.insert(toRemove, i)
+                        remove = true
                     end
                 end
             end
 
             -- Despawn after 5 seconds
-            if proj.lifetime > 5 then
+            if not remove and proj.lifetime > 5 then
                 proj.alive = false
-                table.insert(toRemove, i)
+                remove = true
             end
-
-            ::continue::
         end
-    end
 
-    for i = #toRemove, 1, -1 do
-        table.remove(shared.projectiles, toRemove[i])
+        if remove then
+            projectiles[i] = projectiles[n]
+            projectiles[n] = nil
+            n = n - 1
+        else
+            i = i + 1
+        end
     end
 end
 
