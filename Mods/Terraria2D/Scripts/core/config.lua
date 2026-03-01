@@ -10,7 +10,7 @@ Config.SCREEN_W = 800
 Config.SCREEN_H = 600
 
 -- Tiles
-Config.TILE_SIZE = 8
+Config.TILE_SIZE = 12
 
 -- World dimensions (in tiles)
 Config.WORLD_W = 400
@@ -46,7 +46,7 @@ Config.INVINCIBILITY_TIME = 1.0
 Config.RESPAWN_TIME = 3.0
 
 -- Mining
-Config.MINE_RATE = 1.0
+Config.MINE_RATE = 3.0
 
 -- Day/Night
 Config.DAY_LENGTH = 120

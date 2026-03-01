@@ -61,9 +61,10 @@ local GameplayRoot = Node.new({
 
         -- Initialize inventory with starter items
         shared.inventory = Inventory.New()
-        Inventory.Add(shared.inventory, "wooden_sword", 1)
-        Inventory.Add(shared.inventory, "torch", 50)
         Inventory.Add(shared.inventory, "wood", 10)
+        Inventory.Add(shared.inventory, "torch", 50)
+        Inventory.Add(shared.inventory, "wooden_sword", 1)
+        -- Default to slot 1 (wood) so player can mine/place immediately
 
         -- Initialize camera (viewport in world coords = screen / zoom)
         local TS = Config.TILE_SIZE

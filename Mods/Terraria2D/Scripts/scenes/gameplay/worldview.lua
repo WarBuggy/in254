@@ -32,16 +32,15 @@ function WorldView.Draw(shared)
     -- Per-frame tile draw (3 params — camera read from CameraManager in C#)
     Drawing.DrawTileMap(viewW, viewH, shared.lightMap)
 
-    -- Mining indicator (world-space positions)
-    if shared.mineTarget and shared.mineProgress > 0 then
-        local mx = shared.mineTarget.x
-        local my = shared.mineTarget.y
-        local sx = mx * TS
-        local sy = my * TS
+    -- Mining indicator — progress bar above player head
+    if shared.mineTarget and shared.mineProgress > 0 and shared.player then
+        local p = shared.player
+        local barW = 20
+        local bx = floor(p.x + p.w / 2 - barW / 2)
+        local by = floor(p.y - 6)
         local prog = shared.mineProgress
-        UI.Rect(sx, sy, TS, TS, Color.New(255, 255, 255, floor(60 + 100 * prog)))
-        UI.Rect(sx, sy + TS, TS, 2, _cMineBg)
-        UI.Rect(sx, sy + TS, floor(TS * prog), 2, _cMineFg)
+        UI.Rect(bx, by, barW, 3, _cMineBg)
+        UI.Rect(bx, by, floor(barW * prog), 3, _cMineFg)
     end
 end
 
