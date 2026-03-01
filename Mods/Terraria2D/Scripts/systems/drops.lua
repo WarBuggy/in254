@@ -8,12 +8,9 @@ local Camera = require("core/camera")
 local Tiles = require("world/tiles")
 local Physics = require("systems/physics")
 local UI = require("core/ui")
-local Batch = require("core/batch")
-
 local Drops = {}
 
--- Batch state (lazy init)
-local _batch = Batch.new()
+local _DR = Drawing.Rect
 local _ps -- pixel sprite id
 
 function Drops.Spawn(shared, itemId, count, x, y)
@@ -107,9 +104,7 @@ function Drops.DrawAll(shared)
     local camY = Camera.GetY()
     local screenW = shared.W
     local screenH = shared.H
-    local b = _batch
-    local R = Batch.rect
-    Batch.clear(b)
+    local R = _DR
 
     for _, drop in ipairs(shared.drops) do
         local sx = math.floor(drop.x - camX)
@@ -118,12 +113,10 @@ function Drops.DrawAll(shared)
         if sx + drop.w + 1 >= 0 and sx - 1 <= screenW and sy + drop.h + 3 >= 0 and sy - 3 <= screenH then
             sy = sy + math.floor(math.sin(drop.lifetime * 3) * 2)
 
-            R(b, _ps, sx, sy, drop.w, drop.h, drop.packedColor)
-            R(b, _ps, sx - 1, sy - 1, drop.w + 2, 1, _cHighlight)
+            R(_ps, sx, sy, drop.w, drop.h, drop.packedColor)
+            R(_ps, sx - 1, sy - 1, drop.w + 2, 1, _cHighlight)
         end
     end
-
-    Batch.flush(b)
 end
 
 return Drops

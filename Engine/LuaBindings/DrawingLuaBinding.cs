@@ -54,12 +54,10 @@ namespace in254.Engine.LuaBindings
                 );
                 // Optional tile renderer config
                 var marginDyn = opts.Get("tileMargin");
-                var cooldownDyn = opts.Get("rebuildCooldown");
-                if (!marginDyn.IsNil() || !cooldownDyn.IsNil())
+                if (!marginDyn.IsNil())
                 {
                     TileRendererManager.Instance.Configure(
-                        marginDyn.IsNil() ? null : (int?)marginDyn.Number,
-                        cooldownDyn.IsNil() ? null : (int?)cooldownDyn.Number
+                        (int?)marginDyn.Number
                     );
                 }
             });
@@ -115,13 +113,6 @@ namespace in254.Engine.LuaBindings
                 return DrawManager.Instance.RegisterPixelSprite(texture);
             });
 
-            // SpriteBatch(flatTable, count) — stride-7 command buffer
-            drawTable["SpriteBatch"] = (Action<DynValue, DynValue>)((dataDyn, countDyn) =>
-            {
-                int count = (int)countDyn.Number;
-                DrawManager.Instance.AddSpriteBatch(dataDyn.Table, count);
-            });
-
             // Rect(spriteId, x, y, w, h, packedColor) — single rect, auto-batched in pool
             drawTable["Rect"] = (Action<int, float, float, float, float, int>)(
                 (spriteId, x, y, w, h, packedColor) =>
@@ -143,17 +134,14 @@ namespace in254.Engine.LuaBindings
                 (spriteId, dataDyn, count) =>
                     DrawManager.Instance.AddRectBatchPacked(spriteId, dataDyn.Table, count));
 
-            // ConfigureTileMap({ tileMargin = N, rebuildCooldown = N })
+            // ConfigureTileMap({ tileMargin = N })
             drawTable["ConfigureTileMap"] = (Action<DynValue>)((optsDyn) =>
             {
                 var opts = optsDyn.Table;
                 int? tileMargin = null;
-                int? rebuildCooldown = null;
                 var marginDyn = opts.Get("tileMargin");
                 if (!marginDyn.IsNil()) tileMargin = (int)marginDyn.Number;
-                var cooldownDyn = opts.Get("rebuildCooldown");
-                if (!cooldownDyn.IsNil()) rebuildCooldown = (int)cooldownDyn.Number;
-                TileRendererManager.Instance.Configure(tileMargin, rebuildCooldown);
+                TileRendererManager.Instance.Configure(tileMargin);
             });
 
             // Text(text, x, y, size?, {r,g,b,a}?, "fontName"?)

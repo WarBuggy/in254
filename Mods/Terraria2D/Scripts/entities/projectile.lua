@@ -8,12 +8,9 @@ local WorldData = require("world/worlddata")
 local Camera = require("core/camera")
 local Physics = require("systems/physics")
 local UI = require("core/ui")
-local Batch = require("core/batch")
-
 local Projectile = {}
 
--- Batch state (lazy init)
-local _batch = Batch.new()
+local _DR = Drawing.Rect
 local _ps -- pixel sprite id
 
 function Projectile.Spawn(shared, x, y, vx, vy, damage, projType, friendly)
@@ -134,9 +131,7 @@ function Projectile.DrawAll(shared)
     local camY = Camera.GetY()
     local screenW = shared.W
     local screenH = shared.H
-    local b = _batch
-    local R = Batch.rect
-    Batch.clear(b)
+    local R = _DR
 
     for _, proj in ipairs(shared.projectiles) do
         if proj.alive then
@@ -149,18 +144,16 @@ function Projectile.DrawAll(shared)
             end
 
             if proj.type == "arrow" then
-                R(b, _ps, sx, sy, 6, 2, _cArrowShaft)
-                R(b, _ps, sx + 5, sy - 1, 2, 4, _cArrowHead)
+                R(_ps, sx, sy, 6, 2, _cArrowShaft)
+                R(_ps, sx + 5, sy - 1, 2, 4, _cArrowHead)
             elseif proj.type == "magic" then
-                R(b, _ps, sx - 1, sy - 1, 6, 6, _cMagicGlow)
-                R(b, _ps, sx, sy, 4, 4, _cMagicCore)
+                R(_ps, sx - 1, sy - 1, 6, 6, _cMagicGlow)
+                R(_ps, sx, sy, 4, 4, _cMagicCore)
             end
 
             ::continue::
         end
     end
-
-    Batch.flush(b)
 end
 
 return Projectile

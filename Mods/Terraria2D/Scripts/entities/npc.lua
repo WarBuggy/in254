@@ -7,12 +7,9 @@ local Config = require("core/config")
 local Physics = require("systems/physics")
 local Camera = require("core/camera")
 local UI = require("core/ui")
-local Batch = require("core/batch")
-
 local NPC = {}
 
--- Batch state (lazy init)
-local _batch = Batch.new()
+local _DR = Drawing.Rect
 local _ps -- pixel sprite id
 
 function NPC.SpawnGuide(shared, tileX, tileY)
@@ -146,9 +143,7 @@ function NPC.DrawAll(shared)
     local camY = Camera.GetY()
     local screenW = shared.W
     local screenH = shared.H
-    local b = _batch
-    local R = Batch.rect
-    Batch.clear(b)
+    local R = _DR
 
     for _, npc in ipairs(shared.npcs) do
         local sx = math.floor(npc.x - camX)
@@ -156,21 +151,21 @@ function NPC.DrawAll(shared)
 
         if sx + 80 >= 0 and sx - 80 <= screenW and sy + npc.h >= 0 and sy - 30 <= screenH then
             if npc.type == "guide" then
-                R(b, _ps, sx + 3, sy, 6, 6, _cSkin)
-                R(b, _ps, sx + 3, sy, 6, 2, _cGuideHair)
-                R(b, _ps, sx + 2, sy + 6, 8, 10, _cGuideBody)
-                R(b, _ps, sx + 2, sy + 16, 3, 8, _cGuideLeg)
-                R(b, _ps, sx + 7, sy + 16, 3, 8, _cGuideLeg)
+                R(_ps, sx + 3, sy, 6, 6, _cSkin)
+                R(_ps, sx + 3, sy, 6, 2, _cGuideHair)
+                R(_ps, sx + 2, sy + 6, 8, 10, _cGuideBody)
+                R(_ps, sx + 2, sy + 16, 3, 8, _cGuideLeg)
+                R(_ps, sx + 7, sy + 16, 3, 8, _cGuideLeg)
             elseif npc.type == "merchant" then
-                R(b, _ps, sx + 3, sy, 6, 6, _cSkin)
-                R(b, _ps, sx + 3, sy, 6, 2, _cMerchHat)
-                R(b, _ps, sx + 2, sy + 6, 8, 10, _cMerchBody)
-                R(b, _ps, sx + 2, sy + 16, 3, 8, _cMerchLeg)
-                R(b, _ps, sx + 7, sy + 16, 3, 8, _cMerchLeg)
+                R(_ps, sx + 3, sy, 6, 6, _cSkin)
+                R(_ps, sx + 3, sy, 6, 2, _cMerchHat)
+                R(_ps, sx + 2, sy + 6, 8, 10, _cMerchBody)
+                R(_ps, sx + 2, sy + 16, 3, 8, _cMerchLeg)
+                R(_ps, sx + 7, sy + 16, 3, 8, _cMerchLeg)
             end
 
             local eyeX = npc.facingRight and (sx + 7) or (sx + 4)
-            R(b, _ps, eyeX, sy + 2, 1, 2, _cEye)
+            R(_ps, eyeX, sy + 2, 1, 2, _cEye)
 
             Drawing.Text(npc.name, sx - 4, sy - 12, 8, _cNameLabel)
 
@@ -179,13 +174,11 @@ function NPC.DrawAll(shared)
                 local bw = #line * 5 + 16
                 local bx = sx - bw / 2 + 6
                 local by = sy - 28
-                R(b, _ps, bx, by, bw, 14, _cDialogBg)
+                R(_ps, bx, by, bw, 14, _cDialogBg)
                 Drawing.Text(line, bx + 4, by + 2, 9, _cDialogText)
             end
         end
     end
-
-    Batch.flush(b)
 end
 
 return NPC

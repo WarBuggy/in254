@@ -5,14 +5,11 @@
 
 local Camera = require("core/camera")
 local UI = require("core/ui")
-local Batch = require("core/batch")
-
 local floor = math.floor
 
 local Particles = {}
 
--- Batch state (lazy init)
-local _batch = Batch.new()
+local _DR = Drawing.Rect
 local _ps -- pixel sprite id
 
 -- Block break: spawn small colored particles
@@ -86,9 +83,7 @@ function Particles.DrawAll(shared)
     local camY = Camera.GetY()
     local screenW = shared.W
     local screenH = shared.H
-    local b = _batch
-    local R = Batch.rect
-    Batch.clear(b)
+    local R = _DR
 
     for _, p in ipairs(shared.particles) do
         local sx = floor(p.x - camX)
@@ -99,14 +94,12 @@ function Particles.DrawAll(shared)
             local alpha = floor(255 * (1 - p.lifetime / p.maxLife))
 
             if p.type == "block" then
-                R(b, _ps, sx, sy, p.size, p.size, Color.New(p.cr, p.cg, p.cb, alpha))
+                R(_ps, sx, sy, p.size, p.size, Color.New(p.cr, p.cg, p.cb, alpha))
             elseif p.type == "text" then
                 Drawing.Text(p.text, sx, sy, 12, Color.New(p.cr, p.cg, p.cb, alpha))
             end
         end
     end
-
-    Batch.flush(b)
 end
 
 return Particles

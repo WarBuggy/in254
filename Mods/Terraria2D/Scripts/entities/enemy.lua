@@ -8,12 +8,9 @@ local Physics = require("systems/physics")
 local Camera = require("core/camera")
 local UI = require("core/ui")
 local Combat = require("systems/combat")
-local Batch = require("core/batch")
-
 local Enemy = {}
 
--- Batch state (lazy init)
-local _batch = Batch.new()
+local _DR = Drawing.Rect
 local _ps -- pixel sprite id
 
 -- Enemy type definitions
@@ -198,9 +195,7 @@ function Enemy.DrawAll(shared)
     local camY = Camera.GetY()
     local screenW = shared.W
     local screenH = shared.H
-    local b = _batch
-    local R = Batch.rect
-    Batch.clear(b)
+    local R = _DR
 
     for _, e in ipairs(shared.enemies) do
         if e.alive then
@@ -219,44 +214,42 @@ function Enemy.DrawAll(shared)
             end
 
             if e.type == "slime" then
-                R(b, _ps, sx + 1, sy + 2, e.w - 2, e.h - 2, pc)
-                R(b, _ps, sx, sy + 4, e.w, e.h - 6, pc)
+                R(_ps, sx + 1, sy + 2, e.w - 2, e.h - 2, pc)
+                R(_ps, sx, sy + 4, e.w, e.h - 6, pc)
                 local eyeOff = e.facingRight and 2 or -2
-                R(b, _ps, sx + 3 + eyeOff, sy + 3, 2, 2, _cEye)
-                R(b, _ps, sx + 7 + eyeOff, sy + 3, 2, 2, _cEye)
+                R(_ps, sx + 3 + eyeOff, sy + 3, 2, 2, _cEye)
+                R(_ps, sx + 7 + eyeOff, sy + 3, 2, 2, _cEye)
             elseif e.type == "zombie" then
-                R(b, _ps, sx + 3, sy, 6, 6, _cZombieHead)
-                R(b, _ps, sx + 2, sy + 6, 8, 10, _cZombieBody)
-                R(b, _ps, sx + 2, sy + 16, 3, 8, _cZombieLeg)
-                R(b, _ps, sx + 7, sy + 16, 3, 8, _cZombieLeg)
+                R(_ps, sx + 3, sy, 6, 6, _cZombieHead)
+                R(_ps, sx + 2, sy + 6, 8, 10, _cZombieBody)
+                R(_ps, sx + 2, sy + 16, 3, 8, _cZombieLeg)
+                R(_ps, sx + 7, sy + 16, 3, 8, _cZombieLeg)
                 local armX = e.facingRight and (sx + 10) or (sx - 2)
-                R(b, _ps, armX, sy + 7, 3, 6, _cZombieHead)
-                R(b, _ps, sx + 4, sy + 2, 2, 2, _cZombieEye)
-                R(b, _ps, sx + 7, sy + 2, 2, 2, _cZombieEye)
+                R(_ps, armX, sy + 7, 3, 6, _cZombieHead)
+                R(_ps, sx + 4, sy + 2, 2, 2, _cZombieEye)
+                R(_ps, sx + 7, sy + 2, 2, 2, _cZombieEye)
             elseif e.type == "skeleton" then
-                R(b, _ps, sx + 3, sy, 6, 6, pc)
-                R(b, _ps, sx + 3, sy + 6, 6, 10, _cSkelRib)
-                R(b, _ps, sx + 3, sy + 16, 2, 8, pc)
-                R(b, _ps, sx + 7, sy + 16, 2, 8, pc)
-                R(b, _ps, sx + 4, sy + 2, 2, 2, _cEye)
-                R(b, _ps, sx + 7, sy + 2, 2, 2, _cEye)
+                R(_ps, sx + 3, sy, 6, 6, pc)
+                R(_ps, sx + 3, sy + 6, 6, 10, _cSkelRib)
+                R(_ps, sx + 3, sy + 16, 2, 8, pc)
+                R(_ps, sx + 7, sy + 16, 2, 8, pc)
+                R(_ps, sx + 4, sy + 2, 2, 2, _cEye)
+                R(_ps, sx + 7, sy + 2, 2, 2, _cEye)
                 local weapX = e.facingRight and (sx + 10) or (sx - 3)
-                R(b, _ps, weapX, sy + 4, 2, 14, _cSkelWeap)
+                R(_ps, weapX, sy + 4, 2, 14, _cSkelWeap)
             end
 
             -- HP bar above enemy
             if e.hp < e.maxHp then
                 local barW = e.w
-                R(b, _ps, sx, sy - 5, barW, 2, _cHpBg)
+                R(_ps, sx, sy - 5, barW, 2, _cHpBg)
                 local fill = math.max(0, e.hp / e.maxHp)
-                R(b, _ps, sx, sy - 5, math.floor(barW * fill), 2, _cHpFg)
+                R(_ps, sx, sy - 5, math.floor(barW * fill), 2, _cHpFg)
             end
 
             ::continue::
         end
     end
-
-    Batch.flush(b)
 end
 
 return Enemy

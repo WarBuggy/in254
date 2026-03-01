@@ -73,12 +73,12 @@ function Lighting.Calculate(shared)
     local H = Config.WORLD_H
     local maxLight = Config.MAX_LIGHT
 
-    -- Viewport bounds
+    -- Viewport bounds — margin must cover tile renderer margin + light propagation radius
     local camTX = floor((shared.camX or 0) / Config.TILE_SIZE)
     local camTY = floor((shared.camY or 0) / Config.TILE_SIZE)
     local viewW = (shared.W or 0) > 0 and ceil(shared.W / Config.TILE_SIZE) + 2 or W
     local viewH = (shared.H or 0) > 0 and ceil(shared.H / Config.TILE_SIZE) + 2 or H
-    local margin = 20
+    local margin = 20 + maxLight  -- tile cache margin (20) + light propagation radius
 
     local startX = max(0, camTX - margin)
     local endX = min(W - 1, camTX + viewW + margin)
@@ -107,8 +107,9 @@ function Lighting.Calculate(shared)
     -- Scatter emitter values from tile ID lookup
     NativeBuffer.ScatterLookup(_lightH, _tileH, _emitH, W, startX, endX, startY, endY)
 
-    -- 4-directional SIMD sweep relaxation (replaces BFS flood fill)
-    NativeBuffer.SweepMax(_lightH, W, H, startX, endX, startY, endY, 1, 2)
+    -- 4-directional SIMD sweep relaxation
+    -- Need maxLight passes for full propagation (each pass spreads light 1 tile per direction)
+    NativeBuffer.SweepMax(_lightH, W, H, startX, endX, startY, endY, 1, maxLight)
 
     -- Store camera position for next calculation
     local Camera = require("core/camera")
@@ -128,7 +129,8 @@ function Lighting.UpdateAt(shared, tx, ty)
 
     local W = Config.WORLD_W
     local H = Config.WORLD_H
-    local radius = Config.MAX_LIGHT
+    local maxLight = Config.MAX_LIGHT
+    local radius = maxLight
 
     local x0 = max(0, tx - radius)
     local x1 = min(W - 1, tx + radius)
@@ -139,12 +141,12 @@ function Lighting.UpdateAt(shared, tx, ty)
     NativeBuffer.FillRect(_lightH, W, x0, y0, x1, y1, 0)
 
     -- Column decay + scatter emitters
-    local skyLight = shared.isNight and 7 or Config.MAX_LIGHT
+    local skyLight = shared.isNight and 7 or maxLight
     NativeBuffer.ColumnDecay(_lightH, _tileH, _solidH, W, H, x0, x1, y0, y1, skyLight, 2, 1)
     NativeBuffer.ScatterLookup(_lightH, _tileH, _emitH, W, x0, x1, y0, y1)
 
-    -- Sweep relaxation
-    NativeBuffer.SweepMax(_lightH, W, H, x0, x1, y0, y1, 1, 2)
+    -- Sweep relaxation — need maxLight passes for full propagation
+    NativeBuffer.SweepMax(_lightH, W, H, x0, x1, y0, y1, 1, maxLight)
 
     Drawing.RefreshTileColors()
 end

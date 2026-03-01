@@ -11,12 +11,9 @@ local Camera = require("core/camera")
 local UI = require("core/ui")
 local HUD = require("scenes/gameplay/hud")
 local Lighting = require("world/lighting")
-local Batch = require("core/batch")
-
 local Player = {}
 
--- Batch state (lazy init)
-local _batch = Batch.new()
+local _DR = Drawing.Rect
 local _ps -- pixel sprite id
 
 -- Item color cache (keyed by item id)
@@ -305,28 +302,26 @@ function Player.Draw(p, shared)
         return
     end
 
-    local b = _batch
-    local R = Batch.rect
-    Batch.clear(b)
+    local R = _DR
 
     -- Body (torso)
-    R(b, _ps, sx + 2, sy + 6, 8, 10, Color.New(60, 120, 200))
+    R(_ps, sx + 2, sy + 6, 8, 10, Color.New(60, 120, 200))
     -- Head
-    R(b, _ps, sx + 3, sy, 6, 6, Color.New(230, 190, 150))
+    R(_ps, sx + 3, sy, 6, 6, Color.New(230, 190, 150))
     -- Hair
-    R(b, _ps, sx + 3, sy, 6, 2, Color.New(100, 60, 20))
+    R(_ps, sx + 3, sy, 6, 2, Color.New(100, 60, 20))
     -- Legs
-    R(b, _ps, sx + 2, sy + 16, 3, 8, Color.New(50, 50, 150))
-    R(b, _ps, sx + 7, sy + 16, 3, 8, Color.New(50, 50, 150))
+    R(_ps, sx + 2, sy + 16, 3, 8, Color.New(50, 50, 150))
+    R(_ps, sx + 7, sy + 16, 3, 8, Color.New(50, 50, 150))
     -- Arms
     if p.facingRight then
-        R(b, _ps, sx + 10, sy + 7, 2, 8, Color.New(230, 190, 150))
+        R(_ps, sx + 10, sy + 7, 2, 8, Color.New(230, 190, 150))
     else
-        R(b, _ps, sx, sy + 7, 2, 8, Color.New(230, 190, 150))
+        R(_ps, sx, sy + 7, 2, 8, Color.New(230, 190, 150))
     end
     -- Eyes
     local eyeX = p.facingRight and (sx + 7) or (sx + 4)
-    R(b, _ps, eyeX, sy + 2, 1, 2, Color.New(40, 40, 40))
+    R(_ps, eyeX, sy + 2, 1, 2, Color.New(40, 40, 40))
 
     -- Draw held item
     local inv = shared.inventory
@@ -338,16 +333,14 @@ function Player.Draw(p, shared)
             if Tiles.IsWeapon(slot.id) then
                 if p.facingRight then ix = sx + 11 else ix = sx - 4 end
                 iy = sy + 5
-                R(b, _ps, ix, iy, 3, 12, packedColor)
+                R(_ps, ix, iy, 3, 12, packedColor)
             else
                 if p.facingRight then ix = sx + 11 else ix = sx - 3 end
                 iy = sy + 8
-                R(b, _ps, ix, iy, 4, 4, packedColor)
+                R(_ps, ix, iy, 4, 4, packedColor)
             end
         end
     end
-
-    Batch.flush(b)
 end
 
 function Player.TakeDamage(p, damage, shared, knockDir)

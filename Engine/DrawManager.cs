@@ -303,31 +303,6 @@ public sealed class DrawManager : LoggerBaseCore
         }
     }
 
-    public void AddSpriteBatch(Table data, int count)
-    {
-        for (int i = 0; i < count; i++)
-        {
-            int off = i * 7;
-            int spriteId = (int)data.Get(off + 1).Number;
-            ref var region = ref _spriteRegions[spriteId];
-            short handle = RegisterTextureSlot(region.Texture);
-            int packed = (int)data.Get(off + 6).Number;
-            Color color = packed == 0 ? Color.White : ColorLuaBinding.ToColor(packed);
-
-            EnsurePoolCapacity();
-            _drawPool[_drawCount++] = new DrawRequest
-            {
-                TextureHandle = handle,
-                Position = new Vector2((float)data.Get(off + 2).Number, (float)data.Get(off + 3).Number),
-                SourceRectangle = region.SourceRect,
-                Scale = new Vector2((float)data.Get(off + 4).Number, (float)data.Get(off + 5).Number),
-                Color = color,
-                LayerId = _activeLayerId,
-                Flags = (byte)((int)data.Get(off + 7).Number & 0x3)
-            };
-        }
-    }
-
     private void EnsurePoolCapacity()
     {
         if (_drawCount < _drawPool.Length) return;

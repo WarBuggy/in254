@@ -13,12 +13,10 @@ public sealed class TileRendererManager : LoggerBaseCore
 
     // --- Tile grid RenderTarget cache ---
     private int _tileMargin = 20;
-    private int _rebuildCooldownMax = 3;
     private RenderTarget2D _tileCache;
     private bool _tileCacheDirty = true;
     private bool _tileIdsDirty = true;
     private bool _tileColorsDirty = true;
-    private int _rebuildCooldown;
     private int _cachedAlignedTX = int.MinValue;
     private int _cachedAlignedTY = int.MinValue;
     private int _cachedViewportW;
@@ -76,10 +74,9 @@ public sealed class TileRendererManager : LoggerBaseCore
     }
 
     // --- Runtime configuration (called from Lua ConfigureTileMap) ---
-    public void Configure(int? tileMargin = null, int? rebuildCooldown = null)
+    public void Configure(int? tileMargin = null)
     {
         if (tileMargin.HasValue) { _tileMargin = Math.Clamp(tileMargin.Value, 1, 100); InvalidateTileCache(); }
-        if (rebuildCooldown.HasValue) _rebuildCooldownMax = Math.Max(0, rebuildCooldown.Value);
     }
 
     // --- Per-frame dynamic data (called from Lua DrawTileMap) ---
@@ -184,10 +181,8 @@ public sealed class TileRendererManager : LoggerBaseCore
             _tileBufValid = false;
         }
 
-        if (_rebuildCooldown > 0) { _rebuildCooldown--; return; }
         if (!_tileCacheDirty) return;
         _tileCacheDirty = false;
-        _rebuildCooldown = _rebuildCooldownMax;
 
         gd.SetRenderTarget(_tileCache);
         gd.Clear(Color.Transparent);
@@ -315,8 +310,10 @@ public sealed class TileRendererManager : LoggerBaseCore
 
         int startTX = Math.Max(0, _cachedAlignedTX - _tileMargin);
         int startTY = Math.Max(0, _cachedAlignedTY - _tileMargin);
-        int endTX = Math.Min(_worldW - 1, (int)Math.Floor((camX + _screenW) / ts) + _tileMargin + 2);
-        int endTY = Math.Min(_worldH - 1, (int)Math.Floor((camY + _screenH) / ts) + _tileMargin + 2);
+        int screenTilesW = (int)Math.Ceiling((double)_screenW / ts);
+        int screenTilesH = (int)Math.Ceiling((double)_screenH / ts);
+        int endTX = Math.Min(_worldW - 1, _cachedAlignedTX + screenTilesW + _tileMargin + 2);
+        int endTY = Math.Min(_worldH - 1, _cachedAlignedTY + screenTilesH + _tileMargin + 2);
 
         PreloadTileRegion(startTX, startTY, endTX, endTY);
 
