@@ -95,7 +95,7 @@ public sealed class DrawManager : LoggerBaseCore
                 Id = 0, Name = "__default", Priority = -1,
                 BlendState = BlendState.AlphaBlend,
                 SortMode = SpriteSortMode.Deferred,
-                SamplerState = SamplerState.PointClamp
+                SamplerState = SamplerState.PointClamp,
             };
             _layerCount = 1;
         }
@@ -110,7 +110,7 @@ public sealed class DrawManager : LoggerBaseCore
             Priority = priority,
             BlendState = blendState,
             SortMode = sortMode,
-            SamplerState = samplerState
+            SamplerState = samplerState,
         };
         _layerCount++;
     }
@@ -128,6 +128,7 @@ public sealed class DrawManager : LoggerBaseCore
     }
 
     public void ResetActiveLayer() => _activeLayerId = 0;
+
 
     public void AddRequest(Texture2D texture, Vector2 position,
                       float rotation = 0f, Vector2 scale = default,
@@ -323,7 +324,8 @@ public sealed class DrawManager : LoggerBaseCore
             Position = position,
             FontSize = fontSize,
             Color = color ?? Color.White,
-            FontName = fontName
+            FontName = fontName,
+            LayerId = _activeLayerId
         };
     }
 
@@ -352,6 +354,7 @@ public sealed class DrawManager : LoggerBaseCore
                 Position = new Vector2(x, y),
                 FontSize = size,
                 Color = color,
+                LayerId = _activeLayerId
             };
         }
     }
@@ -406,6 +409,17 @@ public sealed class DrawManager : LoggerBaseCore
         }
     }
 
+    private void DrawTextForLayer(SpriteBatch spriteBatch, byte layerId)
+    {
+        for (int i = 0; i < _textCount; i++)
+        {
+            ref var req = ref _textPool[i];
+            if (req.LayerId != layerId) continue;
+            var font = FontManager.Instance.GetFont(req.FontSize, req.FontName);
+            spriteBatch.DrawString(font, req.Text, req.Position, req.Color);
+        }
+    }
+
     private void RenderSinglePass(SpriteBatch spriteBatch)
     {
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
@@ -445,44 +459,48 @@ public sealed class DrawManager : LoggerBaseCore
         for (int i = 0; i < _layerCount; i++) _layerOrder[i] = i;
         Array.Sort(_layerOrder, 0, _layerCount, _layerComparer);
 
-        // Merge consecutive layers with identical render state into one Begin/End.
-        // Reduces GPU pipeline flushes (e.g. world+entities share alpha blend → 1 flush).
+        // Merge consecutive layers with identical render state + transform into one Begin/End.
+        // Reduces GPU pipeline flushes (e.g. world+entities share alpha blend + zoom → 1 flush).
+        var camMgr = CameraManager.Instance;
         int li = 0;
         while (li < _layerCount)
         {
             int layerIdx = _layerOrder[li];
             ref var layer = ref _layers[layerIdx];
 
-            // Skip empty non-last layers that share state with the next (will be merged)
-            if (counts[layerIdx] == 0 && li != _layerCount - 1)
+            // Skip empty non-last layers
+            if (counts[layerIdx] == 0 && _textCount == 0 && li != _layerCount - 1)
             {
                 li++;
                 continue;
             }
 
+            var layerTransform = camMgr.GetTransformForLayer(layer.Name);
             spriteBatch.Begin(layer.SortMode, layer.BlendState, layer.SamplerState,
-                DepthStencilState.None, RasterizerState.CullCounterClockwise);
+                DepthStencilState.None, RasterizerState.CullCounterClockwise,
+                null, layerTransform);
 
-            // Draw this layer and all consecutive layers with matching render state
+            // Draw this layer and all consecutive layers with matching render state + transform
             while (li < _layerCount)
             {
                 layerIdx = _layerOrder[li];
-                bool isLast = (li == _layerCount - 1);
 
                 if (counts[layerIdx] > 0)
                     DrawBatch(spriteBatch, _sortScratch, offsets[layerIdx], counts[layerIdx]);
 
-                if (isLast) DrawText(spriteBatch);
+                DrawTextForLayer(spriteBatch, (byte)layerIdx);
 
                 li++;
 
-                // Check if next layer has a different render state → must break
+                // Check if next layer has a different render state or transform → must break
                 if (li < _layerCount)
                 {
                     ref var next = ref _layers[_layerOrder[li]];
+                    var nextTransform = camMgr.GetTransformForLayer(next.Name);
                     if (next.BlendState != layer.BlendState ||
                         next.SortMode != layer.SortMode ||
-                        next.SamplerState != layer.SamplerState)
+                        next.SamplerState != layer.SamplerState ||
+                        nextTransform != layerTransform)
                         break;
                 }
             }
@@ -501,6 +519,7 @@ public sealed class DrawManager : LoggerBaseCore
         public int FontSize;
         public Color Color;
         public string FontName;
+        public byte LayerId;
     }
 
     /// <summary>

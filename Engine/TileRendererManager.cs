@@ -146,16 +146,14 @@ public sealed class TileRendererManager : LoggerBaseCore
             int ts = _tileSize;
             float rtOriginX = (_cachedAlignedTX - _tileMargin) * ts;
             float rtOriginY = (_cachedAlignedTY - _tileMargin) * ts;
-            float offsetX = (float)Math.Floor(-(_camX - rtOriginX));
-            float offsetY = (float)Math.Floor(-(_camY - rtOriginY));
 
-            // Inject on the same layer that was active when DrawTileMap was called
+            // Inject at world-space position — camera transform handles the offset
             var dm = DrawManager.Instance;
             byte savedLayer = dm.ActiveLayerId;
             dm.SetActiveLayerId(_drawLayerId);
             dm.AddRequest(
                 _tileCache,
-                new Vector2(offsetX, offsetY)
+                new Vector2(rtOriginX, rtOriginY)
             );
             dm.SetActiveLayerId(savedLayer);
         }

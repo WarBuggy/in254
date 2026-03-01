@@ -138,17 +138,15 @@ function NPC.DrawAll(shared)
     -- Lazy init pixel sprite
     if not _ps then _ps = Drawing.RegisterPixelSprite(UI.GetPixelId()) end
 
-    local camX = Camera.GetX()
-    local camY = Camera.GetY()
-    local screenW = shared.W
-    local screenH = shared.H
+    local b = shared.camBounds
     local R = _DR
 
     for _, npc in ipairs(shared.npcs) do
-        local sx = math.floor(npc.x - camX)
-        local sy = math.floor(npc.y - camY)
+        local sx = math.floor(npc.x)
+        local sy = math.floor(npc.y)
 
-        if sx + 80 >= 0 and sx - 80 <= screenW and sy + npc.h >= 0 and sy - 30 <= screenH then
+        -- World-space culling (80px margin for dialog boxes)
+        if npc.x + 80 >= b.x and npc.x - 80 <= b.x + b.w and npc.y + npc.h >= b.y and npc.y - 30 <= b.y + b.h then
             if npc.type == "guide" then
                 R(_ps, sx + 3, sy, 6, 6, _cSkin)
                 R(_ps, sx + 3, sy, 6, 2, _cGuideHair)

@@ -1,71 +1,65 @@
 -- ============================================
 -- Terraria2D — Camera
--- 2D camera with smooth follow (X and Y)
+-- Thin wrapper around C# GameCamera binding
 -- ============================================
 
 local Config = require("core/config")
 
 local Camera = {}
 
-local state = {
-    x = 0,
-    y = 0,
-    targetX = 0,
-    targetY = 0,
-    lerpSpeed = 6,
-}
+-- Proxy Camera.zoom to C# GameCamera.GetZoom/SetZoom
+setmetatable(Camera, {
+    __index = function(_, k)
+        if k == "zoom" then return GameCamera.GetZoom() end
+    end,
+    __newindex = function(_, k, v)
+        if k == "zoom" then GameCamera.SetZoom(v) end
+    end,
+})
 
 function Camera.Init(x, y)
-    state.x = x or 0
-    state.y = y or 0
-    state.targetX = state.x
-    state.targetY = state.y
+    GameCamera.Snap(x or 0, y or 0)
 end
 
-function Camera.GetX() return state.x end
-function Camera.GetY() return state.y end
+function Camera.GetX() return GameCamera.GetX() end
+function Camera.GetY() return GameCamera.GetY() end
 
 function Camera.Follow(entityX, entityY, screenW, screenH)
-    state.targetX = entityX - math.floor(screenW / 2)
-    state.targetY = entityY - math.floor(screenH / 2)
-
+    GameCamera.Follow(entityX, entityY, screenW, screenH)
     -- Clamp to world bounds
-    local maxX = Config.WORLD_PX_W - screenW
-    local maxY = Config.WORLD_PX_H - screenH
-    state.targetX = math.max(0, math.min(state.targetX, maxX))
-    state.targetY = math.max(0, math.min(state.targetY, maxY))
+    local viewW = screenW / Camera.zoom
+    local viewH = screenH / Camera.zoom
+    local maxX = Config.WORLD_PX_W - viewW
+    local maxY = Config.WORLD_PX_H - viewH
+    GameCamera.ClampTarget(0, 0, maxX, maxY)
 end
 
 function Camera.Update(dt)
-    local speed = state.lerpSpeed * dt
-    speed = math.min(speed, 1)
-    state.x = state.x + (state.targetX - state.x) * speed
-    state.y = state.y + (state.targetY - state.y) * speed
-    if math.abs(state.x - state.targetX) < 0.5 then state.x = state.targetX end
-    if math.abs(state.y - state.targetY) < 0.5 then state.y = state.targetY end
-end
-
-function Camera.WorldToScreenX(wx)
-    return wx - state.x
-end
-
-function Camera.WorldToScreenY(wy)
-    return wy - state.y
-end
-
-function Camera.ScreenToWorldX(sx)
-    return sx + state.x
-end
-
-function Camera.ScreenToWorldY(sy)
-    return sy + state.y
+    GameCamera.Update(dt)
 end
 
 function Camera.Snap(x, y)
-    state.x = x
-    state.y = y
-    state.targetX = x
-    state.targetY = y
+    GameCamera.Snap(x, y)
+end
+
+function Camera.ScreenToWorldX(sx)
+    return GameCamera.ScreenToWorldX(sx)
+end
+
+function Camera.ScreenToWorldY(sy)
+    return GameCamera.ScreenToWorldY(sy)
+end
+
+function Camera.WorldToScreenX(wx)
+    return GameCamera.WorldToScreenX(wx)
+end
+
+function Camera.WorldToScreenY(wy)
+    return GameCamera.WorldToScreenY(wy)
+end
+
+function Camera.GetWorldBounds(screenW, screenH)
+    return GameCamera.GetWorldBounds(screenW, screenH)
 end
 
 return Camera

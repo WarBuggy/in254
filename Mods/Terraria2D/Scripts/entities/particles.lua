@@ -79,18 +79,16 @@ function Particles.DrawAll(shared)
     -- Lazy init pixel sprite
     if not _ps then _ps = Drawing.RegisterPixelSprite(UI.GetPixelId()) end
 
-    local camX = Camera.GetX()
-    local camY = Camera.GetY()
-    local screenW = shared.W
-    local screenH = shared.H
+    local b = shared.camBounds
     local R = _DR
 
     for _, p in ipairs(shared.particles) do
-        local sx = floor(p.x - camX)
-        local sy = floor(p.y - camY)
+        local sx = floor(p.x)
+        local sy = floor(p.y)
 
         local sz = p.size or 12
-        if sx + sz >= 0 and sx <= screenW and sy + sz >= 0 and sy <= screenH then
+        -- World-space culling
+        if p.x + sz >= b.x and p.x <= b.x + b.w and p.y + sz >= b.y and p.y <= b.y + b.h then
             local alpha = floor(255 * (1 - p.lifetime / p.maxLife))
 
             if p.type == "block" then

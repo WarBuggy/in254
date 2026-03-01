@@ -190,20 +190,17 @@ function Enemy.DrawAll(shared)
     -- Lazy init pixel sprite
     if not _ps then _ps = Drawing.RegisterPixelSprite(UI.GetPixelId()) end
 
-    local camX = Camera.GetX()
-    local camY = Camera.GetY()
-    local screenW = shared.W
-    local screenH = shared.H
+    local b = shared.camBounds
     local R = _DR
 
     for _, e in ipairs(shared.enemies) do
         if e.alive then
-            local sx = math.floor(e.x - camX)
-            local sy = math.floor(e.y - camY)
+            local sx = math.floor(e.x)
+            local sy = math.floor(e.y)
             local pc = e.packedColor
 
-            -- Viewport culling
-            if sx + e.w < 0 or sx > screenW or sy + e.h < 0 or sy > screenH then
+            -- Viewport culling (world-space)
+            if e.x + e.w < b.x or e.x > b.x + b.w or e.y + e.h < b.y or e.y > b.y + b.h then
                 goto continue
             end
 

@@ -134,15 +134,14 @@ function Boss.Draw(shared)
     local boss = shared.boss
     if not boss or not boss.alive then return end
 
-    local camX = Camera.GetX()
-    local camY = Camera.GetY()
-    local sx = math.floor(boss.x - camX)
-    local sy = math.floor(boss.y - camY)
+    local sx = math.floor(boss.x)
+    local sy = math.floor(boss.y)
 
-    -- Viewport culling (40px margin for spin orbs)
+    -- Viewport culling (world-space, 40px margin for spin orbs)
     local margin = 40
-    if sx + boss.w + margin < 0 or sx - margin > shared.W or
-       sy + boss.h + margin < 0 or sy - margin > shared.H then
+    local b = shared.camBounds
+    if boss.x + boss.w + margin < b.x or boss.x - margin > b.x + b.w or
+       boss.y + boss.h + margin < b.y or boss.y - margin > b.y + b.h then
         return
     end
 

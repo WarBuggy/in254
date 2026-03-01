@@ -46,6 +46,11 @@ local GameplayRoot = Node.new({
         Drawing.RegisterLayer("particles", 20, { blend = "additive" })
         Drawing.RegisterLayer("ui", 30, { blend = "alpha" })
 
+        -- Assign world layers to the main camera (UI stays at native resolution)
+        GameCamera.AddLayer("world")
+        GameCamera.AddLayer("entities")
+        GameCamera.AddLayer("particles")
+
         -- Generate world
         local spawnX, spawnY = WorldGen.Generate()
         shared.spawnX = spawnX
@@ -60,11 +65,13 @@ local GameplayRoot = Node.new({
         Inventory.Add(shared.inventory, "torch", 50)
         Inventory.Add(shared.inventory, "wood", 10)
 
-        -- Initialize camera
+        -- Initialize camera (viewport in world coords = screen / zoom)
         local TS = Config.TILE_SIZE
+        local viewW = shared.W / Camera.zoom
+        local viewH = shared.H / Camera.zoom
         Camera.Snap(
-            spawnX * TS - shared.W / 2,
-            spawnY * TS - shared.H / 2
+            spawnX * TS - viewW / 2,
+            spawnY * TS - viewH / 2
         )
 
         -- Initialize systems
@@ -224,6 +231,9 @@ local GameplayRoot = Node.new({
             })
             shared._tileMapConfigured = true
         end
+
+        -- Compute world-space camera bounds for viewport culling
+        shared.camBounds = Camera.GetWorldBounds(shared.W, shared.H)
 
         -- World layer: sky + tiles + mining indicator
         Drawing.SetLayer("world")

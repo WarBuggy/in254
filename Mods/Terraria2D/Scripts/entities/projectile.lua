@@ -127,19 +127,16 @@ function Projectile.DrawAll(shared)
     -- Lazy init pixel sprite
     if not _ps then _ps = Drawing.RegisterPixelSprite(UI.GetPixelId()) end
 
-    local camX = Camera.GetX()
-    local camY = Camera.GetY()
-    local screenW = shared.W
-    local screenH = shared.H
+    local b = shared.camBounds
     local R = _DR
 
     for _, proj in ipairs(shared.projectiles) do
         if proj.alive then
-            local sx = math.floor(proj.x - camX)
-            local sy = math.floor(proj.y - camY)
+            local sx = math.floor(proj.x)
+            local sy = math.floor(proj.y)
 
-            -- Viewport culling (8px margin for projectile sizes)
-            if sx + 8 < 0 or sx - 8 > screenW or sy + 8 < 0 or sy - 8 > screenH then
+            -- Viewport culling (world-space, 8px margin)
+            if proj.x + 8 < b.x or proj.x - 8 > b.x + b.w or proj.y + 8 < b.y or proj.y - 8 > b.y + b.h then
                 goto continue
             end
 

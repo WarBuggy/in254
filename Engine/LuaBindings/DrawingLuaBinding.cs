@@ -62,12 +62,13 @@ namespace in254.Engine.LuaBindings
                 }
             });
 
-            // DrawTileMap — per-frame camera + lightMap (5 params)
-            drawTable["DrawTileMap"] = (Action<DynValue, DynValue, DynValue, DynValue, DynValue>)(
-                (camXDyn, camYDyn, screenWDyn, screenHDyn, lightMapDyn) =>
+            // DrawTileMap — per-frame viewport + lightMap (3 params, camera read from CameraManager)
+            drawTable["DrawTileMap"] = (Action<DynValue, DynValue, DynValue>)(
+                (screenWDyn, screenHDyn, lightMapDyn) =>
             {
+                var cam = CameraManager.Instance.Main;
                 TileRendererManager.Instance.SetFrameParams(
-                    (float)camXDyn.Number, (float)camYDyn.Number,
+                    cam.X, cam.Y,
                     (int)screenWDyn.Number, (int)screenHDyn.Number,
                     lightMapDyn.IsNil() ? null : lightMapDyn.Table
                 );

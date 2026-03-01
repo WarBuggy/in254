@@ -19,23 +19,25 @@ local WorldView = {}
 function WorldView.Draw(shared)
     local W = shared.W
     local H = shared.H
+    local zoom = Camera.zoom
     local TS = Config.TILE_SIZE
     local camX = Camera.GetX()
     local camY = Camera.GetY()
 
-    -- Sky background
-    local skyColor = shared.skyColor or Theme.Colors.SKY_DAY
-    UI.Rect(0, 0, W, H, skyColor)
+    -- Sky background (positioned at camera origin in world-space; camera transform offsets it)
+    local viewW = math.ceil(W / zoom)
+    local viewH = math.ceil(H / zoom)
+    UI.Rect(floor(camX), floor(camY), viewW, viewH, shared.skyColor or Theme.Colors.SKY_DAY)
 
-    -- Per-frame tile draw (config already set in root.lua)
-    Drawing.DrawTileMap(camX, camY, W, H, shared.lightMap)
+    -- Per-frame tile draw (3 params — camera read from CameraManager in C#)
+    Drawing.DrawTileMap(viewW, viewH, shared.lightMap)
 
-    -- Mining indicator
+    -- Mining indicator (world-space positions)
     if shared.mineTarget and shared.mineProgress > 0 then
         local mx = shared.mineTarget.x
         local my = shared.mineTarget.y
-        local sx = floor(mx * TS - camX)
-        local sy = floor(my * TS - camY)
+        local sx = mx * TS
+        local sy = my * TS
         local prog = shared.mineProgress
         UI.Rect(sx, sy, TS, TS, Color.New(255, 255, 255, floor(60 + 100 * prog)))
         UI.Rect(sx, sy + TS, TS, 2, _cMineBg)

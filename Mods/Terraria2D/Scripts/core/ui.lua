@@ -20,9 +20,7 @@ local rightReleased = false
 local tooltipText = nil
 local screenW = 0
 
--- Rect batch buffer (stride-5: x, y, w, h, packedColor)
-local _buf = {}
-local _n = 0
+-- (rect buffer removed — UI.Rect now calls Drawing.Rect directly)
 
 -- Cached default colors
 local _cBtnBase     = Color.New(60, 60, 80, 220)
@@ -78,14 +76,10 @@ function UI.IsRightDown() return rightDown end
 function UI.IsRightPressed() return rightPressed end
 function UI.IsRightReleased() return rightReleased end
 
--- Accumulate rect into batch buffer (pure Lua, zero C# crossings)
+-- Direct auto-batched rect — goes straight to DrawManager pool (strongly-typed, no DynValue boxing)
 function UI.Rect(x, y, w, h, color)
     if not _ps then return end
-    if type(color) == "table" then
-        color = Color.New(color[1] or 255, color[2] or 255, color[3] or 255, color[4] or 255)
-    end
-    _buf[_n+1]=x; _buf[_n+2]=y; _buf[_n+3]=w; _buf[_n+4]=h; _buf[_n+5]=color or 0
-    _n = _n + 5
+    Drawing.Rect(_ps, x, y, w, h, color or 0)
 end
 
 -- Accumulate line into line batch buffer (stride-7: x1,y1,x2,y2,thickness,color,flags)
@@ -99,12 +93,8 @@ function UI.Line(x1, y1, x2, y2, thickness, color)
     _ln = _ln + 7
 end
 
--- Flush all accumulated rects and lines to C# in one crossing each
+-- Flush accumulated lines to C# (rects are now auto-batched via Drawing.Rect)
 function UI.Flush()
-    if _n > 0 then
-        Drawing.FlushRects(_ps, _buf, _n / 5)
-        _n = 0
-    end
     if _ln > 0 then
         Drawing.FlushLines(_ps, _lbuf, _ln / 7)
         _ln = 0

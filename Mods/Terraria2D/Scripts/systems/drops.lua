@@ -99,17 +99,15 @@ function Drops.DrawAll(shared)
     -- Lazy init pixel sprite
     if not _ps then _ps = Drawing.RegisterPixelSprite(UI.GetPixelId()) end
 
-    local camX = Camera.GetX()
-    local camY = Camera.GetY()
-    local screenW = shared.W
-    local screenH = shared.H
+    local b = shared.camBounds
     local R = _DR
 
     for _, drop in ipairs(shared.drops) do
-        local sx = math.floor(drop.x - camX)
-        local sy = math.floor(drop.y - camY)
+        local sx = math.floor(drop.x)
+        local sy = math.floor(drop.y)
 
-        if sx + drop.w + 1 >= 0 and sx - 1 <= screenW and sy + drop.h + 3 >= 0 and sy - 3 <= screenH then
+        -- World-space culling
+        if drop.x + drop.w + 1 >= b.x and drop.x - 1 <= b.x + b.w and drop.y + drop.h + 3 >= b.y and drop.y - 3 <= b.y + b.h then
             sy = sy + math.floor(math.sin(drop.lifetime * 3) * 2)
 
             R(_ps, sx, sy, drop.w, drop.h, drop.packedColor)

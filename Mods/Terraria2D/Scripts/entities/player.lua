@@ -16,6 +16,14 @@ local Player = {}
 local _DR = Drawing.Rect
 local _ps -- pixel sprite id
 
+-- Cached player draw colors (avoid per-frame Color.New allocations)
+local _cBody    = Color.New(60, 120, 200)
+local _cSkin    = Color.New(230, 190, 150)
+local _cHair    = Color.New(100, 60, 20)
+local _cLegs    = Color.New(50, 50, 150)
+local _cEyes    = Color.New(40, 40, 40)
+local _cDmgNum  = Color.New(255, 80, 80)
+
 -- Item color cache (keyed by item id)
 local _itemColorCache = {}
 local function GetItemPackedColor(itemId)
@@ -289,10 +297,8 @@ function Player.Draw(p, shared)
     -- Lazy init pixel sprite
     if not _ps then _ps = Drawing.RegisterPixelSprite(UI.GetPixelId()) end
 
-    local camX = Camera.GetX()
-    local camY = Camera.GetY()
-    local sx = math.floor(p.x - camX)
-    local sy = math.floor(p.y - camY)
+    local sx = math.floor(p.x)
+    local sy = math.floor(p.y)
 
     -- Blink when invincible
     if p.invTimer > 0 and math.floor(p.invTimer * 10) % 2 == 0 then
@@ -302,23 +308,23 @@ function Player.Draw(p, shared)
     local R = _DR
 
     -- Body (torso)
-    R(_ps, sx + 2, sy + 6, 8, 10, Color.New(60, 120, 200))
+    R(_ps, sx + 2, sy + 6, 8, 10, _cBody)
     -- Head
-    R(_ps, sx + 3, sy, 6, 6, Color.New(230, 190, 150))
+    R(_ps, sx + 3, sy, 6, 6, _cSkin)
     -- Hair
-    R(_ps, sx + 3, sy, 6, 2, Color.New(100, 60, 20))
+    R(_ps, sx + 3, sy, 6, 2, _cHair)
     -- Legs
-    R(_ps, sx + 2, sy + 16, 3, 8, Color.New(50, 50, 150))
-    R(_ps, sx + 7, sy + 16, 3, 8, Color.New(50, 50, 150))
+    R(_ps, sx + 2, sy + 16, 3, 8, _cLegs)
+    R(_ps, sx + 7, sy + 16, 3, 8, _cLegs)
     -- Arms
     if p.facingRight then
-        R(_ps, sx + 10, sy + 7, 2, 8, Color.New(230, 190, 150))
+        R(_ps, sx + 10, sy + 7, 2, 8, _cSkin)
     else
-        R(_ps, sx, sy + 7, 2, 8, Color.New(230, 190, 150))
+        R(_ps, sx, sy + 7, 2, 8, _cSkin)
     end
     -- Eyes
     local eyeX = p.facingRight and (sx + 7) or (sx + 4)
-    R(_ps, eyeX, sy + 2, 1, 2, Color.New(40, 40, 40))
+    R(_ps, eyeX, sy + 2, 1, 2, _cEyes)
 
     -- Draw held item
     local inv = shared.inventory
@@ -354,7 +360,7 @@ function Player.TakeDamage(p, damage, shared, knockDir)
 
     -- Damage number
     local Particles = require("entities/particles")
-    Particles.DamageNumber(shared, p.x + p.w / 2, p.y, damage, {255, 80, 80})
+    Particles.DamageNumber(shared, p.x + p.w / 2, p.y, damage, _cDmgNum)
 
     if p.hp <= 0 then
         p.hp = 0
