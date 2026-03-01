@@ -164,16 +164,22 @@ function NPC.DrawAll(shared)
             local eyeX = npc.facingRight and (sx + 7) or (sx + 4)
             R(_ps, eyeX, sy + 2, 1, 2, _cEye)
 
-            Drawing.Text(npc.name, sx - 4, sy - 12, 8, _cNameLabel)
+            -- Name label + dialog rendered on UI layer at native resolution
+            Drawing.SetLayer("ui")
+            local uiX = math.floor(Camera.WorldToScreenX(npc.x))
+            local uiY = math.floor(Camera.WorldToScreenY(npc.y))
+
+            Drawing.Text(npc.name, uiX - 4, uiY - 12, 8, _cNameLabel)
 
             if npc.showDialog then
                 local line = npc.dialogLines[npc.dialogIndex]
                 local bw = #line * 5 + 16
-                local bx = sx - bw / 2 + 6
-                local by = sy - 28
+                local bx = uiX - bw / 2 + 6
+                local by = uiY - 28
                 R(_ps, bx, by, bw, 14, _cDialogBg)
                 Drawing.Text(line, bx + 4, by + 2, 9, _cDialogText)
             end
+            Drawing.SetLayer("entities")
         end
     end
 end
