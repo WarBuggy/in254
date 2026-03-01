@@ -55,6 +55,8 @@ public sealed class DrawManager : LoggerBaseCore
     private RenderLayer[] _layers = new RenderLayer[16];
     private int _layerCount;
     private byte _activeLayerId;
+    public byte ActiveLayerId => _activeLayerId;
+    public void SetActiveLayerId(byte id) => _activeLayerId = id;
 
     // Scratch buffers for layer-sorted rendering
     private DrawRequest[] _sortScratch = new DrawRequest[4096];

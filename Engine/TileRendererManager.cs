@@ -48,6 +48,7 @@ public sealed class TileRendererManager : LoggerBaseCore
     private float _camX, _camY;
     private int _screenW, _screenH;
     private Table _lightMap;
+    private byte _drawLayerId; // layer active when DrawTileMap was called
 
     // --- Native overlay buffer (replaces Lua table lightMap when set) ---
     private int _nativeOverlayHandle;
@@ -90,6 +91,7 @@ public sealed class TileRendererManager : LoggerBaseCore
         _screenH = screenH;
         _lightMap = lightMap;
         _hasFrameParams = true;
+        _drawLayerId = DrawManager.Instance.ActiveLayerId;
 
         // Align camera to _tileMargin grid — only rebuild when crossing a margin boundary
         int camTX = (int)Math.Floor(camX / _tileSize);
@@ -150,10 +152,15 @@ public sealed class TileRendererManager : LoggerBaseCore
             float offsetX = (float)Math.Floor(-(_camX - rtOriginX));
             float offsetY = (float)Math.Floor(-(_camY - rtOriginY));
 
-            DrawManager.Instance.AddRequest(
+            // Inject on the same layer that was active when DrawTileMap was called
+            var dm = DrawManager.Instance;
+            byte savedLayer = dm.ActiveLayerId;
+            dm.SetActiveLayerId(_drawLayerId);
+            dm.AddRequest(
                 _tileCache,
                 new Vector2(offsetX, offsetY)
             );
+            dm.SetActiveLayerId(savedLayer);
         }
 
         _hasFrameParams = false;

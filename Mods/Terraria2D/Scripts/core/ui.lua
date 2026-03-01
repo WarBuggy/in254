@@ -81,6 +81,9 @@ function UI.IsRightReleased() return rightReleased end
 -- Accumulate rect into batch buffer (pure Lua, zero C# crossings)
 function UI.Rect(x, y, w, h, color)
     if not _ps then return end
+    if type(color) == "table" then
+        color = Color.New(color[1] or 255, color[2] or 255, color[3] or 255, color[4] or 255)
+    end
     _buf[_n+1]=x; _buf[_n+2]=y; _buf[_n+3]=w; _buf[_n+4]=h; _buf[_n+5]=color or 0
     _n = _n + 5
 end
