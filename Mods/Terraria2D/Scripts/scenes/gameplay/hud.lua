@@ -13,17 +13,38 @@ local C = Theme.Colors
 
 local HUD = {}
 
+-- Cached colors for inline literals
+local _cBarOutline = Color.New(0, 0, 0, 150)
+local _cSlotKey    = Color.New(150, 150, 150)
+local _cBossBarBg  = Color.New(0, 0, 0, 180)
+local _cBossBarFg  = Color.New(200, 40, 40)
+local _cBossBarBg2 = Color.New(60, 10, 10, 200)
+local _cMinimapBg  = Color.New(0, 0, 0, 200)
+local _cPlayerDot  = Color.New(255, 255, 255)
+
+-- Item color cache (keyed by item id, avoids per-frame Color.New in hotbar)
+local _itemColorCache = {}
+
+local function GetItemPackedColor(itemId)
+    local cached = _itemColorCache[itemId]
+    if cached then return cached end
+    local c = Tiles.GetItemColor(itemId)
+    cached = Color.New(c[1], c[2], c[3])
+    _itemColorCache[itemId] = cached
+    return cached
+end
+
 function HUD.Draw(shared)
     local W = shared.W
     local p = shared.player
 
     -- HP bar
-    UI.Rect(8, 8, 104, 14, {0, 0, 0, 150})
+    UI.Rect(8, 8, 104, 14, _cBarOutline)
     UI.ProgressBar(9, 9, 102, 12, p.hp, p.maxHp, C.HP_FG, C.HP_BG)
     Drawing.Text("HP " .. p.hp .. "/" .. p.maxHp, 14, 10, 10, C.WHITE)
 
     -- Mana bar
-    UI.Rect(8, 24, 104, 14, {0, 0, 0, 150})
+    UI.Rect(8, 24, 104, 14, _cBarOutline)
     UI.ProgressBar(9, 25, 102, 12, p.mana, p.maxMana, C.MANA_FG, C.MANA_BG)
     Drawing.Text("MP " .. p.mana .. "/" .. p.maxMana, 14, 26, 10, C.WHITE)
 
@@ -36,7 +57,7 @@ function HUD.Draw(shared)
     local hotbarY = shared.H - slotSize - 6
 
     -- Hotbar background
-    UI.Rect(hotbarX - 4, hotbarY - 4, hotbarW + 8, slotSize + 8, {0, 0, 0, 150})
+    UI.Rect(hotbarX - 4, hotbarY - 4, hotbarW + 8, slotSize + 8, _cBarOutline)
 
     local inv = shared.inventory
     for i = 1, hotbarSize do
@@ -48,7 +69,7 @@ function HUD.Draw(shared)
         -- Item in slot
         local slot = inv.slots[i]
         if slot then
-            local color = Tiles.GetItemColor(slot.id)
+            local color = GetItemPackedColor(slot.id)
             local itemSize = Tiles.IsWeapon(slot.id) and 14 or 10
             local ox = math.floor((slotSize - itemSize) / 2)
             local oy = math.floor((slotSize - itemSize) / 2)
@@ -68,7 +89,7 @@ function HUD.Draw(shared)
 
         -- Slot number
         local keyLabel = i == 10 and "0" or tostring(i)
-        Drawing.Text(keyLabel, sx + slotSize - 8, hotbarY + 1, 7, {150, 150, 150})
+        Drawing.Text(keyLabel, sx + slotSize - 8, hotbarY + 1, 7, _cSlotKey)
 
         -- Tooltip on hover
         if slot and UI.IsHovered(sx, hotbarY, slotSize, slotSize) then
@@ -88,8 +109,8 @@ function HUD.Draw(shared)
     if shared.boss and shared.boss.alive then
         local bossW = 200
         local bossX = math.floor(W / 2 - bossW / 2)
-        UI.Rect(bossX - 2, 6, bossW + 4, 18, {0, 0, 0, 180})
-        UI.ProgressBar(bossX, 8, bossW, 14, shared.boss.hp, shared.boss.maxHp, {200, 40, 40}, {60, 10, 10, 200})
+        UI.Rect(bossX - 2, 6, bossW + 4, 18, _cBossBarBg)
+        UI.ProgressBar(bossX, 8, bossW, 14, shared.boss.hp, shared.boss.maxHp, _cBossBarFg, _cBossBarBg2)
         Drawing.Text(shared.boss.name, bossX + 4, 9, 10, C.WHITE)
     end
 end
@@ -110,7 +131,7 @@ function HUD.DrawMinimap(shared)
     local mapX = W - mapW - 8
     local mapY = 24
 
-    UI.Rect(mapX - 1, mapY - 1, mapW + 2, mapH + 2, {0, 0, 0, 200})
+    UI.Rect(mapX - 1, mapY - 1, mapW + 2, mapH + 2, _cMinimapBg)
 
     local WorldData = require("world/worlddata")
     local TS = Config.TILE_SIZE
@@ -162,7 +183,7 @@ function HUD.DrawMinimap(shared)
     local p = shared.player
     local px = floor(p.x / TS / scaleX)
     local py = floor(p.y / TS / scaleY)
-    UI.Rect(mapX + px - 1, mapY + py - 1, 3, 3, {255, 255, 255})
+    UI.Rect(mapX + px - 1, mapY + py - 1, 3, 3, _cPlayerDot)
 end
 
 return HUD

@@ -8,8 +8,13 @@ local Physics = require("systems/physics")
 local Camera = require("core/camera")
 local UI = require("core/ui")
 local Combat = require("systems/combat")
+local Batch = require("core/batch")
 
 local Enemy = {}
+
+-- Batch state (lazy init)
+local _batch = Batch.new()
+local _ps -- pixel sprite id
 
 -- Enemy type definitions
 Enemy.types = {
@@ -42,6 +47,7 @@ function Enemy.Spawn(shared, typeName, x, y)
     local def = Enemy.types[typeName]
     if not def then return end
 
+    local c = def.color
     local e = {
         type = typeName,
         x = x,
@@ -55,6 +61,7 @@ function Enemy.Spawn(shared, typeName, x, y)
         damage = def.damage,
         speed = def.speed,
         color = def.color,
+        packedColor = Color.New(c[1], c[2], c[3]),
         drops = def.drops,
         alive = true,
         invTimer = 0,
@@ -164,11 +171,28 @@ function Enemy.SkeletonAI(e, p, dt)
     end
 end
 
+-- Pre-packed colors for enemy parts
+local _cEye = Color.New(40, 40, 40)
+local _cZombieHead = Color.New(80, 120, 60)
+local _cZombieBody = Color.New(50, 90, 40)
+local _cZombieLeg = Color.New(40, 70, 30)
+local _cZombieEye = Color.New(200, 50, 50)
+local _cSkelRib = Color.New(200, 200, 180)
+local _cSkelWeap = Color.New(180, 180, 160)
+local _cHpBg = Color.New(60, 0, 0)
+local _cHpFg = Color.New(220, 40, 40)
+
 function Enemy.DrawAll(shared)
+    -- Lazy init pixel sprite
+    if not _ps then _ps = Drawing.RegisterPixelSprite(UI.GetPixelId()) end
+
     local camX = Camera.GetX()
     local camY = Camera.GetY()
     local screenW = shared.W
     local screenH = shared.H
+    local b = _batch
+    local R = Batch.rect
+    Batch.clear(b)
 
     for _, e in ipairs(shared.enemies) do
         if e.alive then
@@ -185,52 +209,47 @@ function Enemy.DrawAll(shared)
                 goto continue
             end
 
+            local pc = e.packedColor
+
             if e.type == "slime" then
-                -- Slime: rounded body
-                UI.Rect(sx + 1, sy + 2, e.w - 2, e.h - 2, e.color)
-                UI.Rect(sx, sy + 4, e.w, e.h - 6, e.color)
-                -- Eyes
+                R(b, _ps, sx + 1, sy + 2, e.w - 2, e.h - 2, pc)
+                R(b, _ps, sx, sy + 4, e.w, e.h - 6, pc)
                 local eyeOff = e.facingRight and 2 or -2
-                UI.Rect(sx + 3 + eyeOff, sy + 3, 2, 2, {40, 40, 40})
-                UI.Rect(sx + 7 + eyeOff, sy + 3, 2, 2, {40, 40, 40})
+                R(b, _ps, sx + 3 + eyeOff, sy + 3, 2, 2, _cEye)
+                R(b, _ps, sx + 7 + eyeOff, sy + 3, 2, 2, _cEye)
             elseif e.type == "zombie" then
-                -- Zombie humanoid
-                UI.Rect(sx + 3, sy, 6, 6, {80, 120, 60})       -- head
-                UI.Rect(sx + 2, sy + 6, 8, 10, {50, 90, 40})   -- body
-                UI.Rect(sx + 2, sy + 16, 3, 8, {40, 70, 30})   -- legs
-                UI.Rect(sx + 7, sy + 16, 3, 8, {40, 70, 30})
-                -- Arms reaching out
+                R(b, _ps, sx + 3, sy, 6, 6, _cZombieHead)
+                R(b, _ps, sx + 2, sy + 6, 8, 10, _cZombieBody)
+                R(b, _ps, sx + 2, sy + 16, 3, 8, _cZombieLeg)
+                R(b, _ps, sx + 7, sy + 16, 3, 8, _cZombieLeg)
                 local armX = e.facingRight and (sx + 10) or (sx - 2)
-                UI.Rect(armX, sy + 7, 3, 6, {80, 120, 60})
-                -- Eyes
-                UI.Rect(sx + 4, sy + 2, 2, 2, {200, 50, 50})
-                UI.Rect(sx + 7, sy + 2, 2, 2, {200, 50, 50})
+                R(b, _ps, armX, sy + 7, 3, 6, _cZombieHead)
+                R(b, _ps, sx + 4, sy + 2, 2, 2, _cZombieEye)
+                R(b, _ps, sx + 7, sy + 2, 2, 2, _cZombieEye)
             elseif e.type == "skeleton" then
-                -- Skeleton humanoid
-                UI.Rect(sx + 3, sy, 6, 6, e.color)             -- skull
-                UI.Rect(sx + 3, sy + 6, 6, 10, {200, 200, 180})-- ribcage
-                UI.Rect(sx + 3, sy + 16, 2, 8, e.color)        -- legs
-                UI.Rect(sx + 7, sy + 16, 2, 8, e.color)
-                -- Eye sockets
-                UI.Rect(sx + 4, sy + 2, 2, 2, {40, 40, 40})
-                UI.Rect(sx + 7, sy + 2, 2, 2, {40, 40, 40})
-                -- Weapon
+                R(b, _ps, sx + 3, sy, 6, 6, pc)
+                R(b, _ps, sx + 3, sy + 6, 6, 10, _cSkelRib)
+                R(b, _ps, sx + 3, sy + 16, 2, 8, pc)
+                R(b, _ps, sx + 7, sy + 16, 2, 8, pc)
+                R(b, _ps, sx + 4, sy + 2, 2, 2, _cEye)
+                R(b, _ps, sx + 7, sy + 2, 2, 2, _cEye)
                 local weapX = e.facingRight and (sx + 10) or (sx - 3)
-                UI.Rect(weapX, sy + 4, 2, 14, {180, 180, 160})
+                R(b, _ps, weapX, sy + 4, 2, 14, _cSkelWeap)
             end
 
             -- HP bar above enemy
             if e.hp < e.maxHp then
                 local barW = e.w
-                local barH = 2
-                UI.Rect(sx, sy - 5, barW, barH, {60, 0, 0})
+                R(b, _ps, sx, sy - 5, barW, 2, _cHpBg)
                 local fill = math.max(0, e.hp / e.maxHp)
-                UI.Rect(sx, sy - 5, math.floor(barW * fill), barH, {220, 40, 40})
+                R(b, _ps, sx, sy - 5, math.floor(barW * fill), 2, _cHpFg)
             end
 
             ::continue::
         end
     end
+
+    Batch.flush(b)
 end
 
 return Enemy

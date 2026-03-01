@@ -7,8 +7,13 @@ local Config = require("core/config")
 local Physics = require("systems/physics")
 local Camera = require("core/camera")
 local UI = require("core/ui")
+local Batch = require("core/batch")
 
 local NPC = {}
+
+-- Batch state (lazy init)
+local _batch = Batch.new()
+local _ps -- pixel sprite id
 
 function NPC.SpawnGuide(shared, tileX, tileY)
     local TS = Config.TILE_SIZE
@@ -120,11 +125,30 @@ function NPC.UpdateAll(shared, dt)
     end
 end
 
+-- Pre-packed NPC colors
+local _cSkin = Color.New(230, 190, 150)
+local _cGuideHair = Color.New(80, 50, 20)
+local _cGuideBody = Color.New(40, 140, 40)
+local _cGuideLeg = Color.New(30, 100, 30)
+local _cMerchHat = Color.New(60, 60, 60)
+local _cMerchBody = Color.New(40, 40, 140)
+local _cMerchLeg = Color.New(30, 30, 100)
+local _cEye = Color.New(40, 40, 40)
+local _cDialogBg = Color.New(0, 0, 0, 200)
+local _cNameLabel = Color.New(255, 255, 100)
+local _cDialogText = Color.New(255, 255, 255)
+
 function NPC.DrawAll(shared)
+    -- Lazy init pixel sprite
+    if not _ps then _ps = Drawing.RegisterPixelSprite(UI.GetPixelId()) end
+
     local camX = Camera.GetX()
     local camY = Camera.GetY()
     local screenW = shared.W
     local screenH = shared.H
+    local b = _batch
+    local R = Batch.rect
+    Batch.clear(b)
 
     for _, npc in ipairs(shared.npcs) do
         local sx = math.floor(npc.x - camX)
@@ -132,34 +156,36 @@ function NPC.DrawAll(shared)
 
         if sx + 80 >= 0 and sx - 80 <= screenW and sy + npc.h >= 0 and sy - 30 <= screenH then
             if npc.type == "guide" then
-                UI.Rect(sx + 3, sy, 6, 6, {230, 190, 150})        -- head
-                UI.Rect(sx + 3, sy, 6, 2, {80, 50, 20})           -- hair
-                UI.Rect(sx + 2, sy + 6, 8, 10, {40, 140, 40})     -- body
-                UI.Rect(sx + 2, sy + 16, 3, 8, {30, 100, 30})     -- legs
-                UI.Rect(sx + 7, sy + 16, 3, 8, {30, 100, 30})
+                R(b, _ps, sx + 3, sy, 6, 6, _cSkin)
+                R(b, _ps, sx + 3, sy, 6, 2, _cGuideHair)
+                R(b, _ps, sx + 2, sy + 6, 8, 10, _cGuideBody)
+                R(b, _ps, sx + 2, sy + 16, 3, 8, _cGuideLeg)
+                R(b, _ps, sx + 7, sy + 16, 3, 8, _cGuideLeg)
             elseif npc.type == "merchant" then
-                UI.Rect(sx + 3, sy, 6, 6, {230, 190, 150})        -- head
-                UI.Rect(sx + 3, sy, 6, 2, {60, 60, 60})           -- hat
-                UI.Rect(sx + 2, sy + 6, 8, 10, {40, 40, 140})     -- body
-                UI.Rect(sx + 2, sy + 16, 3, 8, {30, 30, 100})     -- legs
-                UI.Rect(sx + 7, sy + 16, 3, 8, {30, 30, 100})
+                R(b, _ps, sx + 3, sy, 6, 6, _cSkin)
+                R(b, _ps, sx + 3, sy, 6, 2, _cMerchHat)
+                R(b, _ps, sx + 2, sy + 6, 8, 10, _cMerchBody)
+                R(b, _ps, sx + 2, sy + 16, 3, 8, _cMerchLeg)
+                R(b, _ps, sx + 7, sy + 16, 3, 8, _cMerchLeg)
             end
 
             local eyeX = npc.facingRight and (sx + 7) or (sx + 4)
-            UI.Rect(eyeX, sy + 2, 1, 2, {40, 40, 40})
+            R(b, _ps, eyeX, sy + 2, 1, 2, _cEye)
 
-            Drawing.Text(npc.name, sx - 4, sy - 12, 8, {255, 255, 100})
+            Drawing.Text(npc.name, sx - 4, sy - 12, 8, _cNameLabel)
 
             if npc.showDialog then
                 local line = npc.dialogLines[npc.dialogIndex]
                 local bw = #line * 5 + 16
                 local bx = sx - bw / 2 + 6
                 local by = sy - 28
-                UI.Rect(bx, by, bw, 14, {0, 0, 0, 200})
-                Drawing.Text(line, bx + 4, by + 2, 9, {255, 255, 255})
+                R(b, _ps, bx, by, bw, 14, _cDialogBg)
+                Drawing.Text(line, bx + 4, by + 2, 9, _cDialogText)
             end
         end
     end
+
+    Batch.flush(b)
 end
 
 return NPC

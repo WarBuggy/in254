@@ -59,6 +59,22 @@ public sealed class InputManager
     public bool IsKeyPressed(string keyName) => TryResolveKey(keyName, out var k) && IsKeyPressed(k);
     public bool IsKeyReleased(string keyName) => TryResolveKey(keyName, out var k) && IsKeyReleased(k);
 
+    /// <summary>Returns 0-9 if a number key was just pressed, or -1 if none.</summary>
+    public int GetNumberKeyPressed()
+    {
+        if (IsKeyPressed(Keys.D1)) return 1;
+        if (IsKeyPressed(Keys.D2)) return 2;
+        if (IsKeyPressed(Keys.D3)) return 3;
+        if (IsKeyPressed(Keys.D4)) return 4;
+        if (IsKeyPressed(Keys.D5)) return 5;
+        if (IsKeyPressed(Keys.D6)) return 6;
+        if (IsKeyPressed(Keys.D7)) return 7;
+        if (IsKeyPressed(Keys.D8)) return 8;
+        if (IsKeyPressed(Keys.D9)) return 9;
+        if (IsKeyPressed(Keys.D0)) return 0;
+        return -1;
+    }
+
     // ========== Mouse Buttons ==========
 
     public bool IsMouseDown(MouseButton button) => GetButtonState(_currMouse, button) == ButtonState.Pressed;
@@ -100,7 +116,7 @@ public sealed class InputManager
 
     // ========== Helpers ==========
 
-    public enum MouseButton { Left, Right, Middle }
+    public enum MouseButton { Left, Right, Middle, X1, X2 }
 
     private static ButtonState GetButtonState(MouseState state, MouseButton button)
     {
@@ -109,11 +125,13 @@ public sealed class InputManager
             MouseButton.Left => state.LeftButton,
             MouseButton.Right => state.RightButton,
             MouseButton.Middle => state.MiddleButton,
+            MouseButton.X1 => state.XButton1,
+            MouseButton.X2 => state.XButton2,
             _ => ButtonState.Released
         };
     }
 
-    private static bool TryResolveKey(string keyName, out Keys key)
+    public static bool TryResolveKey(string keyName, out Keys key)
     {
         if (_keyNameCache.TryGetValue(keyName, out key))
             return true;
@@ -176,6 +194,8 @@ public sealed class InputManager
             "left" or "leftmouse" or "lmb" => MouseButton.Left,
             "right" or "rightmouse" or "rmb" => MouseButton.Right,
             "middle" or "middlemouse" or "mmb" => MouseButton.Middle,
+            "x1" or "mouse4" or "back" or "xbutton1" => MouseButton.X1,
+            "x2" or "mouse5" or "forward" or "xbutton2" => MouseButton.X2,
             _ => (MouseButton)(-1)
         };
         return (int)button >= 0;

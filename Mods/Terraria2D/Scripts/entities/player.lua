@@ -10,8 +10,25 @@ local WorldData = require("world/worlddata")
 local Camera = require("core/camera")
 local UI = require("core/ui")
 local HUD = require("scenes/gameplay/hud")
+local Lighting = require("world/lighting")
+local Batch = require("core/batch")
 
 local Player = {}
+
+-- Batch state (lazy init)
+local _batch = Batch.new()
+local _ps -- pixel sprite id
+
+-- Item color cache (keyed by item id)
+local _itemColorCache = {}
+local function GetItemPackedColor(itemId)
+    local cached = _itemColorCache[itemId]
+    if cached then return cached end
+    local c = Tiles.GetItemColor(itemId)
+    cached = Color.New(c[1], c[2], c[3], c[4] or 255)
+    _itemColorCache[itemId] = cached
+    return cached
+end
 
 function Player.new(spawnX, spawnY)
     local TS = Config.TILE_SIZE
@@ -89,14 +106,10 @@ function Player.Update(p, dt, shared)
     -- Attack (left click, if holding weapon)
     Player.HandleAttack(p, dt, shared)
 
-    -- Hotbar keys
-    for i = 1, 9 do
-        if Input.IsKeyPressed(tostring(i)) then
-            shared.inventory.selected = i
-        end
-    end
-    if Input.IsKeyPressed("0") then
-        shared.inventory.selected = 10
+    -- Hotbar keys (wrapped by input.lua, zero crossings)
+    local numKey = Input.GetNumberKeyPressed()
+    if numKey >= 0 then
+        shared.inventory.selected = numKey == 0 and 10 or numKey
     end
 
     -- Camera follow
@@ -165,6 +178,7 @@ function Player.HandleMining(p, dt, shared)
         if shared.mineProgress >= 1.0 then
             -- Block mined!
             WorldData.Set(tx, ty, Tiles.AIR)
+            Lighting.UpdateAt(shared, tx, ty)
             Drawing.RefreshTileMap()
             HUD.RefreshMinimap()
             -- Drop item
@@ -222,6 +236,7 @@ function Player.HandlePlacing(p, shared)
     -- Place tile
     local tileId = Tiles.itemToTile[slot.id]
     WorldData.Set(tx, ty, tileId)
+    Lighting.UpdateAt(shared, tx, ty)
     Drawing.RefreshTileMap()
     HUD.RefreshMinimap()
 
@@ -275,6 +290,9 @@ end
 function Player.Draw(p, shared)
     if not p.alive then return end
 
+    -- Lazy init pixel sprite
+    if not _ps then _ps = Drawing.RegisterPixelSprite(UI.GetPixelId()) end
+
     local camX = Camera.GetX()
     local camY = Camera.GetY()
     local sx = math.floor(p.x - camX)
@@ -285,53 +303,49 @@ function Player.Draw(p, shared)
         return
     end
 
+    local b = _batch
+    local R = Batch.rect
+    Batch.clear(b)
+
     -- Body (torso)
-    UI.Rect(sx + 2, sy + 6, 8, 10, {60, 120, 200})
+    R(b, _ps, sx + 2, sy + 6, 8, 10, Color.New(60, 120, 200))
     -- Head
-    UI.Rect(sx + 3, sy, 6, 6, {230, 190, 150})
+    R(b, _ps, sx + 3, sy, 6, 6, Color.New(230, 190, 150))
     -- Hair
-    UI.Rect(sx + 3, sy, 6, 2, {100, 60, 20})
+    R(b, _ps, sx + 3, sy, 6, 2, Color.New(100, 60, 20))
     -- Legs
-    UI.Rect(sx + 2, sy + 16, 3, 8, {50, 50, 150})
-    UI.Rect(sx + 7, sy + 16, 3, 8, {50, 50, 150})
+    R(b, _ps, sx + 2, sy + 16, 3, 8, Color.New(50, 50, 150))
+    R(b, _ps, sx + 7, sy + 16, 3, 8, Color.New(50, 50, 150))
     -- Arms
     if p.facingRight then
-        UI.Rect(sx + 10, sy + 7, 2, 8, {230, 190, 150})
+        R(b, _ps, sx + 10, sy + 7, 2, 8, Color.New(230, 190, 150))
     else
-        UI.Rect(sx, sy + 7, 2, 8, {230, 190, 150})
+        R(b, _ps, sx, sy + 7, 2, 8, Color.New(230, 190, 150))
     end
     -- Eyes
     local eyeX = p.facingRight and (sx + 7) or (sx + 4)
-    UI.Rect(eyeX, sy + 2, 1, 2, {40, 40, 40})
+    R(b, _ps, eyeX, sy + 2, 1, 2, Color.New(40, 40, 40))
 
     -- Draw held item
     local inv = shared.inventory
     if inv then
         local slot = inv.slots[inv.selected]
         if slot then
-            local color = Tiles.GetItemColor(slot.id)
+            local packedColor = GetItemPackedColor(slot.id)
             local ix, iy
             if Tiles.IsWeapon(slot.id) then
-                -- Draw weapon
-                if p.facingRight then
-                    ix = sx + 11
-                else
-                    ix = sx - 4
-                end
+                if p.facingRight then ix = sx + 11 else ix = sx - 4 end
                 iy = sy + 5
-                UI.Rect(ix, iy, 3, 12, color)
+                R(b, _ps, ix, iy, 3, 12, packedColor)
             else
-                -- Draw block item
-                if p.facingRight then
-                    ix = sx + 11
-                else
-                    ix = sx - 3
-                end
+                if p.facingRight then ix = sx + 11 else ix = sx - 3 end
                 iy = sy + 8
-                UI.Rect(ix, iy, 4, 4, color)
+                R(b, _ps, ix, iy, 4, 4, packedColor)
             end
         end
     end
+
+    Batch.flush(b)
 end
 
 function Player.TakeDamage(p, damage, shared, knockDir)

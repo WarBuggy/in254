@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 using FontStashSharp;
 using MoonSharp.Interpreter;
 using in254.Core;
+using in254.Engine.LuaBindings;
 
 namespace in254.Engine;
 
@@ -13,10 +14,38 @@ public sealed class DrawManager : LoggerBaseCore
     private static readonly DrawManager _instance = new();
     public static DrawManager Instance => _instance;
 
-    // --- Draw request pool ---
+    // --- Sprite registry (persistent across frames) ---
+    public struct SpriteRegion
+    {
+        public Texture2D Texture;
+        public Rectangle SourceRect;
+    }
+
+    private SpriteRegion[] _spriteRegions = new SpriteRegion[256];
+    private int _spriteRegionCount;
+
+    public int RegisterSprite(Texture2D texture, int srcX, int srcY, int srcW, int srcH)
+    {
+        if (_spriteRegionCount >= _spriteRegions.Length)
+            Array.Resize(ref _spriteRegions, _spriteRegions.Length * 2);
+        _spriteRegions[_spriteRegionCount] = new SpriteRegion
+        {
+            Texture = texture,
+            SourceRect = new Rectangle(srcX, srcY, srcW, srcH)
+        };
+        return _spriteRegionCount++;
+    }
+
+    public int RegisterPixelSprite(Texture2D pixelTexture)
+        => RegisterSprite(pixelTexture, 0, 0, 1, 1);
+
+    // --- Draw request pool (struct array, zero-alloc per frame) ---
     private DrawRequest[] _drawPool = new DrawRequest[4096];
     private int _drawCount;
-    private readonly List<TextDrawRequest> _textQueue = new();
+
+    // --- Text request pool (struct array, zero-alloc per frame) ---
+    private TextDrawRequest[] _textPool = new TextDrawRequest[128];
+    private int _textCount;
 
     // --- Texture slot indirection (keeps DrawRequest blittable) ---
     private Texture2D[] _textureSlots = new Texture2D[64];
@@ -30,24 +59,8 @@ public sealed class DrawManager : LoggerBaseCore
     // Scratch buffers for layer-sorted rendering
     private DrawRequest[] _sortScratch = new DrawRequest[4096];
     private int[] _layerOrder;
-
-    private bool HasLayers => _layerCount > 1;
-
-    // --- Tile grid RenderTarget cache ---
-    private RenderTarget2D _tileCache;
-    private bool _tileCacheDirty = true;
-    private int _cachedCamTileX = int.MinValue;
-    private int _cachedCamTileY = int.MinValue;
-    private int _cachedViewportW;
-    private int _cachedViewportH;
-
-    // Stored tile grid params (rendered to RT when dirty)
-    private bool _hasPendingTileMap;
-    private Table _pendingTiles, _pendingColorCache, _pendingLightMap, _pendingTileData;
-    private float _pendingCamX, _pendingCamY;
-    private int _pendingTileSize, _pendingWorldW, _pendingWorldH;
-    private int _pendingScreenW, _pendingScreenH, _pendingMaxLight, _pendingSurfaceY;
-    private Texture2D _pendingPixelTex;
+    private static readonly Comparer<int> _layerComparer =
+        Comparer<int>.Create((a, b) => Instance._layers[a].Priority.CompareTo(Instance._layers[b].Priority));
 
     private DrawManager() { }
 
@@ -70,16 +83,14 @@ public sealed class DrawManager : LoggerBaseCore
     public void RegisterLayer(string name, int priority,
         BlendState blendState, SpriteSortMode sortMode, SamplerState samplerState)
     {
-        // Check for duplicate name
         for (int i = 0; i < _layerCount; i++)
             if (_layers[i].Name == name) return;
 
         if (_layerCount == 0)
         {
-            // Auto-create default layer at slot 0
             _layers[0] = new RenderLayer
             {
-                Id = 0, Name = "__default", Priority = 0,
+                Id = 0, Name = "__default", Priority = -1,
                 BlendState = BlendState.AlphaBlend,
                 SortMode = SpriteSortMode.Deferred,
                 SamplerState = SamplerState.PointClamp
@@ -116,9 +127,6 @@ public sealed class DrawManager : LoggerBaseCore
 
     public void ResetActiveLayer() => _activeLayerId = 0;
 
-    /// <summary>
-    /// Adds a draw request to the queue.
-    /// </summary>
     public void AddRequest(Texture2D texture, Vector2 position,
                       float rotation = 0f, Vector2 scale = default,
                       Color? color = null, float layerDepth = 0f,
@@ -152,9 +160,112 @@ public sealed class DrawManager : LoggerBaseCore
         };
     }
 
-    /// <summary>
-    /// Batch-add colored rects from a flat Lua table (stride 8: x, y, w, h, r, g, b, a).
-    /// </summary>
+    public void AddRect(int spriteId, float x, float y, float w, float h, int packedColor)
+    {
+        ref var region = ref _spriteRegions[spriteId];
+        short handle = RegisterTextureSlot(region.Texture);
+        Color color = packedColor == 0 ? Color.White : ColorLuaBinding.ToColor(packedColor);
+        EnsurePoolCapacity();
+        _drawPool[_drawCount++] = new DrawRequest
+        {
+            TextureHandle = handle,
+            Position = new Vector2(x, y),
+            SourceRectangle = region.SourceRect,
+            Scale = new Vector2(w, h),
+            Color = color,
+            LayerId = _activeLayerId,
+            Flags = 0
+        };
+    }
+
+    public void AddLine(int spriteId, float x1, float y1, float x2, float y2, float thickness, int packedColor)
+    {
+        ref var region = ref _spriteRegions[spriteId];
+        short handle = RegisterTextureSlot(region.Texture);
+        Color color = packedColor == 0 ? Color.White : ColorLuaBinding.ToColor(packedColor);
+
+        float dx = x2 - x1, dy = y2 - y1;
+        float length = MathF.Sqrt(dx * dx + dy * dy);
+        float rotation = MathF.Atan2(dy, dx);
+
+        EnsurePoolCapacity();
+        _drawPool[_drawCount++] = new DrawRequest
+        {
+            TextureHandle = handle,
+            Position = new Vector2(x1, y1),
+            SourceRectangle = region.SourceRect,
+            Rotation = rotation,
+            Scale = new Vector2(length, thickness),
+            Color = color,
+            LayerId = _activeLayerId,
+            Flags = 0
+        };
+    }
+
+    public void AddLineBatch(int spriteId, Table data, int count)
+    {
+        ref var region = ref _spriteRegions[spriteId];
+        short handle = RegisterTextureSlot(region.Texture);
+
+        for (int i = 0; i < count; i++)
+        {
+            int off = i * 7;
+            float x1 = (float)data.Get(off + 1).Number;
+            float y1 = (float)data.Get(off + 2).Number;
+            float x2 = (float)data.Get(off + 3).Number;
+            float y2 = (float)data.Get(off + 4).Number;
+            float thickness = (float)data.Get(off + 5).Number;
+            int packed = (int)data.Get(off + 6).Number;
+            Color color = packed == 0 ? Color.White : ColorLuaBinding.ToColor(packed);
+
+            float dx = x2 - x1, dy = y2 - y1;
+            float length = MathF.Sqrt(dx * dx + dy * dy);
+            float rotation = MathF.Atan2(dy, dx);
+
+            EnsurePoolCapacity();
+            _drawPool[_drawCount++] = new DrawRequest
+            {
+                TextureHandle = handle,
+                Position = new Vector2(x1, y1),
+                SourceRectangle = region.SourceRect,
+                Rotation = rotation,
+                Scale = new Vector2(length, thickness),
+                Color = color,
+                LayerId = _activeLayerId,
+                Flags = 0
+            };
+        }
+    }
+
+    public void AddRectBatchPacked(int spriteId, Table data, int count)
+    {
+        ref var region = ref _spriteRegions[spriteId];
+        short handle = RegisterTextureSlot(region.Texture);
+
+        for (int i = 0; i < count; i++)
+        {
+            int off = i * 5;
+            float x = (float)data.Get(off + 1).Number;
+            float y = (float)data.Get(off + 2).Number;
+            float w = (float)data.Get(off + 3).Number;
+            float h = (float)data.Get(off + 4).Number;
+            int packed = (int)data.Get(off + 5).Number;
+            Color color = packed == 0 ? Color.White : ColorLuaBinding.ToColor(packed);
+
+            EnsurePoolCapacity();
+            _drawPool[_drawCount++] = new DrawRequest
+            {
+                TextureHandle = handle,
+                Position = new Vector2(x, y),
+                SourceRectangle = region.SourceRect,
+                Scale = new Vector2(w, h),
+                Color = color,
+                LayerId = _activeLayerId,
+                Flags = 0
+            };
+        }
+    }
+
     public void AddRectBatch(Texture2D texture, Table data, int count)
     {
         if (texture == null)
@@ -164,7 +275,7 @@ public sealed class DrawManager : LoggerBaseCore
 
         for (int i = 0; i < count; i++)
         {
-            int offset = i * 8; // stride 8
+            int offset = i * 8;
             float x = (float)data.Get(offset + 1).Number;
             float y = (float)data.Get(offset + 2).Number;
             float w = (float)data.Get(offset + 3).Number;
@@ -190,6 +301,31 @@ public sealed class DrawManager : LoggerBaseCore
         }
     }
 
+    public void AddSpriteBatch(Table data, int count)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            int off = i * 7;
+            int spriteId = (int)data.Get(off + 1).Number;
+            ref var region = ref _spriteRegions[spriteId];
+            short handle = RegisterTextureSlot(region.Texture);
+            int packed = (int)data.Get(off + 6).Number;
+            Color color = packed == 0 ? Color.White : ColorLuaBinding.ToColor(packed);
+
+            EnsurePoolCapacity();
+            _drawPool[_drawCount++] = new DrawRequest
+            {
+                TextureHandle = handle,
+                Position = new Vector2((float)data.Get(off + 2).Number, (float)data.Get(off + 3).Number),
+                SourceRectangle = region.SourceRect,
+                Scale = new Vector2((float)data.Get(off + 4).Number, (float)data.Get(off + 5).Number),
+                Color = color,
+                LayerId = _activeLayerId,
+                Flags = (byte)((int)data.Get(off + 7).Number & 0x3)
+            };
+        }
+    }
+
     private void EnsurePoolCapacity()
     {
         if (_drawCount < _drawPool.Length) return;
@@ -199,120 +335,67 @@ public sealed class DrawManager : LoggerBaseCore
         _drawPool = newPool;
     }
 
-    /// <summary>
-    /// Adds a text draw request to the queue.
-    /// </summary>
     public void AddTextRequest(string text, Vector2 position, int fontSize, Color? color = null, string fontName = null)
     {
-        _textQueue.Add(new TextDrawRequest
+        if (_textCount >= _textPool.Length)
+            Array.Resize(ref _textPool, _textPool.Length * 2);
+
+        _textPool[_textCount++] = new TextDrawRequest
         {
             Text = text,
             Position = position,
             FontSize = fontSize,
             Color = color ?? Color.White,
             FontName = fontName
-        });
+        };
     }
 
-    // =============================================
-    // Tile cache (Lua calls StoreTileMapParams / InvalidateTileCache,
-    //             Render() handles everything else internally)
-    // =============================================
-
-    public void StoreTileMapParams(
-        Texture2D pixelTex, Table tiles, Table colorCache, Table lightMap, Table tileData,
-        float camX, float camY, int tileSize,
-        int worldW, int worldH, int screenW, int screenH,
-        int maxLight, int surfaceY)
+    /// <summary>
+    /// Batch text requests from a stride-5 Lua table: text, x, y, size, packedColor.
+    /// Single C# crossing for N text draws.
+    /// </summary>
+    public void AddTextBatch(Table data, int count)
     {
-        _hasPendingTileMap = true;
-        _pendingPixelTex = pixelTex;
-        _pendingTiles = tiles;
-        _pendingColorCache = colorCache;
-        _pendingLightMap = lightMap;
-        _pendingTileData = tileData;
-        _pendingCamX = camX;
-        _pendingCamY = camY;
-        _pendingTileSize = tileSize;
-        _pendingWorldW = worldW;
-        _pendingWorldH = worldH;
-        _pendingScreenW = screenW;
-        _pendingScreenH = screenH;
-        _pendingMaxLight = maxLight;
-        _pendingSurfaceY = surfaceY;
+        for (int i = 0; i < count; i++)
+        {
+            int off = i * 5;
+            string text = data.Get(off + 1).String;
+            float x = (float)data.Get(off + 2).Number;
+            float y = (float)data.Get(off + 3).Number;
+            int size = (int)data.Get(off + 4).Number;
+            int packed = (int)data.Get(off + 5).Number;
+            Color color = packed == 0 ? Color.White : ColorLuaBinding.ToColor(packed);
 
-        int camTX = (int)Math.Floor(camX / tileSize);
-        int camTY = (int)Math.Floor(camY / tileSize);
-        if (camTX != _cachedCamTileX || camTY != _cachedCamTileY)
-        {
-            _tileCacheDirty = true;
-            _cachedCamTileX = camTX;
-            _cachedCamTileY = camTY;
-        }
-        if (screenW != _cachedViewportW || screenH != _cachedViewportH)
-        {
-            _tileCacheDirty = true;
-            _cachedViewportW = screenW;
-            _cachedViewportH = screenH;
+            if (_textCount >= _textPool.Length)
+                Array.Resize(ref _textPool, _textPool.Length * 2);
+
+            _textPool[_textCount++] = new TextDrawRequest
+            {
+                Text = text,
+                Position = new Vector2(x, y),
+                FontSize = size,
+                Color = color,
+            };
         }
     }
 
-    public void InvalidateTileCache() => _tileCacheDirty = true;
-
     // =============================================
-    // Render — single entry point called by EngineManager
-    // Handles: tile RT update → tile blit → entity draw → text → cleanup
+    // Render
     // =============================================
 
     public void Render(GraphicsDevice graphicsDevice, SpriteBatch spriteBatch)
     {
-        // 1. Update tile RenderTarget if dirty
-        UpdateTileCache(graphicsDevice, spriteBatch);
-
-        // 2. Draw everything (tiles + entities + text)
         if (_layerCount > 1)
             RenderMultiLayer(spriteBatch);
         else
             RenderSinglePass(spriteBatch);
 
-        // 3. Cleanup
         _drawCount = 0;
-        _textQueue.Clear();
-        _hasPendingTileMap = false;
+        _textCount = 0;
         _textureSlotCount = 0;
     }
 
     // --- Internals ---
-
-    private void UpdateTileCache(GraphicsDevice graphicsDevice, SpriteBatch spriteBatch)
-    {
-        if (!_hasPendingTileMap) return;
-
-        if (_tileCache == null ||
-            _tileCache.Width != _pendingScreenW || _tileCache.Height != _pendingScreenH)
-        {
-            _tileCache?.Dispose();
-            _tileCache = new RenderTarget2D(graphicsDevice, _pendingScreenW, _pendingScreenH);
-            _tileCacheDirty = true;
-        }
-
-        if (!_tileCacheDirty) return;
-        _tileCacheDirty = false;
-
-        graphicsDevice.SetRenderTarget(_tileCache);
-        graphicsDevice.Clear(Color.Transparent);
-        spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-            SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise);
-        DrawTiles(spriteBatch);
-        spriteBatch.End();
-        graphicsDevice.SetRenderTarget(null);
-    }
-
-    private void BlitTileCache(SpriteBatch spriteBatch)
-    {
-        if (_tileCache != null && _hasPendingTileMap)
-            spriteBatch.Draw(_tileCache, Vector2.Zero, Color.White);
-    }
 
     private void DrawBatch(SpriteBatch spriteBatch, DrawRequest[] pool, int start, int count)
     {
@@ -323,9 +406,13 @@ public sealed class DrawManager : LoggerBaseCore
             if ((req.Flags & 1) != 0) effects |= SpriteEffects.FlipHorizontally;
             if ((req.Flags & 2) != 0) effects |= SpriteEffects.FlipVertically;
 
+            Rectangle? srcRect = (req.SourceRectangle.Width > 0 && req.SourceRectangle.Height > 0)
+                ? req.SourceRectangle
+                : null;
+
             spriteBatch.Draw(
                 _textureSlots[req.TextureHandle],
-                req.Position, req.SourceRectangle, req.Color,
+                req.Position, srcRect, req.Color,
                 req.Rotation, Vector2.Zero, req.Scale,
                 effects, req.LayerDepth
             );
@@ -334,8 +421,9 @@ public sealed class DrawManager : LoggerBaseCore
 
     private void DrawText(SpriteBatch spriteBatch)
     {
-        foreach (var req in _textQueue)
+        for (int i = 0; i < _textCount; i++)
         {
+            ref var req = ref _textPool[i];
             var font = FontManager.Instance.GetFont(req.FontSize, req.FontName);
             spriteBatch.DrawString(font, req.Text, req.Position, req.Color);
         }
@@ -345,7 +433,6 @@ public sealed class DrawManager : LoggerBaseCore
     {
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
             SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise);
-        BlitTileCache(spriteBatch);
         DrawBatch(spriteBatch, _drawPool, 0, _drawCount);
         DrawText(spriteBatch);
         spriteBatch.End();
@@ -353,12 +440,6 @@ public sealed class DrawManager : LoggerBaseCore
 
     private void RenderMultiLayer(SpriteBatch spriteBatch)
     {
-        // Blit tile cache in its own pass first
-        spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-            SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise);
-        BlitTileCache(spriteBatch);
-        spriteBatch.End();
-
         // Counting sort by LayerId
         if (_sortScratch.Length < _drawPool.Length)
             _sortScratch = new DrawRequest[_drawPool.Length];
@@ -381,128 +462,42 @@ public sealed class DrawManager : LoggerBaseCore
             _sortScratch[writePos[lid]++] = _drawPool[i];
         }
 
-        // Sort layers by priority
+        // Sort layers by priority (cached comparer, no lambda alloc)
         if (_layerOrder == null || _layerOrder.Length < _layerCount)
             _layerOrder = new int[_layerCount];
         for (int i = 0; i < _layerCount; i++) _layerOrder[i] = i;
-        Array.Sort(_layerOrder, 0, _layerCount,
-            Comparer<int>.Create((a, b) => _layers[a].Priority.CompareTo(_layers[b].Priority)));
+        Array.Sort(_layerOrder, 0, _layerCount, _layerComparer);
 
         // One Begin/End per layer
         for (int li = 0; li < _layerCount; li++)
         {
             int layerIdx = _layerOrder[li];
             int count = counts[layerIdx];
-            if (count == 0) continue;
+            if (count == 0 && li != _layerCount - 1)
+                continue;
 
             ref var layer = ref _layers[layerIdx];
             spriteBatch.Begin(layer.SortMode, layer.BlendState, layer.SamplerState,
                 DepthStencilState.None, RasterizerState.CullCounterClockwise);
-            DrawBatch(spriteBatch, _sortScratch, offsets[layerIdx], count);
+
+            if (count > 0)
+                DrawBatch(spriteBatch, _sortScratch, offsets[layerIdx], count);
+
             if (li == _layerCount - 1) DrawText(spriteBatch);
             spriteBatch.End();
         }
     }
 
-    private void DrawTiles(SpriteBatch spriteBatch)
-    {
-        var tiles = _pendingTiles;
-        var tileData = _pendingTileData;
-        var colorCache = _pendingColorCache;
-        var lightMap = _pendingLightMap;
-        var pixelTex = _pendingPixelTex;
-        float camX = _pendingCamX, camY = _pendingCamY;
-        int ts = _pendingTileSize;
-        int worldW = _pendingWorldW;
-        int maxLight = _pendingMaxLight, surfaceY = _pendingSurfaceY;
-        int screenW = _pendingScreenW, screenH = _pendingScreenH;
-
-        int startTX = Math.Max(0, (int)Math.Floor(camX / ts));
-        int startTY = Math.Max(0, (int)Math.Floor(camY / ts));
-        int endTX = Math.Min(_pendingWorldW - 1, (int)Math.Floor((camX + screenW) / ts) + 1);
-        int endTY = Math.Min(_pendingWorldH - 1, (int)Math.Floor((camY + screenH) / ts) + 1);
-
-        var scale = new Vector2(ts, ts);
-
-        for (int y = startTY; y <= endTY; y++)
-        {
-            int baseIdx = y * worldW;
-            float sy = (float)Math.Floor(y * ts - camY);
-
-            for (int x = startTX; x <= endTX; x++)
-            {
-                int idx = baseIdx + x + 1;
-                var tileDyn = tiles.Get(idx);
-                int tileId = tileDyn.IsNil() ? 0 : (int)tileDyn.Number;
-                if (tileId == 0) continue;
-
-                Color color;
-
-                if (colorCache != null)
-                {
-                    var cachedDyn = colorCache.Get(idx);
-                    if (cachedDyn.Type == DataType.Table)
-                    {
-                        int lf = maxLight;
-                        if (lightMap != null)
-                        {
-                            var lfDyn = lightMap.Get(idx);
-                            lf = lfDyn.IsNil() ? 0 : (int)lfDyn.Number;
-                        }
-                        if (lf <= 0 && y >= surfaceY + 3) continue;
-
-                        var ct = cachedDyn.Table;
-                        int r = (int)(ct.Get(1).IsNil() ? 0 : ct.Get(1).Number);
-                        int g = (int)(ct.Get(2).IsNil() ? 0 : ct.Get(2).Number);
-                        int b = (int)(ct.Get(3).IsNil() ? 0 : ct.Get(3).Number);
-                        int a = (int)(ct.Get(4).IsNil() ? 255 : ct.Get(4).Number);
-                        color = Color.FromNonPremultiplied(r, g, b, a);
-                    }
-                    else
-                    {
-                        color = GetTileColorFromTable(tileData, tileId);
-                    }
-                }
-                else
-                {
-                    color = GetTileColorFromTable(tileData, tileId);
-                }
-
-                float sx = (float)Math.Floor(x * ts - camX);
-
-                spriteBatch.Draw(pixelTex, new Vector2(sx, sy), Rectangle.Empty,
-                    color, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
-            }
-        }
-    }
-
-    private static Color GetTileColorFromTable(Table tileData, int tileId)
-    {
-        var dataDyn = tileData.Get(tileId);
-        Table data = dataDyn.Type == DataType.Table ? dataDyn.Table : tileData.Get(0).Table;
-        var colorDyn = data.Get("color");
-        if (colorDyn.Type == DataType.Table)
-        {
-            var ct = colorDyn.Table;
-            int r = (int)(ct.Get(1).IsNil() ? 200 : ct.Get(1).Number);
-            int g = (int)(ct.Get(2).IsNil() ? 200 : ct.Get(2).Number);
-            int b = (int)(ct.Get(3).IsNil() ? 200 : ct.Get(3).Number);
-            int a = (int)(ct.Get(4).IsNil() ? 255 : ct.Get(4).Number);
-            return Color.FromNonPremultiplied(r, g, b, a);
-        }
-        return Color.White;
-    }
-
     /// <summary>
-    /// A single text draw request.
+    /// A single text draw request (struct — no heap allocation).
     /// </summary>
-    public class TextDrawRequest
+    public struct TextDrawRequest
     {
-        public string Text { get; set; } = "";
-        public Vector2 Position { get; set; }
-        public int FontSize { get; set; } = 16;
-        public Color Color { get; set; } = Color.White;
-        public string FontName { get; set; }
+        public string Text;
+        public Vector2 Position;
+        public int FontSize;
+        public Color Color;
+        public string FontName;
     }
 
     /// <summary>

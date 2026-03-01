@@ -5,13 +5,15 @@
 
 local Camera = require("core/camera")
 local UI = require("core/ui")
+local Batch = require("core/batch")
 
 local floor = math.floor
 
 local Particles = {}
 
--- Reusable color table for draw (avoids allocation per particle per frame)
-local _drawColor = { 0, 0, 0, 255 }
+-- Batch state (lazy init)
+local _batch = Batch.new()
+local _ps -- pixel sprite id
 
 -- Block break: spawn small colored particles
 function Particles.BlockBreak(shared, x, y, color)
@@ -22,12 +24,9 @@ function Particles.BlockBreak(shared, x, y, color)
             vx = math.random(-80, 80),
             vy = math.random(-120, -20),
             size = math.random(2, 4),
-            color = {
-                math.min(255, color[1] + math.random(-20, 20)),
-                math.min(255, color[2] + math.random(-20, 20)),
-                math.min(255, color[3] + math.random(-20, 20)),
-                255,
-            },
+            cr = math.min(255, color[1] + math.random(-20, 20)),
+            cg = math.min(255, color[2] + math.random(-20, 20)),
+            cb = math.min(255, color[3] + math.random(-20, 20)),
             lifetime = 0,
             maxLife = 0.5 + math.random() * 0.5,
             type = "block",
@@ -43,7 +42,7 @@ function Particles.DamageNumber(shared, x, y, amount, color)
         y = y - 10,
         vy = -40,
         text = tostring(amount),
-        color = color,
+        cr = color[1], cg = color[2], cb = color[3],
         lifetime = 0,
         maxLife = 1.0,
         type = "text",
@@ -77,11 +76,16 @@ function Particles.UpdateAll(shared, dt)
 end
 
 function Particles.DrawAll(shared)
+    -- Lazy init pixel sprite
+    if not _ps then _ps = Drawing.RegisterPixelSprite(UI.GetPixelId()) end
+
     local camX = Camera.GetX()
     local camY = Camera.GetY()
     local screenW = shared.W
     local screenH = shared.H
-    local dc = _drawColor
+    local b = _batch
+    local R = Batch.rect
+    Batch.clear(b)
 
     for _, p in ipairs(shared.particles) do
         local sx = floor(p.x - camX)
@@ -92,16 +96,14 @@ function Particles.DrawAll(shared)
             local alpha = floor(255 * (1 - p.lifetime / p.maxLife))
 
             if p.type == "block" then
-                local c = p.color
-                dc[1] = c[1]; dc[2] = c[2]; dc[3] = c[3]; dc[4] = alpha
-                UI.Rect(sx, sy, p.size, p.size, dc)
+                R(b, _ps, sx, sy, p.size, p.size, Color.New(p.cr, p.cg, p.cb, alpha))
             elseif p.type == "text" then
-                local c = p.color
-                dc[1] = c[1]; dc[2] = c[2]; dc[3] = c[3]; dc[4] = alpha
-                Drawing.Text(p.text, sx, sy, 12, dc)
+                Drawing.Text(p.text, sx, sy, 12, Color.New(p.cr, p.cg, p.cb, alpha))
             end
         end
     end
+
+    Batch.flush(b)
 end
 
 return Particles

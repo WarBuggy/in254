@@ -13,6 +13,21 @@ local InventoryUI = {}
 
 local heldItem = nil -- { id, count } for click-to-move
 
+-- Cached colors
+local _cOverlay = Color.New(0, 0, 0, 150)
+local _cPanelBg = Color.New(25, 25, 40, 240)
+
+-- Item color cache (keyed by item id)
+local _itemColorCache = {}
+local function GetItemPackedColor(itemId)
+    local cached = _itemColorCache[itemId]
+    if cached then return cached end
+    local c = Tiles.GetItemColor(itemId)
+    cached = Color.New(c[1], c[2], c[3])
+    _itemColorCache[itemId] = cached
+    return cached
+end
+
 function InventoryUI.Update(shared)
     -- Click handling is done in Draw (since we need positions)
 end
@@ -23,14 +38,14 @@ function InventoryUI.Draw(shared)
     local inv = shared.inventory
 
     -- Overlay background
-    UI.Rect(0, 0, W, H, {0, 0, 0, 150})
+    UI.Rect(0, 0, W, H, _cOverlay)
 
     local panelW = 340
     local panelH = 360
     local panelX = math.floor(W / 2 - panelW / 2)
     local panelY = math.floor(H / 2 - panelH / 2)
 
-    UI.Panel(panelX, panelY, panelW, panelH, {25, 25, 40, 240})
+    UI.Panel(panelX, panelY, panelW, panelH, _cPanelBg)
     Drawing.Text("Inventory", panelX + 10, panelY + 8, 16, C.YELLOW)
     Drawing.Text("[E] Close", panelX + panelW - 70, panelY + 10, 10, C.GRAY)
 
@@ -100,14 +115,14 @@ function InventoryUI.Draw(shared)
     if heldItem then
         local mx = UI.MouseX()
         local my = UI.MouseY()
-        local color = Tiles.GetItemColor(heldItem.id)
+        local color = GetItemPackedColor(heldItem.id)
         UI.Rect(mx - 5, my - 5, 10, 10, color)
         Drawing.Text(tostring(heldItem.count), mx + 6, my + 2, 8, C.WHITE)
     end
 end
 
 function InventoryUI.DrawSlotItem(sx, sy, size, slot)
-    local color = Tiles.GetItemColor(slot.id)
+    local color = GetItemPackedColor(slot.id)
     if Tiles.IsWeapon(slot.id) then
         UI.Rect(sx + size/2 - 2, sy + 4, 4, size - 8, color)
     else

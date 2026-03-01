@@ -23,6 +23,10 @@ namespace in254.Engine.LuaBindings
             inputTable["IsKeyReleased"] = (Func<string, bool>)(key =>
                 InputManager.Instance.IsKeyReleased(key));
 
+            // Input.GetNumberKeyPressed() → 0-9 or -1
+            inputTable["GetNumberKeyPressed"] = (Func<int>)(() =>
+                InputManager.Instance.GetNumberKeyPressed());
+
             // ========== Mouse Buttons ==========
             // Input.IsMouseDown("left")      — held
             // Input.IsMousePressed("left")    — just clicked

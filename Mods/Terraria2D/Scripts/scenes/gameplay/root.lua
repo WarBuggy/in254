@@ -8,6 +8,7 @@ local UI = require("core/ui")
 local Config = require("core/config")
 local Camera = require("core/camera")
 local Player = require("entities/player")
+local Tiles = require("world/tiles")
 local WorldGen = require("world/worldgen")
 local WorldData = require("world/worlddata")
 local WorldView = require("scenes/gameplay/worldview")
@@ -26,6 +27,11 @@ local HUD = require("scenes/gameplay/hud")
 local InventoryUI = require("scenes/gameplay/inventoryui")
 local CraftingUI = require("scenes/gameplay/craftingui")
 local PauseUI = require("scenes/gameplay/pauseui")
+
+-- Cached colors
+local _cDeathOverlay = Color.New(180, 0, 0, 80)
+local _cDeathText    = Color.New(255, 50, 50)
+local _cRespawnText  = Color.New(200, 200, 200)
 
 local GameplayRoot = Node.new({
     name = "gameplay_root",
@@ -77,7 +83,9 @@ local GameplayRoot = Node.new({
         shared.mineTarget = nil
         shared.mineProgress = 0
 
-        -- Generate initial light map
+        -- Generate initial light map (need W/H for viewport-culled lighting)
+        shared.W = Screen.Width()
+        shared.H = Screen.Height()
         Lighting.Calculate(shared)
 
         -- Spawn NPCs near spawn
@@ -180,9 +188,10 @@ local GameplayRoot = Node.new({
             Boss.Update(shared, dt)
         end
 
-        -- Recalculate lighting periodically (every 0.5s for performance)
+        -- Full lighting recalc only for day/night transitions (every 5s)
+        -- Tile changes use incremental Lighting.UpdateAt instead
         shared.lightTimer = (shared.lightTimer or 0) + dt
-        if shared.lightTimer >= 0.5 then
+        if shared.lightTimer >= 5.0 then
             shared.lightTimer = 0
             Lighting.Calculate(shared)
         end
@@ -192,12 +201,21 @@ local GameplayRoot = Node.new({
         if not UI.ResolvePixel() then return end
         if not Theme.ResolveTextures(shared) then return end
 
-        shared.W = Screen.Width()
-        shared.H = Screen.Height()
+        -- One-time tile config (deferred until UI.ResolvePixel succeeds)
+        if not shared._tileMapConfigured then
+            Drawing.SetTileMap({
+                tiles = WorldData.GetTiles(), tileData = Tiles.data,
+                tileSize = Config.TILE_SIZE, worldW = Config.WORLD_W, worldH = Config.WORLD_H,
+                pixelId = UI.GetPixelId(), maxLight = Config.MAX_LIGHT, surfaceY = Config.SURFACE_Y,
+                tileMargin = 20, rebuildCooldown = 3,
+            })
+            shared._tileMapConfigured = true
+        end
 
         -- World layer: sky + tiles + mining indicator
         Drawing.SetLayer("world")
         WorldView.Draw(shared)
+        UI.Flush() -- flush world-layer rects (sky, mining indicator)
 
         -- Entities layer: all game objects
         Drawing.SetLayer("entities")
@@ -219,10 +237,10 @@ local GameplayRoot = Node.new({
         HUD.Draw(shared)
 
         if not shared.player.alive then
-            UI.Rect(0, 0, shared.W, shared.H, {180, 0, 0, 80})
-            Drawing.Text("YOU DIED", shared.W / 2 - 60, shared.H / 2 - 20, 28, {255, 50, 50})
+            UI.Rect(0, 0, shared.W, shared.H, _cDeathOverlay)
+            Drawing.Text("YOU DIED", shared.W / 2 - 60, shared.H / 2 - 20, 28, _cDeathText)
             local remaining = math.ceil(shared.respawnTimer)
-            Drawing.Text("Respawning in " .. remaining .. "...", shared.W / 2 - 70, shared.H / 2 + 20, 14, {200, 200, 200})
+            Drawing.Text("Respawning in " .. remaining .. "...", shared.W / 2 - 70, shared.H / 2 + 20, 14, _cRespawnText)
         end
 
         if shared.showInventory then
@@ -236,6 +254,7 @@ local GameplayRoot = Node.new({
         end
 
         UI.DrawTooltip()
+        UI.Flush() -- flush all UI-layer rects (HUD, overlays, tooltip)
         Drawing.ResetLayer()
     end
 })

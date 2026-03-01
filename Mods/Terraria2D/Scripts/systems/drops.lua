@@ -8,10 +8,16 @@ local Camera = require("core/camera")
 local Tiles = require("world/tiles")
 local Physics = require("systems/physics")
 local UI = require("core/ui")
+local Batch = require("core/batch")
 
 local Drops = {}
 
+-- Batch state (lazy init)
+local _batch = Batch.new()
+local _ps -- pixel sprite id
+
 function Drops.Spawn(shared, itemId, count, x, y)
+    local rawColor = Tiles.GetItemColor(itemId)
     local drop = {
         x = x - 3,
         y = y,
@@ -23,6 +29,7 @@ function Drops.Spawn(shared, itemId, count, x, y)
         count = count,
         lifetime = 0,
         onGround = false,
+        packedColor = Color.New(rawColor[1], rawColor[2], rawColor[3], rawColor[4] or 255),
     }
     table.insert(shared.drops, drop)
 end
@@ -84,25 +91,33 @@ function Drops.UpdateAll(shared, dt)
     end
 end
 
+local _cHighlight = Color.New(255, 255, 255, 80)
+
 function Drops.DrawAll(shared)
+    -- Lazy init pixel sprite
+    if not _ps then _ps = Drawing.RegisterPixelSprite(UI.GetPixelId()) end
+
     local camX = Camera.GetX()
     local camY = Camera.GetY()
     local screenW = shared.W
     local screenH = shared.H
+    local b = _batch
+    local R = Batch.rect
+    Batch.clear(b)
 
     for _, drop in ipairs(shared.drops) do
         local sx = math.floor(drop.x - camX)
         local sy = math.floor(drop.y - camY)
 
         if sx + drop.w + 1 >= 0 and sx - 1 <= screenW and sy + drop.h + 3 >= 0 and sy - 3 <= screenH then
-            local color = Tiles.GetItemColor(drop.itemId)
-
             sy = sy + math.floor(math.sin(drop.lifetime * 3) * 2)
 
-            UI.Rect(sx, sy, drop.w, drop.h, color)
-            UI.Rect(sx - 1, sy - 1, drop.w + 2, 1, {255, 255, 255, 80})
+            R(b, _ps, sx, sy, drop.w, drop.h, drop.packedColor)
+            R(b, _ps, sx - 1, sy - 1, drop.w + 2, 1, _cHighlight)
         end
     end
+
+    Batch.flush(b)
 end
 
 return Drops

@@ -14,6 +14,27 @@ local CraftingUI = {}
 
 local scrollOffset = 0
 
+-- Cached colors
+local _cOverlay      = Color.New(0, 0, 0, 150)
+local _cPanelBg      = Color.New(25, 25, 40, 240)
+local _cRowCraft     = Color.New(40, 50, 40, 200)
+local _cRowNoCraft   = Color.New(50, 40, 40, 200)
+local _cRowCraftHov  = Color.New(50, 70, 50, 220)
+local _cRowNoCraftHov = Color.New(60, 50, 50, 220)
+local _cCraftBtn     = Color.New(40, 80, 40, 230)
+local _cCraftBtnHov  = Color.New(60, 110, 60, 240)
+
+-- Item color cache (keyed by item id)
+local _itemColorCache = {}
+local function GetItemPackedColor(itemId)
+    local cached = _itemColorCache[itemId]
+    if cached then return cached end
+    local c = Tiles.GetItemColor(itemId)
+    cached = Color.New(c[1], c[2], c[3])
+    _itemColorCache[itemId] = cached
+    return cached
+end
+
 function CraftingUI.Update(shared)
     local scroll = Input.ScrollDelta()
     if scroll ~= 0 then
@@ -27,14 +48,14 @@ function CraftingUI.Draw(shared)
     local p = shared.player
 
     -- Overlay
-    UI.Rect(0, 0, W, H, {0, 0, 0, 150})
+    UI.Rect(0, 0, W, H, _cOverlay)
 
     local panelW = 320
     local panelH = 400
     local panelX = math.floor(W / 2 - panelW / 2)
     local panelY = math.floor(H / 2 - panelH / 2)
 
-    UI.Panel(panelX, panelY, panelW, panelH, {25, 25, 40, 240})
+    UI.Panel(panelX, panelY, panelW, panelH, _cPanelBg)
 
     -- Header
     local nearStation = Crafting.GetNearStation(p.x + p.w / 2, p.y + p.h / 2)
@@ -64,15 +85,14 @@ function CraftingUI.Draw(shared)
         local ry = startY + (i - 1) * rowH
 
         -- Row background
-        local rowBg = canCraft and {40, 50, 40, 200} or {50, 40, 40, 200}
+        local rowBg = canCraft and _cRowCraft or _cRowNoCraft
         if UI.IsHovered(panelX + 8, ry, panelW - 16, rowH - 2) then
-            rowBg = canCraft and {50, 70, 50, 220} or {60, 50, 50, 220}
+            rowBg = canCraft and _cRowCraftHov or _cRowNoCraftHov
         end
         UI.Rect(panelX + 8, ry, panelW - 16, rowH - 2, rowBg)
 
         -- Output item icon
-        local outColor = Tiles.GetItemColor(recipe.output)
-        UI.Rect(panelX + 14, ry + 6, 16, 16, outColor)
+        UI.Rect(panelX + 14, ry + 6, 16, 16, GetItemPackedColor(recipe.output))
 
         -- Output name
         local outName = Tiles.GetName(recipe.output)
@@ -93,8 +113,8 @@ function CraftingUI.Draw(shared)
         if canCraft then
             local btnX = panelX + panelW - 60
             if UI.Button(btnX, ry + 4, 44, 24, "Craft", {
-                color = {40, 80, 40, 230},
-                hoverColor = {60, 110, 60, 240},
+                color = _cCraftBtn,
+                hoverColor = _cCraftBtnHov,
                 textSize = 10,
             }) then
                 Crafting.Craft(shared.inventory, recipe)

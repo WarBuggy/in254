@@ -4,13 +4,15 @@
 -- ============================================
 
 local Config = require("core/config")
-local Tiles = require("world/tiles")
-local WorldData = require("world/worlddata")
 local Camera = require("core/camera")
 local UI = require("core/ui")
 local Theme = require("core/theme")
 
 local floor = math.floor
+
+-- Cached colors
+local _cMineBg  = Color.New(40, 40, 40, 200)
+local _cMineFg  = Color.New(255, 255, 100)
 
 local WorldView = {}
 
@@ -25,14 +27,8 @@ function WorldView.Draw(shared)
     local skyColor = shared.skyColor or Theme.Colors.SKY_DAY
     UI.Rect(0, 0, W, H, skyColor)
 
-    -- Batch all visible tiles in one Lua→C# call
-    Drawing.TileMap(
-        WorldData.GetTiles(), shared.colorCache,
-        camX, camY, TS,
-        Config.WORLD_W, Config.WORLD_H, W, H,
-        Config.MAX_LIGHT, shared.lightMap, Config.SURFACE_Y,
-        UI.GetPixelId(), Tiles.data
-    )
+    -- Per-frame tile draw (config already set in root.lua)
+    Drawing.DrawTileMap(camX, camY, W, H, shared.lightMap)
 
     -- Mining indicator
     if shared.mineTarget and shared.mineProgress > 0 then
@@ -41,9 +37,9 @@ function WorldView.Draw(shared)
         local sx = floor(mx * TS - camX)
         local sy = floor(my * TS - camY)
         local prog = shared.mineProgress
-        UI.Rect(sx, sy, TS, TS, {255, 255, 255, floor(60 + 100 * prog)})
-        UI.Rect(sx, sy + TS, TS, 2, {40, 40, 40, 200})
-        UI.Rect(sx, sy + TS, floor(TS * prog), 2, {255, 255, 100})
+        UI.Rect(sx, sy, TS, TS, Color.New(255, 255, 255, floor(60 + 100 * prog)))
+        UI.Rect(sx, sy + TS, TS, 2, _cMineBg)
+        UI.Rect(sx, sy + TS, floor(TS * prog), 2, _cMineFg)
     end
 end
 

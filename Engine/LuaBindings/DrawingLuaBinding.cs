@@ -35,22 +35,51 @@ namespace in254.Engine.LuaBindings
             //         widthDyn, heightDyn, spriteOffXDyn, spriteOffYDyn);
             // });
 
-            // DrawTileMap — batch render a tile grid with lighting to a cached RenderTarget
-            drawTable["TileMap"] = (Action<DynValue, DynValue, DynValue, DynValue, DynValue,
-                DynValue, DynValue, DynValue, DynValue, DynValue,
-                DynValue, DynValue, DynValue, DynValue>)(
-                (tilesDyn, colorCacheDyn, camXDyn, camYDyn, tileSizeDyn,
-                 worldWDyn, worldHDyn, screenWDyn, screenHDyn, maxLightDyn,
-                 lightMapDyn, surfaceYDyn, pixelIdDyn, tileDataDyn) =>
+            // SetTileMap — one-time tile config from a table
+            drawTable["SetTileMap"] = (Action<DynValue>)((optsDyn) =>
             {
                 string modId = ScriptManager.Instance.CurrentExecutingModId;
-                DrawTileMapInternal(modId, tilesDyn, colorCacheDyn, camXDyn, camYDyn,
-                    tileSizeDyn, worldWDyn, worldHDyn, screenWDyn, screenHDyn,
-                    maxLightDyn, lightMapDyn, surfaceYDyn, pixelIdDyn, tileDataDyn);
+                var opts = optsDyn.Table;
+                int pixelId = (int)opts.Get("pixelId").Number;
+                var pixelTex = TextureManager.Instance.GetTexture(modId, pixelId);
+                TileRendererManager.Instance.SetConfig(
+                    pixelTex,
+                    opts.Get("tiles").Table,
+                    opts.Get("tileData").Table,
+                    (int)opts.Get("tileSize").Number,
+                    (int)opts.Get("worldW").Number,
+                    (int)opts.Get("worldH").Number,
+                    (int)opts.Get("maxLight").Number,
+                    (int)opts.Get("surfaceY").Number
+                );
+                // Optional tile renderer config
+                var marginDyn = opts.Get("tileMargin");
+                var cooldownDyn = opts.Get("rebuildCooldown");
+                if (!marginDyn.IsNil() || !cooldownDyn.IsNil())
+                {
+                    TileRendererManager.Instance.Configure(
+                        marginDyn.IsNil() ? null : (int?)marginDyn.Number,
+                        cooldownDyn.IsNil() ? null : (int?)cooldownDyn.Number
+                    );
+                }
+            });
+
+            // DrawTileMap — per-frame camera + lightMap (5 params)
+            drawTable["DrawTileMap"] = (Action<DynValue, DynValue, DynValue, DynValue, DynValue>)(
+                (camXDyn, camYDyn, screenWDyn, screenHDyn, lightMapDyn) =>
+            {
+                TileRendererManager.Instance.SetFrameParams(
+                    (float)camXDyn.Number, (float)camYDyn.Number,
+                    (int)screenWDyn.Number, (int)screenHDyn.Number,
+                    lightMapDyn.IsNil() ? null : lightMapDyn.Table
+                );
             });
 
             // InvalidateTileCache — mark tile RenderTarget as dirty for next frame
-            drawTable["RefreshTileMap"] = (Action)(() => DrawManager.Instance.InvalidateTileCache());
+            drawTable["RefreshTileMap"] = (Action)(() => TileRendererManager.Instance.InvalidateTileCache());
+
+            // InvalidateTileColors — lighter refresh (reuses cached tile IDs, only re-reads colors)
+            drawTable["RefreshTileColors"] = (Action)(() => TileRendererManager.Instance.InvalidateTileColors());
 
             // DrawRectBatch — batch queue colored rects from a flat table (stride 8: x,y,w,h,r,g,b,a)
             drawTable["RectBatch"] = (Action<DynValue, DynValue, DynValue>)(
@@ -63,6 +92,66 @@ namespace in254.Engine.LuaBindings
                 DrawManager.Instance.AddRectBatch(pixelTex, dataDyn.Table, count);
             });
 
+            // RegisterSprite(textureId, srcX, srcY, srcW, srcH) → spriteId
+            drawTable["RegisterSprite"] = (Func<DynValue, int, int, int, int, int>)(
+                (textureIdDyn, srcX, srcY, srcW, srcH) =>
+            {
+                string modId = ScriptManager.Instance.CurrentExecutingModId;
+                int textureId = (int)textureIdDyn.Number;
+                var texture = TextureManager.Instance.GetTexture(modId, textureId);
+                return DrawManager.Instance.RegisterSprite(texture, srcX, srcY, srcW, srcH);
+            });
+
+            // RegisterPixelSprite(textureId) → spriteId
+            drawTable["RegisterPixelSprite"] = (Func<DynValue, int>)((textureIdDyn) =>
+            {
+                string modId = ScriptManager.Instance.CurrentExecutingModId;
+                int textureId = (int)textureIdDyn.Number;
+                var texture = TextureManager.Instance.GetTexture(modId, textureId);
+                return DrawManager.Instance.RegisterPixelSprite(texture);
+            });
+
+            // SpriteBatch(flatTable, count) — stride-7 command buffer
+            drawTable["SpriteBatch"] = (Action<DynValue, DynValue>)((dataDyn, countDyn) =>
+            {
+                int count = (int)countDyn.Number;
+                DrawManager.Instance.AddSpriteBatch(dataDyn.Table, count);
+            });
+
+            // Rect(spriteId, x, y, w, h, packedColor) — single rect, auto-batched in pool
+            drawTable["Rect"] = (Action<int, float, float, float, float, int>)(
+                (spriteId, x, y, w, h, packedColor) =>
+                    DrawManager.Instance.AddRect(spriteId, x, y, w, h, packedColor));
+
+            // Line(spriteId, x1, y1, x2, y2, thickness, packedColor) — single line, auto-batched
+            drawTable["Line"] = (Action<int, float, float, float, float, float, int>)(
+                (spriteId, x1, y1, x2, y2, thickness, packedColor) =>
+                    DrawManager.Instance.AddLine(spriteId, x1, y1, x2, y2, thickness, packedColor));
+
+            // FlushLines(spriteId, flatTable, count) — stride-7 batch (x1,y1,x2,y2,thickness,color,flags)
+            drawTable["FlushLines"] = (Action<int, DynValue, int>)(
+                (spriteId, dataDyn, count) =>
+                    DrawManager.Instance.AddLineBatch(spriteId, dataDyn.Table, count));
+
+            // FlushRects(spriteId, flatTable, count) — stride-5 batch (x,y,w,h,packedColor)
+            // Single spriteId resolved once for all rects. Core batch path for UI.
+            drawTable["FlushRects"] = (Action<int, DynValue, int>)(
+                (spriteId, dataDyn, count) =>
+                    DrawManager.Instance.AddRectBatchPacked(spriteId, dataDyn.Table, count));
+
+            // ConfigureTileMap({ tileMargin = N, rebuildCooldown = N })
+            drawTable["ConfigureTileMap"] = (Action<DynValue>)((optsDyn) =>
+            {
+                var opts = optsDyn.Table;
+                int? tileMargin = null;
+                int? rebuildCooldown = null;
+                var marginDyn = opts.Get("tileMargin");
+                if (!marginDyn.IsNil()) tileMargin = (int)marginDyn.Number;
+                var cooldownDyn = opts.Get("rebuildCooldown");
+                if (!cooldownDyn.IsNil()) rebuildCooldown = (int)cooldownDyn.Number;
+                TileRendererManager.Instance.Configure(tileMargin, rebuildCooldown);
+            });
+
             // Text(text, x, y, size?, {r,g,b,a}?, "fontName"?)
             drawTable["Text"] = (Action<string, DynValue, DynValue, DynValue, DynValue, DynValue>)(
                 (text, xDyn, yDyn, sizeDyn, colorDyn, fontDyn) =>
@@ -72,7 +161,11 @@ namespace in254.Engine.LuaBindings
                 int size = (int)(sizeDyn.IsNil() ? 16 : sizeDyn.Number);
 
                 Color color = Color.White;
-                if (colorDyn != null && colorDyn.Type == DataType.Table)
+                if (colorDyn != null && colorDyn.Type == DataType.Number)
+                {
+                    color = ColorLuaBinding.ToColor((int)colorDyn.Number);
+                }
+                else if (colorDyn != null && colorDyn.Type == DataType.Table)
                 {
                     var t = colorDyn.Table;
                     int r = (int)(t.Get(1).IsNil() ? 255 : t.Get(1).Number);
@@ -88,6 +181,11 @@ namespace in254.Engine.LuaBindings
 
                 DrawManager.Instance.AddTextRequest(text, new Vector2(x, y), size, color, fontName);
             });
+
+            // FlushText(flatTable, count) — stride-5 batch (text,x,y,size,packedColor)
+            drawTable["FlushText"] = (Action<DynValue, int>)(
+                (dataDyn, count) =>
+                    DrawManager.Instance.AddTextBatch(dataDyn.Table, count));
 
             // RegisterLayer(name, priority, opts?)
             drawTable["RegisterLayer"] = (Action<string, DynValue, DynValue>)((name, priorityDyn, optsDyn) =>
@@ -146,31 +244,6 @@ namespace in254.Engine.LuaBindings
                 "pointwrap" => SamplerState.PointWrap,
                 _ => SamplerState.PointClamp
             };
-
-        private static void DrawTileMapInternal(
-            string modId, DynValue tilesDyn, DynValue colorCacheDyn,
-            DynValue camXDyn, DynValue camYDyn, DynValue tileSizeDyn,
-            DynValue worldWDyn, DynValue worldHDyn, DynValue screenWDyn, DynValue screenHDyn,
-            DynValue maxLightDyn, DynValue lightMapDyn, DynValue surfaceYDyn,
-            DynValue pixelIdDyn, DynValue tileDataDyn)
-        {
-            int pixelId = (int)pixelIdDyn.Number;
-            var pixelTex = TextureManager.Instance.GetTexture(modId, pixelId);
-
-            // Store params for deferred RenderTarget rendering
-            DrawManager.Instance.StoreTileMapParams(
-                pixelTex,
-                tilesDyn.Table,
-                colorCacheDyn.IsNil() ? null : colorCacheDyn.Table,
-                lightMapDyn.IsNil() ? null : lightMapDyn.Table,
-                tileDataDyn.Table,
-                (float)camXDyn.Number, (float)camYDyn.Number,
-                (int)tileSizeDyn.Number,
-                (int)worldWDyn.Number, (int)worldHDyn.Number,
-                (int)screenWDyn.Number, (int)screenHDyn.Number,
-                (int)maxLightDyn.Number, (int)surfaceYDyn.Number
-            );
-        }
 
         private static void AddRequestInternal
         (

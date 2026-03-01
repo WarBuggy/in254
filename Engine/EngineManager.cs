@@ -36,8 +36,9 @@ public class EngineManager : Game
 
     protected override void Initialize()
     {
-        // Initialize TextureManager with the game's ContentManager
-        // TextureManager.Instance.Initialize(Content);
+        // Reduce GC pauses during gameplay
+        System.Runtime.GCSettings.LatencyMode = System.Runtime.GCLatencyMode.SustainedLowLatency;
+
         base.Initialize();
     }
 
@@ -94,6 +95,10 @@ public class EngineManager : Game
         InputManager.Instance.UpdateState();
 
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+        float totalTime = (float)gameTime.TotalGameTime.TotalSeconds;
+
+        // Bridge C# state into Lua Frame table — zero-crossing reads for Lua
+        InputBridgeLuaBinding.Instance?.Push(deltaTime, totalTime);
         bool consoleConsumed = ConsoleManager.Instance.Update(deltaTime);
 
         if (!consoleConsumed)
@@ -107,7 +112,6 @@ public class EngineManager : Game
             DataManager.Instance.SetData("Core", "gowi.list", new LedgerMap(), "Core");
             CreateActiveActionList();
         }
-        float totalTime = (float)gameTime.TotalGameTime.TotalSeconds;
 
         SoundManager.Instance.Update();
 
@@ -134,7 +138,8 @@ public class EngineManager : Game
         ScriptManager.Instance.Fire(LuaGameEvents.OnDraw);
         SceneManager.Instance.FireSceneDraws();
 
-        // All game rendering (tiles + entities + text) in one call
+        // Tile RT update + injection, then all game rendering
+        TileRendererManager.Instance.UpdateAndInject(GraphicsDevice, _spriteBatch);
         DrawManager.Instance.Render(GraphicsDevice, _spriteBatch);
 
         // Overlays (error banner, console) — always on top

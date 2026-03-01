@@ -8,8 +8,13 @@ local WorldData = require("world/worlddata")
 local Camera = require("core/camera")
 local Physics = require("systems/physics")
 local UI = require("core/ui")
+local Batch = require("core/batch")
 
 local Projectile = {}
+
+-- Batch state (lazy init)
+local _batch = Batch.new()
+local _ps -- pixel sprite id
 
 function Projectile.Spawn(shared, x, y, vx, vy, damage, projType, friendly)
     local proj = {
@@ -109,11 +114,23 @@ function Projectile.UpdateAll(shared, dt)
     end
 end
 
+-- Pre-packed colors for projectile parts
+local _cArrowShaft = Color.New(180, 160, 120)
+local _cArrowHead = Color.New(140, 140, 140)
+local _cMagicGlow = Color.New(120, 60, 255, 180)
+local _cMagicCore = Color.New(200, 150, 255)
+
 function Projectile.DrawAll(shared)
+    -- Lazy init pixel sprite
+    if not _ps then _ps = Drawing.RegisterPixelSprite(UI.GetPixelId()) end
+
     local camX = Camera.GetX()
     local camY = Camera.GetY()
     local screenW = shared.W
     local screenH = shared.H
+    local b = _batch
+    local R = Batch.rect
+    Batch.clear(b)
 
     for _, proj in ipairs(shared.projectiles) do
         if proj.alive then
@@ -126,16 +143,18 @@ function Projectile.DrawAll(shared)
             end
 
             if proj.type == "arrow" then
-                UI.Rect(sx, sy, 6, 2, {180, 160, 120})
-                UI.Rect(sx + 5, sy - 1, 2, 4, {140, 140, 140})
+                R(b, _ps, sx, sy, 6, 2, _cArrowShaft)
+                R(b, _ps, sx + 5, sy - 1, 2, 4, _cArrowHead)
             elseif proj.type == "magic" then
-                UI.Rect(sx - 1, sy - 1, 6, 6, {120, 60, 255, 180})
-                UI.Rect(sx, sy, 4, 4, {200, 150, 255})
+                R(b, _ps, sx - 1, sy - 1, 6, 6, _cMagicGlow)
+                R(b, _ps, sx, sy, 4, 4, _cMagicCore)
             end
 
             ::continue::
         end
     end
+
+    Batch.flush(b)
 end
 
 return Projectile

@@ -1,6 +1,7 @@
 -- ============================================
 -- Terraria2D — Lighting
--- Sunlight columns + torch BFS (optimized)
+-- Sunlight columns + torch BFS (incremental)
+-- Color computation moved to C# DrawManager
 -- ============================================
 
 local Config = require("core/config")
@@ -15,7 +16,7 @@ local ceil = math.ceil
 local max = math.max
 local min = math.min
 
--- Pre-allocated BFS queue arrays (avoids per-node table allocation)
+-- Pre-allocated BFS queue arrays
 local _queueX = {}
 local _queueY = {}
 local _queueL = {}
@@ -31,109 +32,84 @@ local function ensureQueueCapacity(n)
     _queueCap = n
 end
 
--- Direction offsets (pre-allocated, not per-iteration)
+-- Direction offsets
 local DX = { 0, 0, -1, 1 }
 local DY = { -1, 1, 0, 0 }
 
-function Lighting.Calculate(shared)
-    local W = Config.WORLD_W
-    local H = Config.WORLD_H
-    local maxLight = Config.MAX_LIGHT
+-- Pre-built flat lookups (indexed by tile ID, avoids field access per tile)
+local _solidLookup = nil
+local _lightLookup = nil
+
+local function buildLookups()
+    if _solidLookup then return end
     local tileData = Tiles.data
-    local tiles = WorldData.GetTiles()
-
-    -- Reuse or create light map
-    local lightMap = shared.lightMap
-    if not lightMap then
-        lightMap = {}
-        for i = 1, W * H do
-            lightMap[i] = 0
-        end
-    else
-        -- Clear only the viewport region (faster than full clear)
-        local prevStartX = shared._lightStartX or 0
-        local prevEndX = shared._lightEndX or (W - 1)
-        local prevEndY = shared._lightEndY or (H - 1)
-        for y = 0, prevEndY do
-            local base = y * W
-            for x = prevStartX, prevEndX do
-                lightMap[base + x + 1] = 0
-            end
-        end
+    _solidLookup = {}
+    _lightLookup = {}
+    for id, data in pairs(tileData) do
+        _solidLookup[id] = data.solid or false
+        _lightLookup[id] = data.light or 0
     end
+end
 
-    -- Only calculate around camera for performance
-    local camTX = floor((shared.camX or 0) / Config.TILE_SIZE)
-    local camTY = floor((shared.camY or 0) / Config.TILE_SIZE)
-    local viewW = ceil(shared.W / Config.TILE_SIZE) + 2
-    local viewH = ceil(shared.H / Config.TILE_SIZE) + 2
-    local margin = 20
-
-    local startX = max(0, camTX - margin)
-    local endX = min(W - 1, camTX + viewW + margin)
-    local startY = max(0, camTY - margin)
-    local endY = min(H - 1, camTY + viewH + margin)
-
-    -- Store bounds for next clear
-    shared._lightStartX = startX
-    shared._lightEndX = endX
-    shared._lightEndY = endY
-
-    -- Pass 1: Sunlight - scan columns from top (direct array access)
-    local skyLight = shared.isNight and 7 or maxLight
-
+-- ============================================
+-- Sunlight column scan with culling
+-- Splits into two phases:
+--   1a) Above viewport: only track attenuation (no writes)
+--   1b) In viewport: write lightMap + collect emitters
+-- ============================================
+local function sunlightPass(tiles, solid, emit, lightMap, W,
+                            startX, endX, startY, endY, skyLight,
+                            queueX, queueY, queueL, tail)
     for x = startX, endX do
         local light = skyLight
-        for y = 0, endY do
+
+        -- Phase 1a: above viewport — just track sunlight attenuation
+        for y = 0, startY - 1 do
+            local tileId = tiles[y * W + x + 1] or 0
+            if solid[tileId] then
+                light = light - 2
+                if light <= 0 then light = 0; break end
+            end
+        end
+
+        -- Phase 1b: in viewport — write lightMap + collect emitters
+        for y = startY, endY do
             local idx = y * W + x + 1
             local tileId = tiles[idx] or 0
-            local data = tileData[tileId] or tileData[0]
 
-            if tileId == 0 or (not data.solid) then
-                local cur = lightMap[idx]
-                if light > cur then lightMap[idx] = light end
+            if tileId == 0 or not solid[tileId] then
+                if light > lightMap[idx] then lightMap[idx] = light end
             else
                 local reduced = light - 1
                 if reduced < 0 then reduced = 0 end
-                local cur = lightMap[idx]
-                if reduced > cur then lightMap[idx] = reduced end
+                if reduced > lightMap[idx] then lightMap[idx] = reduced end
                 light = light - 2
                 if light < 0 then light = 0 end
             end
-        end
-    end
 
-    -- Pass 2: Collect light-emitting tiles into flat queue
-    local head = 1
-    local tail = 0
-
-    for y = startY, endY do
-        local base = y * W
-        for x = startX, endX do
-            local tileId = tiles[base + x + 1] or 0
-            local data = tileData[tileId]
-            if data and data.light > 0 then
+            -- Collect emitters
+            if (emit[tileId] or 0) > 0 then
                 tail = tail + 1
-                _queueX[tail] = x
-                _queueY[tail] = y
-                _queueL[tail] = data.light
+                queueX[tail] = x
+                queueY[tail] = y
+                queueL[tail] = emit[tileId]
             end
         end
     end
+    return tail
+end
 
-    -- Ensure queue arrays are large enough
-    local estimatedSize = tail + (endX - startX + 1) * (endY - startY + 1)
-    ensureQueueCapacity(estimatedSize)
-
-    -- BFS flood fill with index-based circular queue (O(1) dequeue)
+-- ============================================
+-- BFS flood fill (shared by Calculate + UpdateAt)
+-- ============================================
+local function bfsFloodFill(lightMap, W, H, queueX, queueY, queueL, head, tail)
     while head <= tail do
-        local x = _queueX[head]
-        local y = _queueY[head]
-        local light = _queueL[head]
+        local x = queueX[head]
+        local y = queueY[head]
+        local light = queueL[head]
         head = head + 1
 
         local idx = y * W + x + 1
-
         if light > lightMap[idx] then
             lightMap[idx] = light
         end
@@ -147,57 +123,128 @@ function Lighting.Calculate(shared)
                     local nidx = ny * W + nx + 1
                     if nextLight > (lightMap[nidx] or 0) then
                         tail = tail + 1
-                        _queueX[tail] = nx
-                        _queueY[tail] = ny
-                        _queueL[tail] = nextLight
+                        queueX[tail] = nx
+                        queueY[tail] = ny
+                        queueL[tail] = nextLight
                     end
                 end
             end
         end
     end
+end
 
-    shared.lightMap = lightMap
+-- ============================================
+-- Full recalculation (initial + day/night)
+-- ============================================
+function Lighting.Calculate(shared)
+    buildLookups()
 
-    -- Pre-compute lit colors for the viewport (avoids per-tile math in draw)
-    local colorCache = shared.colorCache
-    if not colorCache then
-        colorCache = {}
-        shared.colorCache = colorCache
-    end
+    local W = Config.WORLD_W
+    local H = Config.WORLD_H
+    local maxLight = Config.MAX_LIGHT
+    local tiles = WorldData.GetTiles()
+    local solid = _solidLookup
+    local emit = _lightLookup
 
-    local invMax = 1 / maxLight
-    for y = startY, endY do
-        local base = y * W
-        for x = startX, endX do
-            local idx = base + x + 1
-            local tileId = tiles[idx] or 0
-            if tileId ~= 0 then
-                local data = tileData[tileId] or tileData[0]
-                local color = data.color
-                local light = lightMap[idx] or 0
-                local lf = light * invMax
-                -- Store as packed r,g,b,a (reuse table if exists)
-                local cached = colorCache[idx]
-                if not cached then
-                    cached = { 0, 0, 0, 255 }
-                    colorCache[idx] = cached
-                end
-                cached[1] = floor(color[1] * lf)
-                cached[2] = floor(color[2] * lf)
-                cached[3] = floor(color[3] * lf)
-                cached[4] = color[4] or 255
-            else
-                colorCache[idx] = nil
+    -- Reuse or create light map
+    local lightMap = shared.lightMap
+    if not lightMap then
+        lightMap = {}
+        for i = 1, W * H do
+            lightMap[i] = 0
+        end
+    else
+        -- Clear previous viewport region
+        local prevStartX = shared._lightStartX or 0
+        local prevStartY = shared._lightStartY or 0
+        local prevEndX = shared._lightEndX or (W - 1)
+        local prevEndY = shared._lightEndY or (H - 1)
+        for y = prevStartY, prevEndY do
+            local base = y * W
+            for x = prevStartX, prevEndX do
+                lightMap[base + x + 1] = 0
             end
         end
     end
+
+    -- Viewport bounds
+    local camTX = floor((shared.camX or 0) / Config.TILE_SIZE)
+    local camTY = floor((shared.camY or 0) / Config.TILE_SIZE)
+    local viewW = (shared.W or 0) > 0 and ceil(shared.W / Config.TILE_SIZE) + 2 or Config.WORLD_W
+    local viewH = (shared.H or 0) > 0 and ceil(shared.H / Config.TILE_SIZE) + 2 or Config.WORLD_H
+    local margin = 20
+
+    local startX = max(0, camTX - margin)
+    local endX = min(W - 1, camTX + viewW + margin)
+    local startY = max(0, camTY - margin)
+    local endY = min(H - 1, camTY + viewH + margin)
+
+    shared._lightStartX = startX
+    shared._lightStartY = startY
+    shared._lightEndX = endX
+    shared._lightEndY = endY
+
+    -- Sunlight + emitter collection (culled)
+    local skyLight = shared.isNight and 7 or maxLight
+    local tail = sunlightPass(tiles, solid, emit, lightMap, W,
+        startX, endX, startY, endY, skyLight,
+        _queueX, _queueY, _queueL, 0)
+
+    -- BFS flood fill
+    ensureQueueCapacity(tail + (endX - startX + 1) * (endY - startY + 1))
+    bfsFloodFill(lightMap, W, H, _queueX, _queueY, _queueL, 1, tail)
+
+    shared.lightMap = lightMap
 
     -- Store camera position for next calculation
     local Camera = require("core/camera")
     shared.camX = Camera.GetX()
     shared.camY = Camera.GetY()
 
-    Drawing.RefreshTileMap()
+    Drawing.RefreshTileColors()
+end
+
+-- ============================================
+-- Incremental update (tile mine/place)
+-- Only recalculates a local region around the
+-- changed tile instead of the full viewport.
+-- ============================================
+function Lighting.UpdateAt(shared, tx, ty)
+    buildLookups()
+
+    local W = Config.WORLD_W
+    local H = Config.WORLD_H
+    local tiles = WorldData.GetTiles()
+    local solid = _solidLookup
+    local emit = _lightLookup
+    local lightMap = shared.lightMap
+    if not lightMap then return end
+
+    local radius = Config.MAX_LIGHT
+    local x0 = max(0, tx - radius)
+    local x1 = min(W - 1, tx + radius)
+    local y0 = max(0, ty - radius)
+    local y1 = min(H - 1, ty + radius)
+
+    -- Clear local region
+    for y = y0, y1 do
+        local base = y * W
+        for x = x0, x1 do
+            lightMap[base + x + 1] = 0
+        end
+    end
+
+    -- Sunlight + emitters (culled — only writes y0..y1)
+    local skyLight = shared.isNight and 7 or Config.MAX_LIGHT
+    local tail = sunlightPass(tiles, solid, emit, lightMap, W,
+        x0, x1, y0, y1, skyLight,
+        _queueX, _queueY, _queueL, 0)
+
+    -- BFS flood fill
+    ensureQueueCapacity(tail + (x1 - x0 + 1) * (y1 - y0 + 1))
+    bfsFloodFill(lightMap, W, H, _queueX, _queueY, _queueL, 1, tail)
+
+    Drawing.RefreshTileColors()
 end
 
 return Lighting
