@@ -206,6 +206,7 @@ function Enemy.DrawAll(shared)
         if e.alive then
             local sx = math.floor(e.x - camX)
             local sy = math.floor(e.y - camY)
+            local pc = e.packedColor
 
             -- Viewport culling
             if sx + e.w < 0 or sx > screenW or sy + e.h < 0 or sy > screenH then
@@ -216,8 +217,6 @@ function Enemy.DrawAll(shared)
             if e.invTimer > 0 and math.floor(e.invTimer * 10) % 2 == 0 then
                 goto continue
             end
-
-            local pc = e.packedColor
 
             if e.type == "slime" then
                 R(b, _ps, sx + 1, sy + 2, e.w - 2, e.h - 2, pc)
