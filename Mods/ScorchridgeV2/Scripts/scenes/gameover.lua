@@ -9,7 +9,7 @@ local UI = require("core/ui")
 local modId = "ScorchridgeV2"
 local C = Theme.Colors
 
-local gameoverNode = SceneNode.new({
+local gameoverNode = Node.new({
     name = "gameover",
 
     onEnter = function(self, shared)

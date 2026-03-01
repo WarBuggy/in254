@@ -22,7 +22,7 @@ local function resolveTextures()
     return true
 end
 
-local gameoverNode = SceneNode.new({
+local gameoverNode = Node.new({
     name = "gameover",
 
     onEnter = function(self, shared)

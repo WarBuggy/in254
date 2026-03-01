@@ -6,7 +6,7 @@ local UI = require("core/ui")
 local Theme = require("core/theme")
 local C = Theme.Colors
 
-local titleNode = SceneNode.new({
+local titleNode = Node.new({
     name = "title",
 
     onEnter = function(self, shared)

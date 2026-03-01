@@ -11,7 +11,7 @@ local modId = "ScorchridgeV2"
 local C = Theme.Colors
 local L = Theme.Layout
 
-return SceneNode.new({
+return Node.new({
     name = "bottombar",
 
     onDraw = function(self, shared)

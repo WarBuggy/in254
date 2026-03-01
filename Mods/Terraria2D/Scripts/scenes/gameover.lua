@@ -6,7 +6,7 @@ local UI = require("core/ui")
 local Theme = require("core/theme")
 local C = Theme.Colors
 
-local gameoverNode = SceneNode.new({
+local gameoverNode = Node.new({
     name = "gameover",
 
     onEnter = function(self, shared)

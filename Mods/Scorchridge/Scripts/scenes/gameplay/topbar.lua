@@ -10,7 +10,7 @@ local Colony = require("systems/colony")
 local C = Theme.Colors
 local L = Theme.Layout
 
-return SceneNode.new({
+return Node.new({
     name = "topbar",
 
     onDraw = function(self, shared)

@@ -27,7 +27,7 @@ local function resolveTextures()
     return true
 end
 
-local helpNode = SceneNode.new({
+local helpNode = Node.new({
     name = "help",
 
     onEnter = function(self, shared)

@@ -100,7 +100,7 @@ local function drawLevel(level, shared, phase, bobTimer)
     end
 end
 
-return SceneNode.new({
+return Node.new({
     name = "world",
 
     onDraw = function(self, shared)

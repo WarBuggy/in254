@@ -11,7 +11,7 @@ local C = Theme.Colors
 local L = Theme.Layout
 local spr = Theme.Spr
 
-return SceneNode.new({
+return Node.new({
     name = "bottombar",
 
     onDraw = function(self, shared)

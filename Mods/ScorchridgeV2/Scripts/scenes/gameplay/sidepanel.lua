@@ -17,7 +17,7 @@ local L = Theme.Layout
 local TIER_ICONS = {"Cu", "Ag", "Au"}
 local PORTION_ICONS = {"S", "M", "L"}
 
-return SceneNode.new({
+return Node.new({
     name = "sidepanel",
 
     onDraw = function(self, shared)

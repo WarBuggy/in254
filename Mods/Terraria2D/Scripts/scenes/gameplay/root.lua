@@ -27,7 +27,7 @@ local InventoryUI = require("scenes/gameplay/inventoryui")
 local CraftingUI = require("scenes/gameplay/craftingui")
 local PauseUI = require("scenes/gameplay/pauseui")
 
-local GameplayRoot = SceneNode.new({
+local GameplayRoot = Node.new({
     name = "gameplay_root",
     shared = Theme.NewGameplayShared(),
 

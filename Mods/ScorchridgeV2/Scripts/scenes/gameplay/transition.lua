@@ -5,7 +5,7 @@
 
 local UI = require("core/ui")
 
-return SceneNode.new({
+return Node.new({
     name = "transition",
 
     onDraw = function(self, shared)

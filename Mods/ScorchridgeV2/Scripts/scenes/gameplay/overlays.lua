@@ -15,7 +15,7 @@ local Inventory = require("systems/inventory")
 local modId = "ScorchridgeV2"
 local C = Theme.Colors
 
-return SceneNode.new({
+return Node.new({
     name = "overlays",
     blocksInput = false,
 

@@ -13,7 +13,7 @@ local GameEvents = require("systems/events")
 local modId = "Scorchridge"
 local C = Theme.Colors
 
-return SceneNode.new({
+return Node.new({
     name = "overlays",
     blocksInput = false,
 

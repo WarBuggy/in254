@@ -9,7 +9,7 @@ local UI = require("core/ui")
 local modId = "ScorchridgeV2"
 local C = Theme.Colors
 
-local helpNode = SceneNode.new({
+local helpNode = Node.new({
     name = "help",
 
     onEnter = function(self, shared)

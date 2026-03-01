@@ -33,7 +33,7 @@ local function drawInmateTopDown(inmTex, x, y, scale, selected, tierColor)
     end
 end
 
-return SceneNode.new({
+return Node.new({
     name = "world",
 
     onDraw = function(self, shared)

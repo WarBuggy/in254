@@ -16,7 +16,7 @@ local Colony = require("systems/colony")
 
 local modId = "ScorchridgeV2"
 
-local GameplayRoot = SceneNode.new({
+local GameplayRoot = Node.new({
     name   = "gameplay_root",
     shared = Theme.NewGameplayShared(),
 
