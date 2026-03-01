@@ -9,6 +9,7 @@ local Camera = require("core/camera")
 local UI = require("core/ui")
 local NPC = {}
 
+local floor = math.floor
 local _DR = Drawing.Rect
 local _ps -- pixel sprite id
 
@@ -164,20 +165,21 @@ function NPC.DrawAll(shared)
             local eyeX = npc.facingRight and (sx + 7) or (sx + 4)
             R(_ps, eyeX, sy + 2, 1, 2, _cEye)
 
-            -- Name label + dialog rendered on UI layer at native resolution
+            -- Name label + dialog on UI layer (scale sizes by zoom for screen-space)
             Drawing.SetLayer("ui")
+            local zoom = Camera.zoom
             local uiX = math.floor(Camera.WorldToScreenX(npc.x))
             local uiY = math.floor(Camera.WorldToScreenY(npc.y))
 
-            Drawing.Text(npc.name, uiX - 4, uiY - 12, 8, _cNameLabel)
+            Drawing.Text(npc.name, uiX - floor(4 * zoom), uiY - floor(12 * zoom), floor(8 * zoom), _cNameLabel)
 
             if npc.showDialog then
                 local line = npc.dialogLines[npc.dialogIndex]
-                local bw = #line * 5 + 16
-                local bx = uiX - bw / 2 + 6
-                local by = uiY - 28
-                R(_ps, bx, by, bw, 14, _cDialogBg)
-                Drawing.Text(line, bx + 4, by + 2, 9, _cDialogText)
+                local bw = floor((#line * 5 + 16) * zoom)
+                local bx = floor(uiX - bw / 2 + 6 * zoom)
+                local by = floor(uiY - 28 * zoom)
+                R(_ps, bx, by, bw, floor(14 * zoom), _cDialogBg)
+                Drawing.Text(line, bx + floor(4 * zoom), by + floor(2 * zoom), floor(9 * zoom), _cDialogText)
             end
             Drawing.SetLayer("entities")
         end

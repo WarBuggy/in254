@@ -22,7 +22,7 @@ local _cSkin    = Color.New(230, 190, 150)
 local _cHair    = Color.New(100, 60, 20)
 local _cLegs    = Color.New(50, 50, 150)
 local _cEyes    = Color.New(40, 40, 40)
-local _cDmgNum  = Color.New(255, 80, 80)
+local _cDmgNum  = {255, 80, 80}
 
 -- Item color cache (keyed by item id)
 local _itemColorCache = {}

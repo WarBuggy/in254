@@ -83,18 +83,21 @@ function Particles.DrawAll(shared)
     local R = _DR
 
     for _, p in ipairs(shared.particles) do
-        local sx = floor(p.x)
-        local sy = floor(p.y)
-
         local sz = p.size or 12
         -- World-space culling
         if p.x + sz >= b.x and p.x <= b.x + b.w and p.y + sz >= b.y and p.y <= b.y + b.h then
             local alpha = floor(255 * (1 - p.lifetime / p.maxLife))
 
             if p.type == "block" then
-                R(_ps, sx, sy, p.size, p.size, Color.New(p.cr, p.cg, p.cb, alpha))
+                R(_ps, floor(p.x), floor(p.y), p.size, p.size, Color.New(p.cr, p.cg, p.cb, alpha))
             elseif p.type == "text" then
-                Drawing.Text(p.text, sx, sy, 12, Color.New(p.cr, p.cg, p.cb, alpha))
+                -- Render text on UI layer (scale size by zoom for screen-space)
+                Drawing.SetLayer("ui")
+                local zoom = Camera.zoom
+                local uiX = floor(Camera.WorldToScreenX(p.x))
+                local uiY = floor(Camera.WorldToScreenY(p.y))
+                Drawing.Text(p.text, uiX, uiY, floor(12 * zoom), Color.New(p.cr, p.cg, p.cb, alpha))
+                Drawing.SetLayer("particles")
             end
         end
     end

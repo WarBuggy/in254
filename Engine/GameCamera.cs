@@ -63,10 +63,10 @@ public sealed class GameCamera
              * Matrix.CreateScale(Zoom, Zoom, 1f);
     }
 
-    public float ScreenToWorldX(float sx) => sx / Zoom + X;
-    public float ScreenToWorldY(float sy) => sy / Zoom + Y;
-    public float WorldToScreenX(float wx) => (wx - X) * Zoom;
-    public float WorldToScreenY(float wy) => (wy - Y) * Zoom;
+    public float ScreenToWorldX(float sx) => sx / Zoom + MathF.Floor(X);
+    public float ScreenToWorldY(float sy) => sy / Zoom + MathF.Floor(Y);
+    public float WorldToScreenX(float wx) => (wx - MathF.Floor(X)) * Zoom;
+    public float WorldToScreenY(float wy) => (wy - MathF.Floor(Y)) * Zoom;
 
     public Rectangle GetWorldBounds(float screenW, float screenH)
     {
