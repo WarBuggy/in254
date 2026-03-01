@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using MoonSharp.Interpreter;
 using AxiomPlayground.Scripting;
+using AxiomPlayground.Modding;
 
 namespace in254.Engine;
 
@@ -199,27 +200,36 @@ public sealed class SceneManager
         foreach (var kvp in _activeScenes)
         {
             string modId = kvp.Key;
+            if (ModErrorTracker.Instance.IsModErrored(modId)) continue;
+
             string? sceneName = kvp.Value;
             if (sceneName == null) continue;
 
-            // Tree scene?
-            if (_treeScenes.TryGetValue(modId, out var modTrees) &&
-                modTrees.TryGetValue(sceneName, out var root))
+            try
             {
-                if (root.HasBlockingNode())
-                    _inputBlocked = true;
+                // Tree scene?
+                if (_treeScenes.TryGetValue(modId, out var modTrees) &&
+                    modTrees.TryGetValue(sceneName, out var root))
+                {
+                    if (root.HasBlockingNode())
+                        _inputBlocked = true;
 
-                root.Update(args.Length > 0 ? args[0] : DynValue.Nil,
-                            args.Length > 1 ? args[1] : DynValue.Nil);
-                continue;
+                    root.Update(args.Length > 0 ? args[0] : DynValue.Nil,
+                                args.Length > 1 ? args[1] : DynValue.Nil);
+                    continue;
+                }
+
+                // Flat scene
+                if (_scenes.TryGetValue(modId, out var modScenes) &&
+                    modScenes.TryGetValue(sceneName, out var def) &&
+                    def.OnUpdate != null)
+                {
+                    ScriptManager.Instance.CallWithModContext(modId, def.OnUpdate, args);
+                }
             }
-
-            // Flat scene
-            if (_scenes.TryGetValue(modId, out var modScenes) &&
-                modScenes.TryGetValue(sceneName, out var def) &&
-                def.OnUpdate != null)
+            catch (Exception ex)
             {
-                ScriptManager.Instance.CallWithModContext(modId, def.OnUpdate, args);
+                ModErrorTracker.Instance.MarkModErrored(modId, ex.Message, $"scene update '{sceneName}'");
             }
         }
     }
@@ -229,23 +239,32 @@ public sealed class SceneManager
         foreach (var kvp in _activeScenes)
         {
             string modId = kvp.Key;
+            if (ModErrorTracker.Instance.IsModErrored(modId)) continue;
+
             string? sceneName = kvp.Value;
             if (sceneName == null) continue;
 
-            // Tree scene?
-            if (_treeScenes.TryGetValue(modId, out var modTrees) &&
-                modTrees.TryGetValue(sceneName, out var root))
+            try
             {
-                root.Draw();
-                continue;
-            }
+                // Tree scene?
+                if (_treeScenes.TryGetValue(modId, out var modTrees) &&
+                    modTrees.TryGetValue(sceneName, out var root))
+                {
+                    root.Draw();
+                    continue;
+                }
 
-            // Flat scene
-            if (_scenes.TryGetValue(modId, out var modScenes) &&
-                modScenes.TryGetValue(sceneName, out var def) &&
-                def.OnDraw != null)
+                // Flat scene
+                if (_scenes.TryGetValue(modId, out var modScenes) &&
+                    modScenes.TryGetValue(sceneName, out var def) &&
+                    def.OnDraw != null)
+                {
+                    ScriptManager.Instance.CallWithModContext(modId, def.OnDraw);
+                }
+            }
+            catch (Exception ex)
             {
-                ScriptManager.Instance.CallWithModContext(modId, def.OnDraw);
+                ModErrorTracker.Instance.MarkModErrored(modId, ex.Message, $"scene draw '{sceneName}'");
             }
         }
     }

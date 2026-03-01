@@ -8,6 +8,7 @@ using in254.Engine.LuaBindings;
 using System.Collections.Generic;
 using in254.Core;
 using System;
+using System.Linq;
 using MoonSharp.Interpreter;
 
 namespace in254.Engine;
@@ -21,6 +22,7 @@ public class EngineManager : Game
     private const float FrameDuration = 0.12f;
 
     private readonly Dictionary<string, ActionInput> _actionInputBindings = [];
+    private Texture2D _errorPixelTexture;
 
     private EngineManager()
     {
@@ -52,17 +54,34 @@ public class EngineManager : Game
         ConsoleManager.Instance.Initialize(GraphicsDevice);
         Window.TextInput += (_, e) => InputManager.Instance.AccumulateTextInput(e.Character);
 
+        _errorPixelTexture = new Texture2D(GraphicsDevice, 1, 1);
+        _errorPixelTexture.SetData([Color.White]);
+
         var queue = ScriptManager.Instance.LoadAll(ModManager.Instance.FinalModList);
         ScriptManager.Instance.ExecuteQueue(queue);
 
-        ScriptManager.Instance.Fire(LuaGameEvents.OnDataInit, DynValue.Nil);
+        try
+        {
+            ScriptManager.Instance.Fire(LuaGameEvents.OnDataInit, DynValue.Nil);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[EngineManager] Error during OnDataInit: {ex.Message}");
+        }
 
         foreach (var manager in managers)
         {
             foreach (var dispatch in manager.CollectLoadEvents())
             {
-                var dynArgs = ScriptManager.Instance.BuildEventArgs(dispatch.Args);
-                ScriptManager.Instance.Fire(dispatch.EventName, dynArgs);
+                try
+                {
+                    var dynArgs = ScriptManager.Instance.BuildEventArgs(dispatch.Args);
+                    ScriptManager.Instance.Fire(dispatch.EventName, dynArgs);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[EngineManager] Error during '{dispatch.EventName}': {ex.Message}");
+                }
             }
         }
 
@@ -123,11 +142,52 @@ public class EngineManager : Game
         ScriptManager.Instance.Fire(LuaGameEvents.OnDraw);
         SceneManager.Instance.FireSceneDraws();
         DrawManager.Instance.RenderQueue(_spriteBatch);
+        DrawModErrorOverlay(_spriteBatch);
         ConsoleManager.Instance.Draw(_spriteBatch, GraphicsDevice);
 
         _spriteBatch.End();
 
         base.Draw(gameTime);
+    }
+
+    private void DrawModErrorOverlay(SpriteBatch spriteBatch)
+    {
+        var errors = ModErrorTracker.Instance.GetErrors();
+        if (errors.Count == 0 || _errorPixelTexture == null) return;
+
+        var font = FontManager.Instance.GetFont(12);
+        float lineHeight = font.MeasureString("A").Y + 2;
+        int padding = 6;
+        var viewport = GraphicsDevice.Viewport;
+
+        // Group by mod — show one line per errored mod (first error only)
+        var erroredMods = ModErrorTracker.Instance.GetErroredModIds();
+        int lineCount = erroredMods.Count + 1; // header + one per mod
+        int bannerHeight = (int)(lineCount * lineHeight) + padding * 2;
+
+        // Semi-transparent red banner at top
+        spriteBatch.Draw(_errorPixelTexture,
+            new Rectangle(0, 0, viewport.Width, bannerHeight),
+            new Color(140, 20, 20, 200));
+
+        float y = padding;
+        font.DrawText(spriteBatch, $"[{erroredMods.Count} mod(s) disabled due to errors]",
+            new Vector2(padding, y), Color.Yellow);
+        y += lineHeight;
+
+        foreach (var modId in erroredMods)
+        {
+            var firstError = errors.First(e => string.Equals(e.ModId, modId, StringComparison.OrdinalIgnoreCase));
+            string msg = firstError.Message;
+            // Truncate long messages
+            int maxChars = (int)(viewport.Width / 7) - modId.Length - 10;
+            if (maxChars > 0 && msg.Length > maxChars)
+                msg = msg[..maxChars] + "...";
+
+            font.DrawText(spriteBatch, $"  {modId}: [{firstError.Context}] {msg}",
+                new Vector2(padding, y), Color.White);
+            y += lineHeight;
+        }
     }
 
     private void CreateActiveActionList()
