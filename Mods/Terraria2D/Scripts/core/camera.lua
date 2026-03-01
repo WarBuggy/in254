@@ -12,8 +12,9 @@ setmetatable(Camera, {
     __index = function(_, k)
         if k == "zoom" then return GameCamera.GetZoom() end
     end,
-    __newindex = function(_, k, v)
-        if k == "zoom" then GameCamera.SetZoom(v) end
+    __newindex = function(t, k, v)
+        if k == "zoom" then GameCamera.SetZoom(v)
+        else rawset(t, k, v) end
     end,
 })
 
