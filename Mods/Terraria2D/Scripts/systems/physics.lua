@@ -119,6 +119,22 @@ function Physics.ResolveY(ent, ts)
             end
         end
     end
+
+    -- Ground-edge probe: when falling, the -1 in bottom calc can miss the tile
+    -- at the exact bottom edge (y+h sitting on a tile boundary). Check it explicitly.
+    if ent.vy >= 0 then
+        local edgeRow = floor((ent.y + ent.h) / ts)
+        if edgeRow > bottom then
+            for tx = left, right do
+                if WorldData.IsSolid(tx, edgeRow) then
+                    ent.y = edgeRow * ts - ent.h
+                    ent.vy = 0
+                    ent.onGround = true
+                    return
+                end
+            end
+        end
+    end
 end
 
 -- Check AABB overlap between two entities
