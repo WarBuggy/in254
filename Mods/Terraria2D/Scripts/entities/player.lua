@@ -130,13 +130,15 @@ function Player.HandleMining(p, dt, shared)
     local tx = math.floor(mx / TS)
     local ty = math.floor(my / TS)
 
-    -- Check reach distance
-    local pcx = p.x + p.w / 2
-    local pcy = p.y + p.h / 2
-    local tcx = tx * TS + TS / 2
-    local tcy = ty * TS + TS / 2
-    local dist = math.sqrt((pcx - tcx) * (pcx - tcx) + (pcy - tcy) * (pcy - tcy))
-    if dist > Config.REACH_DIST * TS then
+    -- Check reach distance (squared to avoid sqrt)
+    local pcx = p.x + p.w * 0.5
+    local pcy = p.y + p.h * 0.5
+    local tcx = tx * TS + TS * 0.5
+    local tcy = ty * TS + TS * 0.5
+    local dx = pcx - tcx
+    local dy = pcy - tcy
+    local reachPx = Config.REACH_DIST * TS
+    if dx * dx + dy * dy > reachPx * reachPx then
         shared.mineTarget = nil
         shared.mineProgress = 0
         return
@@ -193,13 +195,15 @@ function Player.HandlePlacing(p, shared)
     local tx = math.floor(mx / TS)
     local ty = math.floor(my / TS)
 
-    -- Check reach
-    local pcx = p.x + p.w / 2
-    local pcy = p.y + p.h / 2
-    local tcx = tx * TS + TS / 2
-    local tcy = ty * TS + TS / 2
-    local dist = math.sqrt((pcx - tcx) * (pcx - tcx) + (pcy - tcy) * (pcy - tcy))
-    if dist > Config.REACH_DIST * TS then return end
+    -- Check reach (squared to avoid sqrt)
+    local pcx = p.x + p.w * 0.5
+    local pcy = p.y + p.h * 0.5
+    local tcx = tx * TS + TS * 0.5
+    local tcy = ty * TS + TS * 0.5
+    local dx = pcx - tcx
+    local dy = pcy - tcy
+    local reachPx = Config.REACH_DIST * TS
+    if dx * dx + dy * dy > reachPx * reachPx then return end
 
     -- Must be air
     if WorldData.Get(tx, ty) ~= Tiles.AIR then return end

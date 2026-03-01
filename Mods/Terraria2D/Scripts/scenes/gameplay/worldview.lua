@@ -10,6 +10,11 @@ local Camera = require("core/camera")
 local UI = require("core/ui")
 local Theme = require("core/theme")
 
+-- Localize hot-path functions
+local floor = math.floor
+local max = math.max
+local min = math.min
+
 local WorldView = {}
 
 function WorldView.Draw(shared)
@@ -24,65 +29,46 @@ function WorldView.Draw(shared)
     UI.Rect(0, 0, W, H, skyColor)
 
     -- Calculate visible tile range
-    local startTX = math.floor(camX / TS)
-    local startTY = math.floor(camY / TS)
-    local endTX = math.floor((camX + W) / TS) + 1
-    local endTY = math.floor((camY + H) / TS) + 1
+    local startTX = max(0, floor(camX / TS))
+    local startTY = max(0, floor(camY / TS))
+    local endTX = min(Config.WORLD_W - 1, floor((camX + W) / TS) + 1)
+    local endTY = min(Config.WORLD_H - 1, floor((camY + H) / TS) + 1)
 
-    startTX = math.max(0, startTX)
-    startTY = math.max(0, startTY)
-    endTX = math.min(Config.WORLD_W - 1, endTX)
-    endTY = math.min(Config.WORLD_H - 1, endTY)
-
+    local colorCache = shared.colorCache
     local lightMap = shared.lightMap
     local maxLight = Config.MAX_LIGHT
+    local surfaceY = Config.SURFACE_Y
+    local worldW = Config.WORLD_W
+    local tileData = Tiles.data
 
     for y = startTY, endTY do
+        local base = y * worldW
+        local sy = floor(y * TS - camY)
         for x = startTX, endTX do
+            local idx = base + x + 1
             local tileId = WorldData.Get(x, y)
-            if tileId ~= Tiles.AIR or (tileId == Tiles.AIR and y >= Config.SURFACE_Y) then
-                if tileId ~= Tiles.AIR then
-                    local data = Tiles.GetData(tileId)
-                    local color = data.color
-                    local sx = math.floor(x * TS - camX)
-                    local sy = math.floor(y * TS - camY)
 
-                    -- Apply lighting
-                    local light = maxLight
-                    if lightMap then
-                        local idx = y * Config.WORLD_W + x + 1
-                        light = lightMap[idx] or 0
-                    end
-                    local lf = light / maxLight
-                    local r = math.floor(color[1] * lf)
-                    local g = math.floor(color[2] * lf)
-                    local b = math.floor(color[3] * lf)
-                    local a = color[4] or 255
-
-                    if lf > 0 or y < Config.SURFACE_Y + 3 then
-                        UI.Rect(sx, sy, TS, TS, {r, g, b, a})
-                    end
-                end
-            end
-        end
-    end
-
-    -- Draw underground darkness for air tiles
-    if lightMap then
-        for y = startTY, endTY do
-            if y > Config.SURFACE_Y + 3 then
-                for x = startTX, endTX do
-                    local tileId = WorldData.Get(x, y)
-                    if tileId == Tiles.AIR then
-                        local idx = y * Config.WORLD_W + x + 1
-                        local light = lightMap[idx] or 0
-                        if light > 0 then
-                            -- Show dimly lit air as dark background
-                            local lf = light / maxLight
-                            local darkness = math.floor(255 * (1 - lf * 0.3))
-                            -- Just skip - air is transparent, darkness comes from sky being blocked
+            if tileId ~= 0 then
+                -- Use pre-computed lit color from lighting pass
+                if colorCache then
+                    local c = colorCache[idx]
+                    if c then
+                        local lf = lightMap and (lightMap[idx] or 0) or maxLight
+                        if lf > 0 or y < surfaceY + 3 then
+                            UI.Rect(floor(x * TS - camX), sy, TS, TS, c)
                         end
+                    else
+                        -- Fallback: no cached color, compute inline
+                        local data = tileData[tileId] or tileData[0]
+                        local color = data.color
+                        local sx = floor(x * TS - camX)
+                        UI.Rect(sx, sy, TS, TS, color)
                     end
+                else
+                    -- No color cache yet (first frame before lighting calc)
+                    local data = tileData[tileId] or tileData[0]
+                    local color = data.color
+                    UI.Rect(floor(x * TS - camX), sy, TS, TS, color)
                 end
             end
         end
@@ -92,14 +78,12 @@ function WorldView.Draw(shared)
     if shared.mineTarget and shared.mineProgress > 0 then
         local mx = shared.mineTarget.x
         local my = shared.mineTarget.y
-        local sx = math.floor(mx * TS - camX)
-        local sy = math.floor(my * TS - camY)
-        -- Mining progress overlay
+        local sx = floor(mx * TS - camX)
+        local sy = floor(my * TS - camY)
         local prog = shared.mineProgress
-        UI.Rect(sx, sy, TS, TS, {255, 255, 255, math.floor(60 + 100 * prog)})
-        -- Progress bar below tile
+        UI.Rect(sx, sy, TS, TS, {255, 255, 255, floor(60 + 100 * prog)})
         UI.Rect(sx, sy + TS, TS, 2, {40, 40, 40, 200})
-        UI.Rect(sx, sy + TS, math.floor(TS * prog), 2, {255, 255, 100})
+        UI.Rect(sx, sy + TS, floor(TS * prog), 2, {255, 255, 100})
     end
 end
 

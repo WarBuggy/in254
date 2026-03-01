@@ -45,13 +45,16 @@ function Drops.UpdateAll(shared, dt)
             drop.vx = drop.vx * 0.9
         end
 
-        -- Magnet toward player if close
+        -- Magnet toward player if close (squared distance to avoid sqrt)
         if p.alive then
-            local dx = (p.x + p.w / 2) - (drop.x + drop.w / 2)
-            local dy = (p.y + p.h / 2) - (drop.y + drop.h / 2)
-            local dist = math.sqrt(dx * dx + dy * dy)
+            local dx = (p.x + p.w * 0.5) - (drop.x + drop.w * 0.5)
+            local dy = (p.y + p.h * 0.5) - (drop.y + drop.h * 0.5)
+            local distSq = dx * dx + dy * dy
 
-            if dist < Config.PICKUP_RANGE then
+            local pickupSq = Config.PICKUP_RANGE * Config.PICKUP_RANGE
+            local magnetSq = Config.PICKUP_MAGNET * Config.PICKUP_MAGNET
+
+            if distSq < pickupSq then
                 -- Pick up
                 local remaining = Inventory.Add(inv, drop.itemId, drop.count)
                 if remaining < drop.count then
@@ -60,8 +63,9 @@ function Drops.UpdateAll(shared, dt)
                         table.insert(toRemove, i)
                     end
                 end
-            elseif dist < Config.PICKUP_MAGNET then
-                -- Magnet pull
+            elseif distSq < magnetSq then
+                -- Magnet pull (only sqrt here, when actually needed)
+                local dist = math.sqrt(distSq)
                 local speed = 200
                 drop.vx = (dx / dist) * speed
                 drop.vy = (dy / dist) * speed

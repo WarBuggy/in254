@@ -44,14 +44,22 @@ function WorldData.Set(x, y, id)
     tiles[y * W + x + 1] = id
 end
 
+-- Cache tile data table for IsSolid (avoid require() per call)
+local _tileData = nil
+local function getTileData()
+    if not _tileData then
+        _tileData = require("world/tiles").data
+    end
+    return _tileData
+end
+
 function WorldData.IsSolid(x, y)
     if not WorldData.InBounds(x, y) then
-        if y >= H then return true end
-        return false
+        return y >= H
     end
     local id = tiles[y * W + x + 1] or 0
-    local Tiles = require("world/tiles")
-    return Tiles.IsSolid(id)
+    local d = getTileData()[id]
+    return d and d.solid
 end
 
 function WorldData.GetWidth() return W end

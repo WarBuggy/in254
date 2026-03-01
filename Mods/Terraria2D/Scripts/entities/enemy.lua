@@ -93,10 +93,11 @@ function Enemy.UpdateAll(shared, dt)
             Physics.ApplyGravity(e, dt)
             Physics.MoveAndCollide(e, dt)
 
-            -- Despawn if too far
-            local dx = math.abs(e.x - p.x)
-            local dy = math.abs(e.y - p.y)
-            if dx > Config.DESPAWN_RANGE or dy > Config.DESPAWN_RANGE then
+            -- Despawn if too far (avoid math.abs)
+            local dx = e.x - p.x
+            local dy = e.y - p.y
+            local despawn = Config.DESPAWN_RANGE
+            if dx > despawn or dx < -despawn or dy > despawn or dy < -despawn then
                 table.insert(toRemove, i)
             end
         end
@@ -136,7 +137,7 @@ function Enemy.WalkAI(e, p, dt)
     local dx = p.x - e.x
     e.facingRight = dx > 0
 
-    if math.abs(dx) < 300 then
+    if dx > -300 and dx < 300 then
         e.vx = (dx > 0) and e.speed or -e.speed
     else
         e.vx = 0
@@ -148,7 +149,7 @@ function Enemy.SkeletonAI(e, p, dt)
     local dy = p.y - e.y
     e.facingRight = dx > 0
 
-    if math.abs(dx) < 300 then
+    if dx > -300 and dx < 300 then
         e.vx = (dx > 0) and e.speed or -e.speed
 
         -- Jump if player is above and we're on ground

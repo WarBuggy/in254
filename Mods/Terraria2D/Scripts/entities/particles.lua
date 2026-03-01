@@ -6,7 +6,12 @@
 local Camera = require("core/camera")
 local UI = require("core/ui")
 
+local floor = math.floor
+
 local Particles = {}
+
+-- Reusable color table for draw (avoids allocation per particle per frame)
+local _drawColor = { 0, 0, 0, 255 }
 
 -- Block break: spawn small colored particles
 function Particles.BlockBreak(shared, x, y, color)
@@ -74,18 +79,21 @@ end
 function Particles.DrawAll(shared)
     local camX = Camera.GetX()
     local camY = Camera.GetY()
+    local dc = _drawColor
 
     for _, p in ipairs(shared.particles) do
-        local sx = math.floor(p.x - camX)
-        local sy = math.floor(p.y - camY)
-        local alpha = math.floor(255 * (1 - p.lifetime / p.maxLife))
+        local sx = floor(p.x - camX)
+        local sy = floor(p.y - camY)
+        local alpha = floor(255 * (1 - p.lifetime / p.maxLife))
 
         if p.type == "block" then
             local c = p.color
-            UI.Rect(sx, sy, p.size, p.size, {c[1], c[2], c[3], alpha})
+            dc[1] = c[1]; dc[2] = c[2]; dc[3] = c[3]; dc[4] = alpha
+            UI.Rect(sx, sy, p.size, p.size, dc)
         elseif p.type == "text" then
             local c = p.color
-            Text.Draw(p.text, sx, sy, 12, {c[1], c[2], c[3], alpha})
+            dc[1] = c[1]; dc[2] = c[2]; dc[3] = c[3]; dc[4] = alpha
+            Text.Draw(p.text, sx, sy, 12, dc)
         end
     end
 end

@@ -6,6 +6,12 @@
 local Config = require("core/config")
 local WorldData = require("world/worlddata")
 
+-- Localize hot-path math functions
+local floor = math.floor
+local max = math.max
+local min = math.min
+local sqrt = math.sqrt
+
 local Physics = {}
 
 -- Apply gravity to an entity with { x, y, vx, vy, w, h }
@@ -31,7 +37,7 @@ function Physics.MoveAndCollide(ent, dt)
     Physics.ResolveY(ent, TS)
 
     -- Clamp to world bounds
-    ent.x = math.max(0, math.min(ent.x, Config.WORLD_PX_W - ent.w))
+    ent.x = max(0, min(ent.x, Config.WORLD_PX_W - ent.w))
     if ent.y > Config.WORLD_PX_H then
         ent.y = Config.WORLD_PX_H - ent.h
         ent.vy = 0
@@ -40,10 +46,10 @@ function Physics.MoveAndCollide(ent, dt)
 end
 
 function Physics.ResolveX(ent, TS)
-    local left = math.floor(ent.x / TS)
-    local right = math.floor((ent.x + ent.w - 1) / TS)
-    local top = math.floor(ent.y / TS)
-    local bottom = math.floor((ent.y + ent.h - 1) / TS)
+    local left = floor(ent.x / TS)
+    local right = floor((ent.x + ent.w - 1) / TS)
+    local top = floor(ent.y / TS)
+    local bottom = floor((ent.y + ent.h - 1) / TS)
 
     for ty = top, bottom do
         for tx = left, right do
@@ -63,10 +69,10 @@ function Physics.ResolveX(ent, TS)
 end
 
 function Physics.ResolveY(ent, TS)
-    local left = math.floor(ent.x / TS)
-    local right = math.floor((ent.x + ent.w - 1) / TS)
-    local top = math.floor(ent.y / TS)
-    local bottom = math.floor((ent.y + ent.h - 1) / TS)
+    local left = floor(ent.x / TS)
+    local right = floor((ent.x + ent.w - 1) / TS)
+    local top = floor(ent.y / TS)
+    local bottom = floor((ent.y + ent.h - 1) / TS)
 
     for tx = left, right do
         for ty = top, bottom do
@@ -94,13 +100,16 @@ end
 
 -- Distance between center of two entities
 function Physics.Distance(a, b)
-    local ax = a.x + a.w / 2
-    local ay = a.y + a.h / 2
-    local bx = b.x + b.w / 2
-    local by = b.y + b.h / 2
-    local dx = ax - bx
-    local dy = ay - by
-    return math.sqrt(dx * dx + dy * dy)
+    local dx = (a.x + a.w * 0.5) - (b.x + b.w * 0.5)
+    local dy = (a.y + a.h * 0.5) - (b.y + b.h * 0.5)
+    return sqrt(dx * dx + dy * dy)
+end
+
+-- Squared distance (avoids sqrt for comparison-only checks)
+function Physics.DistanceSq(a, b)
+    local dx = (a.x + a.w * 0.5) - (b.x + b.w * 0.5)
+    local dy = (a.y + a.h * 0.5) - (b.y + b.h * 0.5)
+    return dx * dx + dy * dy
 end
 
 return Physics
