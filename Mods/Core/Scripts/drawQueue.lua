@@ -87,7 +87,7 @@ end
 -- Submit frames to Drawing
 local function submitDrawQueue(drawQueue)
     for _, frame in ipairs(drawQueue) do
-        Drawing.AddRequest(
+        Drawing.Sprite(
             frame.textureId,
             {frame.posX, frame.posY},
             0,             -- rotation

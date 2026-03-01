@@ -131,20 +131,17 @@ public class EngineManager : Game
     {
         GraphicsDevice.Clear(Color.Black);
 
-        // Begin the sprite batch
-        _spriteBatch.Begin(
-            SpriteSortMode.Deferred,
-            BlendState.AlphaBlend,
-            SamplerState.PointClamp,
-            DepthStencilState.None,
-            RasterizerState.CullCounterClockwise
-        );
         ScriptManager.Instance.Fire(LuaGameEvents.OnDraw);
         SceneManager.Instance.FireSceneDraws();
-        DrawManager.Instance.RenderQueue(_spriteBatch);
+
+        // All game rendering (tiles + entities + text) in one call
+        DrawManager.Instance.Render(GraphicsDevice, _spriteBatch);
+
+        // Overlays (error banner, console) — always on top
+        _spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+            SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise);
         DrawModErrorOverlay(_spriteBatch);
         ConsoleManager.Instance.Draw(_spriteBatch, GraphicsDevice);
-
         _spriteBatch.End();
 
         base.Draw(gameTime);

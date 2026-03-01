@@ -9,6 +9,7 @@ local Tiles = require("world/tiles")
 local WorldData = require("world/worlddata")
 local Camera = require("core/camera")
 local UI = require("core/ui")
+local HUD = require("scenes/gameplay/hud")
 
 local Player = {}
 
@@ -164,6 +165,8 @@ function Player.HandleMining(p, dt, shared)
         if shared.mineProgress >= 1.0 then
             -- Block mined!
             WorldData.Set(tx, ty, Tiles.AIR)
+            Drawing.RefreshTileMap()
+            HUD.RefreshMinimap()
             -- Drop item
             if data.drop then
                 local Drops = require("systems/drops")
@@ -219,6 +222,8 @@ function Player.HandlePlacing(p, shared)
     -- Place tile
     local tileId = Tiles.itemToTile[slot.id]
     WorldData.Set(tx, ty, tileId)
+    Drawing.RefreshTileMap()
+    HUD.RefreshMinimap()
 
     -- Consume from inventory
     local Inventory = require("systems/inventory")

@@ -57,7 +57,7 @@ function UI.IsRightReleased() return rightReleased end
 
 function UI.Rect(x, y, w, h, color)
     if not pixelId then return end
-    Drawing.AddRequest(pixelId, {x, y}, 0, {w, h}, color, 0, 1, 1, 0, 0, false, false)
+    Drawing.Sprite(pixelId, {x, y}, 0, {w, h}, color, 0, 1, 1, 0, 0, false, false)
 end
 
 function UI.Panel(x, y, w, h, color)
@@ -86,7 +86,7 @@ function UI.Button(x, y, w, h, label, opts)
 
     if disabled then
         UI.Rect(x, y, w, h, {40, 40, 50, 180})
-        Text.Draw(label, x + 8, y + math.floor((h - textSize) / 2), textSize, {100, 100, 100})
+        Drawing.Text(label, x + 8, y + math.floor((h - textSize) / 2), textSize, {100, 100, 100})
     else
         local bg = baseColor
         if hovered and mouseDown then
@@ -95,7 +95,7 @@ function UI.Button(x, y, w, h, label, opts)
             bg = hoverColor
         end
         UI.Rect(x, y, w, h, bg)
-        Text.Draw(label, x + 8, y + math.floor((h - textSize) / 2), textSize, textColor)
+        Drawing.Text(label, x + 8, y + math.floor((h - textSize) / 2), textSize, textColor)
         clicked = mouseReleased and hovered
     end
 
@@ -123,7 +123,7 @@ function UI.DrawTooltip()
     local tx = math.min(mouseX + 12, Screen.Width() - tw - 4)
     local ty = math.max(mouseY - th - 4, 4)
     UI.Rect(tx, ty, tw, th, {20, 20, 30, 230})
-    Text.Draw(tooltipText, tx + 8, ty + 4, 14, {220, 220, 220})
+    Drawing.Text(tooltipText, tx + 8, ty + 4, 14, {220, 220, 220})
 end
 
 return UI

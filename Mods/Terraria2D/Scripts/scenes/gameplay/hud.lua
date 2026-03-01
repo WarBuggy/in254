@@ -20,12 +20,12 @@ function HUD.Draw(shared)
     -- HP bar
     UI.Rect(8, 8, 104, 14, {0, 0, 0, 150})
     UI.ProgressBar(9, 9, 102, 12, p.hp, p.maxHp, C.HP_FG, C.HP_BG)
-    Text.Draw("HP " .. p.hp .. "/" .. p.maxHp, 14, 10, 10, C.WHITE)
+    Drawing.Text("HP " .. p.hp .. "/" .. p.maxHp, 14, 10, 10, C.WHITE)
 
     -- Mana bar
     UI.Rect(8, 24, 104, 14, {0, 0, 0, 150})
     UI.ProgressBar(9, 25, 102, 12, p.mana, p.maxMana, C.MANA_FG, C.MANA_BG)
-    Text.Draw("MP " .. p.mana .. "/" .. p.maxMana, 14, 26, 10, C.WHITE)
+    Drawing.Text("MP " .. p.mana .. "/" .. p.maxMana, 14, 26, 10, C.WHITE)
 
     -- Hotbar
     local hotbarSize = Inventory.GetHotbarSize()
@@ -62,13 +62,13 @@ function HUD.Draw(shared)
 
             -- Stack count
             if slot.count > 1 then
-                Text.Draw(tostring(slot.count), sx + 2, hotbarY + slotSize - 10, 8, C.WHITE)
+                Drawing.Text(tostring(slot.count), sx + 2, hotbarY + slotSize - 10, 8, C.WHITE)
             end
         end
 
         -- Slot number
         local keyLabel = i == 10 and "0" or tostring(i)
-        Text.Draw(keyLabel, sx + slotSize - 8, hotbarY + 1, 7, {150, 150, 150})
+        Drawing.Text(keyLabel, sx + slotSize - 8, hotbarY + 1, 7, {150, 150, 150})
 
         -- Tooltip on hover
         if slot and UI.IsHovered(sx, hotbarY, slotSize, slotSize) then
@@ -79,7 +79,7 @@ function HUD.Draw(shared)
     -- Day/Night indicator
     local timeStr = DayNight.GetTimeString()
     local dayIcon = shared.isNight and "Night" or "Day"
-    Text.Draw(dayIcon .. " " .. timeStr, W - 90, 10, 10, C.WHITE)
+    Drawing.Text(dayIcon .. " " .. timeStr, W - 90, 10, 10, C.WHITE)
 
     -- Minimap
     HUD.DrawMinimap(shared)
@@ -90,8 +90,17 @@ function HUD.Draw(shared)
         local bossX = math.floor(W / 2 - bossW / 2)
         UI.Rect(bossX - 2, 6, bossW + 4, 18, {0, 0, 0, 180})
         UI.ProgressBar(bossX, 8, bossW, 14, shared.boss.hp, shared.boss.maxHp, {200, 40, 40}, {60, 10, 10, 200})
-        Text.Draw(shared.boss.name, bossX + 4, 9, 10, C.WHITE)
+        Drawing.Text(shared.boss.name, bossX + 4, 9, 10, C.WHITE)
     end
+end
+
+-- Cached minimap batch data (rebuilt only when tiles change)
+local _minimapBatch = nil
+local _minimapCount = 0
+local _minimapDirty = true
+
+function HUD.RefreshMinimap()
+    _minimapDirty = true
 end
 
 function HUD.DrawMinimap(shared)
@@ -103,29 +112,56 @@ function HUD.DrawMinimap(shared)
 
     UI.Rect(mapX - 1, mapY - 1, mapW + 2, mapH + 2, {0, 0, 0, 200})
 
-    -- Draw minimap (sample every N tiles)
     local WorldData = require("world/worlddata")
+    local TS = Config.TILE_SIZE
     local scaleX = Config.WORLD_W / mapW
     local scaleY = Config.WORLD_H / mapH
+    local floor = math.floor
 
-    for my = 0, mapH - 1 do
-        for mx = 0, mapW - 1 do
-            local tx = math.floor(mx * scaleX)
-            local ty = math.floor(my * scaleY)
-            local tileId = WorldData.Get(tx, ty)
-            if tileId ~= 0 then
-                local data = Tiles.GetData(tileId)
-                local c = data.color
-                UI.Rect(mapX + mx, mapY + my, 1, 1, {c[1], c[2], c[3], 200})
+    -- Rebuild batch data only when dirty
+    if _minimapDirty then
+        _minimapDirty = false
+        local tiles = WorldData.GetTiles()
+        local tileData = Tiles.data
+        local batch = {}
+        local count = 0
+
+        for my = 0, mapH - 1 do
+            local ty = floor(my * scaleY)
+            local base = ty * Config.WORLD_W
+            for mx = 0, mapW - 1 do
+                local tx = floor(mx * scaleX)
+                local tileId = tiles[base + tx + 1] or 0
+                if tileId ~= 0 then
+                    local data = tileData[tileId] or tileData[0]
+                    local c = data.color
+                    local i = count * 8
+                    batch[i + 1] = mapX + mx
+                    batch[i + 2] = mapY + my
+                    batch[i + 3] = 1
+                    batch[i + 4] = 1
+                    batch[i + 5] = c[1]
+                    batch[i + 6] = c[2]
+                    batch[i + 7] = c[3]
+                    batch[i + 8] = 200
+                    count = count + 1
+                end
             end
         end
+
+        _minimapBatch = batch
+        _minimapCount = count
     end
 
-    -- Player position on minimap
+    -- One interop call for all minimap pixels
+    if _minimapCount > 0 then
+        Drawing.RectBatch(UI.GetPixelId(), _minimapBatch, _minimapCount)
+    end
+
+    -- Player position on minimap (always fresh)
     local p = shared.player
-    local TS = Config.TILE_SIZE
-    local px = math.floor(p.x / TS / scaleX)
-    local py = math.floor(p.y / TS / scaleY)
+    local px = floor(p.x / TS / scaleX)
+    local py = floor(p.y / TS / scaleY)
     UI.Rect(mapX + px - 1, mapY + py - 1, 3, 3, {255, 255, 255})
 end
 

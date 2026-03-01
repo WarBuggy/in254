@@ -167,11 +167,18 @@ end
 function Enemy.DrawAll(shared)
     local camX = Camera.GetX()
     local camY = Camera.GetY()
+    local screenW = shared.W
+    local screenH = shared.H
 
     for _, e in ipairs(shared.enemies) do
         if e.alive then
             local sx = math.floor(e.x - camX)
             local sy = math.floor(e.y - camY)
+
+            -- Viewport culling
+            if sx + e.w < 0 or sx > screenW or sy + e.h < 0 or sy > screenH then
+                goto continue
+            end
 
             -- Blink when hit
             if e.invTimer > 0 and math.floor(e.invTimer * 10) % 2 == 0 then

@@ -139,6 +139,13 @@ function Boss.Draw(shared)
     local sx = math.floor(boss.x - camX)
     local sy = math.floor(boss.y - camY)
 
+    -- Viewport culling (40px margin for spin orbs)
+    local margin = 40
+    if sx + boss.w + margin < 0 or sx - margin > shared.W or
+       sy + boss.h + margin < 0 or sy - margin > shared.H then
+        return
+    end
+
     -- Blink
     if boss.invTimer > 0 and math.floor(boss.invTimer * 10) % 2 == 0 then
         return

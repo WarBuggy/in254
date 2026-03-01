@@ -47,12 +47,6 @@
     "ModJ": {
       "enabled": false
     },
-    "Scorchridge": {
-      "enabled": false
-    },
-    "ScorchridgeV2": {
-      "enabled": false
-    },
     "Terraria2D": {
       "enabled": true
     }

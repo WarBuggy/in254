@@ -31,8 +31,8 @@ function InventoryUI.Draw(shared)
     local panelY = math.floor(H / 2 - panelH / 2)
 
     UI.Panel(panelX, panelY, panelW, panelH, {25, 25, 40, 240})
-    Text.Draw("Inventory", panelX + 10, panelY + 8, 16, C.YELLOW)
-    Text.Draw("[E] Close", panelX + panelW - 70, panelY + 10, 10, C.GRAY)
+    Drawing.Text("Inventory", panelX + 10, panelY + 8, 16, C.YELLOW)
+    Drawing.Text("[E] Close", panelX + panelW - 70, panelY + 10, 10, C.GRAY)
 
     local slotSize = 28
     local slotGap = 4
@@ -41,7 +41,7 @@ function InventoryUI.Draw(shared)
     local startY = panelY + 34
 
     -- Hotbar slots
-    Text.Draw("Hotbar", startX, startY - 2, 9, C.DIM)
+    Drawing.Text("Hotbar", startX, startY - 2, 9, C.DIM)
     startY = startY + 10
     for i = 1, Inventory.GetHotbarSize() do
         local col = (i - 1) % cols
@@ -68,7 +68,7 @@ function InventoryUI.Draw(shared)
 
     -- Bag slots
     startY = startY + slotSize + 12
-    Text.Draw("Bag", startX, startY - 2, 9, C.DIM)
+    Drawing.Text("Bag", startX, startY - 2, 9, C.DIM)
     startY = startY + 10
 
     local hotbarSize = Inventory.GetHotbarSize()
@@ -102,7 +102,7 @@ function InventoryUI.Draw(shared)
         local my = UI.MouseY()
         local color = Tiles.GetItemColor(heldItem.id)
         UI.Rect(mx - 5, my - 5, 10, 10, color)
-        Text.Draw(tostring(heldItem.count), mx + 6, my + 2, 8, C.WHITE)
+        Drawing.Text(tostring(heldItem.count), mx + 6, my + 2, 8, C.WHITE)
     end
 end
 
@@ -116,7 +116,7 @@ function InventoryUI.DrawSlotItem(sx, sy, size, slot)
         UI.Rect(sx + ox, sy + ox, itemSize, itemSize, color)
     end
     if slot.count > 1 then
-        Text.Draw(tostring(slot.count), sx + 2, sy + size - 10, 8, C.WHITE)
+        Drawing.Text(tostring(slot.count), sx + 2, sy + size - 10, 8, C.WHITE)
     end
 end
 

@@ -123,42 +123,41 @@ end
 function NPC.DrawAll(shared)
     local camX = Camera.GetX()
     local camY = Camera.GetY()
+    local screenW = shared.W
+    local screenH = shared.H
 
     for _, npc in ipairs(shared.npcs) do
         local sx = math.floor(npc.x - camX)
         local sy = math.floor(npc.y - camY)
 
-        if npc.type == "guide" then
-            -- Green outfit
-            UI.Rect(sx + 3, sy, 6, 6, {230, 190, 150})        -- head
-            UI.Rect(sx + 3, sy, 6, 2, {80, 50, 20})           -- hair
-            UI.Rect(sx + 2, sy + 6, 8, 10, {40, 140, 40})     -- body
-            UI.Rect(sx + 2, sy + 16, 3, 8, {30, 100, 30})     -- legs
-            UI.Rect(sx + 7, sy + 16, 3, 8, {30, 100, 30})
-        elseif npc.type == "merchant" then
-            -- Blue outfit
-            UI.Rect(sx + 3, sy, 6, 6, {230, 190, 150})        -- head
-            UI.Rect(sx + 3, sy, 6, 2, {60, 60, 60})           -- hat
-            UI.Rect(sx + 2, sy + 6, 8, 10, {40, 40, 140})     -- body
-            UI.Rect(sx + 2, sy + 16, 3, 8, {30, 30, 100})     -- legs
-            UI.Rect(sx + 7, sy + 16, 3, 8, {30, 30, 100})
-        end
+        if sx + 80 >= 0 and sx - 80 <= screenW and sy + npc.h >= 0 and sy - 30 <= screenH then
+            if npc.type == "guide" then
+                UI.Rect(sx + 3, sy, 6, 6, {230, 190, 150})        -- head
+                UI.Rect(sx + 3, sy, 6, 2, {80, 50, 20})           -- hair
+                UI.Rect(sx + 2, sy + 6, 8, 10, {40, 140, 40})     -- body
+                UI.Rect(sx + 2, sy + 16, 3, 8, {30, 100, 30})     -- legs
+                UI.Rect(sx + 7, sy + 16, 3, 8, {30, 100, 30})
+            elseif npc.type == "merchant" then
+                UI.Rect(sx + 3, sy, 6, 6, {230, 190, 150})        -- head
+                UI.Rect(sx + 3, sy, 6, 2, {60, 60, 60})           -- hat
+                UI.Rect(sx + 2, sy + 6, 8, 10, {40, 40, 140})     -- body
+                UI.Rect(sx + 2, sy + 16, 3, 8, {30, 30, 100})     -- legs
+                UI.Rect(sx + 7, sy + 16, 3, 8, {30, 30, 100})
+            end
 
-        -- Eyes
-        local eyeX = npc.facingRight and (sx + 7) or (sx + 4)
-        UI.Rect(eyeX, sy + 2, 1, 2, {40, 40, 40})
+            local eyeX = npc.facingRight and (sx + 7) or (sx + 4)
+            UI.Rect(eyeX, sy + 2, 1, 2, {40, 40, 40})
 
-        -- Name tag
-        Text.Draw(npc.name, sx - 4, sy - 12, 8, {255, 255, 100})
+            Drawing.Text(npc.name, sx - 4, sy - 12, 8, {255, 255, 100})
 
-        -- Dialog bubble
-        if npc.showDialog then
-            local line = npc.dialogLines[npc.dialogIndex]
-            local bw = #line * 5 + 16
-            local bx = sx - bw / 2 + 6
-            local by = sy - 28
-            UI.Rect(bx, by, bw, 14, {0, 0, 0, 200})
-            Text.Draw(line, bx + 4, by + 2, 9, {255, 255, 255})
+            if npc.showDialog then
+                local line = npc.dialogLines[npc.dialogIndex]
+                local bw = #line * 5 + 16
+                local bx = sx - bw / 2 + 6
+                local by = sy - 28
+                UI.Rect(bx, by, bw, 14, {0, 0, 0, 200})
+                Drawing.Text(line, bx + 4, by + 2, 9, {255, 255, 255})
+            end
         end
     end
 end

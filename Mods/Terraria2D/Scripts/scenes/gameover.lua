@@ -34,8 +34,8 @@ local gameoverNode = Node.new({
         local cy = math.floor(H / 2)
 
         UI.Panel(cx - 150, cy - 60, 300, 120, {30, 10, 10, 240})
-        Text.Draw("GAME OVER", cx - 70, cy - 45, 24, C.RED)
-        Text.Draw("Your adventure has ended.", cx - 90, cy - 10, 12, C.GRAY)
+        Drawing.Text("GAME OVER", cx - 70, cy - 45, 24, C.RED)
+        Drawing.Text("Your adventure has ended.", cx - 90, cy - 10, 12, C.GRAY)
 
         if UI.Button(cx - 80, cy + 20, 160, 30, "  Return to Title", {
             color = {60, 30, 30, 230},

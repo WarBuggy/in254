@@ -112,11 +112,18 @@ end
 function Projectile.DrawAll(shared)
     local camX = Camera.GetX()
     local camY = Camera.GetY()
+    local screenW = shared.W
+    local screenH = shared.H
 
     for _, proj in ipairs(shared.projectiles) do
         if proj.alive then
             local sx = math.floor(proj.x - camX)
             local sy = math.floor(proj.y - camY)
+
+            -- Viewport culling (8px margin for projectile sizes)
+            if sx + 8 < 0 or sx - 8 > screenW or sy + 8 < 0 or sy - 8 > screenH then
+                goto continue
+            end
 
             if proj.type == "arrow" then
                 UI.Rect(sx, sy, 6, 2, {180, 160, 120})
@@ -125,6 +132,8 @@ function Projectile.DrawAll(shared)
                 UI.Rect(sx - 1, sy - 1, 6, 6, {120, 60, 255, 180})
                 UI.Rect(sx, sy, 4, 4, {200, 150, 255})
             end
+
+            ::continue::
         end
     end
 end

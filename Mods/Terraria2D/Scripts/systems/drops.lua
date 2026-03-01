@@ -87,19 +87,21 @@ end
 function Drops.DrawAll(shared)
     local camX = Camera.GetX()
     local camY = Camera.GetY()
+    local screenW = shared.W
+    local screenH = shared.H
 
     for _, drop in ipairs(shared.drops) do
         local sx = math.floor(drop.x - camX)
         local sy = math.floor(drop.y - camY)
-        local color = Tiles.GetItemColor(drop.itemId)
 
-        -- Floating bob
-        sy = sy + math.floor(math.sin(drop.lifetime * 3) * 2)
+        if sx + drop.w + 1 >= 0 and sx - 1 <= screenW and sy + drop.h + 3 >= 0 and sy - 3 <= screenH then
+            local color = Tiles.GetItemColor(drop.itemId)
 
-        -- Item rectangle
-        UI.Rect(sx, sy, drop.w, drop.h, color)
-        -- Outline
-        UI.Rect(sx - 1, sy - 1, drop.w + 2, 1, {255, 255, 255, 80})
+            sy = sy + math.floor(math.sin(drop.lifetime * 3) * 2)
+
+            UI.Rect(sx, sy, drop.w, drop.h, color)
+            UI.Rect(sx - 1, sy - 1, drop.w + 2, 1, {255, 255, 255, 80})
+        end
     end
 end
 

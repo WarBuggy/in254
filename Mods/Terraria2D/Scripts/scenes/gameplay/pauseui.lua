@@ -26,7 +26,7 @@ function PauseUI.Draw(shared)
     local panelY = math.floor(H / 2 - panelH / 2)
 
     UI.Panel(panelX, panelY, panelW, panelH, {25, 25, 40, 240})
-    Text.Draw("PAUSED", panelX + panelW / 2 - 30, panelY + 10, 18, C.YELLOW)
+    Drawing.Text("PAUSED", panelX + panelW / 2 - 30, panelY + 10, 18, C.YELLOW)
 
     local btnW = 180
     local btnH = 30

@@ -79,21 +79,27 @@ end
 function Particles.DrawAll(shared)
     local camX = Camera.GetX()
     local camY = Camera.GetY()
+    local screenW = shared.W
+    local screenH = shared.H
     local dc = _drawColor
 
     for _, p in ipairs(shared.particles) do
         local sx = floor(p.x - camX)
         local sy = floor(p.y - camY)
-        local alpha = floor(255 * (1 - p.lifetime / p.maxLife))
 
-        if p.type == "block" then
-            local c = p.color
-            dc[1] = c[1]; dc[2] = c[2]; dc[3] = c[3]; dc[4] = alpha
-            UI.Rect(sx, sy, p.size, p.size, dc)
-        elseif p.type == "text" then
-            local c = p.color
-            dc[1] = c[1]; dc[2] = c[2]; dc[3] = c[3]; dc[4] = alpha
-            Text.Draw(p.text, sx, sy, 12, dc)
+        local sz = p.size or 12
+        if sx + sz >= 0 and sx <= screenW and sy + sz >= 0 and sy <= screenH then
+            local alpha = floor(255 * (1 - p.lifetime / p.maxLife))
+
+            if p.type == "block" then
+                local c = p.color
+                dc[1] = c[1]; dc[2] = c[2]; dc[3] = c[3]; dc[4] = alpha
+                UI.Rect(sx, sy, p.size, p.size, dc)
+            elseif p.type == "text" then
+                local c = p.color
+                dc[1] = c[1]; dc[2] = c[2]; dc[3] = c[3]; dc[4] = alpha
+                Drawing.Text(p.text, sx, sy, 12, dc)
+            end
         end
     end
 end

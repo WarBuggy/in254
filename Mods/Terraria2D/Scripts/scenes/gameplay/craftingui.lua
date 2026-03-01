@@ -43,8 +43,8 @@ function CraftingUI.Draw(shared)
     elseif nearStation == "furnace" then stationLabel = "Furnace"
     elseif nearStation == "anvil" then stationLabel = "Anvil"
     end
-    Text.Draw("Crafting - " .. stationLabel, panelX + 10, panelY + 8, 14, C.YELLOW)
-    Text.Draw("[C] Close", panelX + panelW - 70, panelY + 10, 10, C.GRAY)
+    Drawing.Text("Crafting - " .. stationLabel, panelX + 10, panelY + 8, 14, C.YELLOW)
+    Drawing.Text("[C] Close", panelX + panelW - 70, panelY + 10, 10, C.GRAY)
 
     -- Get available recipes
     local available = Crafting.GetAvailable(shared.inventory, nearStation)
@@ -79,7 +79,7 @@ function CraftingUI.Draw(shared)
         if recipe.count > 1 then
             outName = outName .. " x" .. recipe.count
         end
-        Text.Draw(outName, panelX + 36, ry + 4, 12, canCraft and C.WHITE or C.DIM)
+        Drawing.Text(outName, panelX + 36, ry + 4, 12, canCraft and C.WHITE or C.DIM)
 
         -- Input list
         local inputStr = ""
@@ -87,7 +87,7 @@ function CraftingUI.Draw(shared)
             if j > 1 then inputStr = inputStr .. " + " end
             inputStr = inputStr .. Tiles.GetName(input[1]) .. "x" .. input[2]
         end
-        Text.Draw(inputStr, panelX + 36, ry + 18, 9, C.GRAY)
+        Drawing.Text(inputStr, panelX + 36, ry + 18, 9, C.GRAY)
 
         -- Craft button
         if canCraft then
@@ -104,7 +104,7 @@ function CraftingUI.Draw(shared)
 
     -- Scroll indicator
     if #available > maxVisible then
-        Text.Draw("Scroll for more...", panelX + 10, panelY + panelH - 16, 9, C.DIM)
+        Drawing.Text("Scroll for more...", panelX + 10, panelY + panelH - 16, 9, C.DIM)
     end
 end
 

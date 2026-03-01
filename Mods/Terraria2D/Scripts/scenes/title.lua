@@ -48,10 +48,10 @@ local titleNode = Node.new({
         -- Title
         local titleY = math.floor(H * 0.15)
         UI.Rect(W / 2 - 170, titleY - 10, 340, 60, {0, 0, 0, 120})
-        Text.Draw("TERRARIA 2D", math.floor(W / 2) - 100, titleY, 32, C.WHITE)
+        Drawing.Text("TERRARIA 2D", math.floor(W / 2) - 100, titleY, 32, C.WHITE)
 
         -- Subtitle
-        Text.Draw("A 2D Sandbox Adventure", math.floor(W / 2) - 90, titleY + 40, 14, C.YELLOW)
+        Drawing.Text("A 2D Sandbox Adventure", math.floor(W / 2) - 90, titleY + 40, 14, C.YELLOW)
 
         -- Buttons
         local btnW, btnH = 200, 40
@@ -69,10 +69,10 @@ local titleNode = Node.new({
 
         -- Controls info
         local infoY = math.floor(H * 0.75)
-        Text.Draw("Controls:", 30, infoY, 14, C.WHITE)
-        Text.Draw("A/D: Move   Space: Jump   LClick: Mine/Attack", 30, infoY + 18, 12, C.GRAY)
-        Text.Draw("RClick: Place   E: Inventory   C: Crafting", 30, infoY + 34, 12, C.GRAY)
-        Text.Draw("1-0: Hotbar   Esc: Pause", 30, infoY + 50, 12, C.GRAY)
+        Drawing.Text("Controls:", 30, infoY, 14, C.WHITE)
+        Drawing.Text("A/D: Move   Space: Jump   LClick: Mine/Attack", 30, infoY + 18, 12, C.GRAY)
+        Drawing.Text("RClick: Place   E: Inventory   C: Crafting", 30, infoY + 34, 12, C.GRAY)
+        Drawing.Text("1-0: Hotbar   Esc: Pause", 30, infoY + 50, 12, C.GRAY)
 
         UI.DrawTooltip()
     end

@@ -196,6 +196,8 @@ function Lighting.Calculate(shared)
     local Camera = require("core/camera")
     shared.camX = Camera.GetX()
     shared.camY = Camera.GetY()
+
+    Drawing.RefreshTileMap()
 end
 
 return Lighting

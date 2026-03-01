@@ -34,6 +34,12 @@ local GameplayRoot = Node.new({
     onEnter = function(self, shared)
         print("[Terraria2D] Generating world...")
 
+        -- Register render layers (priority order: lower = drawn first)
+        Drawing.RegisterLayer("world", 0, { blend = "alpha" })
+        Drawing.RegisterLayer("entities", 10, { blend = "alpha" })
+        Drawing.RegisterLayer("particles", 20, { blend = "additive" })
+        Drawing.RegisterLayer("ui", 30, { blend = "alpha" })
+
         -- Generate world
         local spawnX, spawnY = WorldGen.Generate()
         shared.spawnX = spawnX
@@ -189,44 +195,36 @@ local GameplayRoot = Node.new({
         shared.W = Screen.Width()
         shared.H = Screen.Height()
 
-        -- World tiles
+        -- World layer: sky + tiles + mining indicator
+        Drawing.SetLayer("world")
         WorldView.Draw(shared)
 
-        -- Drops
+        -- Entities layer: all game objects
+        Drawing.SetLayer("entities")
         Drops.DrawAll(shared)
-
-        -- NPCs
         NPC.DrawAll(shared)
-
-        -- Enemies
         Enemy.DrawAll(shared)
-
-        -- Player
         Player.Draw(shared.player, shared)
-
-        -- Projectiles
         Projectile.DrawAll(shared)
-
-        -- Particles
-        Particles.DrawAll(shared)
-
-        -- Boss
         if shared.boss then
             Boss.Draw(shared)
         end
 
-        -- HUD (always on top)
+        -- Particles layer: additive blend for glow effects
+        Drawing.SetLayer("particles")
+        Particles.DrawAll(shared)
+
+        -- UI layer: HUD, overlays, death screen (always on top)
+        Drawing.SetLayer("ui")
         HUD.Draw(shared)
 
-        -- Death overlay
         if not shared.player.alive then
             UI.Rect(0, 0, shared.W, shared.H, {180, 0, 0, 80})
-            Text.Draw("YOU DIED", shared.W / 2 - 60, shared.H / 2 - 20, 28, {255, 50, 50})
+            Drawing.Text("YOU DIED", shared.W / 2 - 60, shared.H / 2 - 20, 28, {255, 50, 50})
             local remaining = math.ceil(shared.respawnTimer)
-            Text.Draw("Respawning in " .. remaining .. "...", shared.W / 2 - 70, shared.H / 2 + 20, 14, {200, 200, 200})
+            Drawing.Text("Respawning in " .. remaining .. "...", shared.W / 2 - 70, shared.H / 2 + 20, 14, {200, 200, 200})
         end
 
-        -- Overlays
         if shared.showInventory then
             InventoryUI.Draw(shared)
         end
@@ -238,6 +236,7 @@ local GameplayRoot = Node.new({
         end
 
         UI.DrawTooltip()
+        Drawing.ResetLayer()
     end
 })
 
