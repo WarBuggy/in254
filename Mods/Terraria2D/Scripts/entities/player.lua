@@ -272,21 +272,45 @@ function Player.HandleAttack(p, dt, shared)
         }
         Combat.MeleeSwing(shared, attackBox, weapon.damage, weapon.knockback, p.facingRight)
     elseif weapon.type == "ranged" then
-        -- Need arrows
+        local ammoType = weapon.ammo or "arrow"
         local Inventory = require("systems/inventory")
-        local arrowSlot = Inventory.FindItem(inv, "arrow")
-        if arrowSlot then
-            Inventory.Remove(inv, arrowSlot, 1)
+        local ammoSlot = Inventory.FindItem(inv, ammoType)
+        if ammoSlot then
+            Inventory.Remove(inv, ammoSlot, 1)
             local Projectile = require("entities/projectile")
-            local dir = p.facingRight and 1 or -1
-            Projectile.Spawn(shared, p.x + p.w / 2, p.y + p.h / 3, dir * 300, 0, weapon.damage, "arrow", true)
+            local projType = ammoType == "bullet" and "bullet" or "arrow"
+            local speed = ammoType == "bullet" and 500 or 300
+            -- Aim toward mouse
+            local ox = p.x + p.w / 2
+            local oy = p.y + p.h / 3
+            local mx = Camera.ScreenToWorldX(UI.MouseX())
+            local my = Camera.ScreenToWorldY(UI.MouseY())
+            local dx = mx - ox
+            local dy = my - oy
+            local len = math.sqrt(dx * dx + dy * dy)
+            if len < 1 then len = 1 end
+            local vx = dx / len * speed
+            local vy = dy / len * speed
+            p.facingRight = dx >= 0
+            Projectile.Spawn(shared, ox, oy, vx, vy, weapon.damage, projType, true)
         end
     elseif weapon.type == "magic" then
         if p.mana >= weapon.manaCost then
             p.mana = p.mana - weapon.manaCost
             local Projectile = require("entities/projectile")
-            local dir = p.facingRight and 1 or -1
-            Projectile.Spawn(shared, p.x + p.w / 2, p.y + p.h / 3, dir * 250, 0, weapon.damage, "magic", true)
+            local speed = 250
+            local ox = p.x + p.w / 2
+            local oy = p.y + p.h / 3
+            local mx = Camera.ScreenToWorldX(UI.MouseX())
+            local my = Camera.ScreenToWorldY(UI.MouseY())
+            local dx = mx - ox
+            local dy = my - oy
+            local len = math.sqrt(dx * dx + dy * dy)
+            if len < 1 then len = 1 end
+            local vx = dx / len * speed
+            local vy = dy / len * speed
+            p.facingRight = dx >= 0
+            Projectile.Spawn(shared, ox, oy, vx, vy, weapon.damage, "magic", true)
         end
     end
 end

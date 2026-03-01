@@ -26,6 +26,7 @@ Tiles.PLANKS     = 16
 Tiles.BRICK      = 17
 Tiles.GLASS      = 18
 Tiles.LEAVES     = 19
+Tiles.TRUNK      = 20
 
 -- Tile data: { name, solid, hardness, color, drop, light }
 Tiles.data = {
@@ -48,7 +49,8 @@ Tiles.data = {
     [16] = { name = "planks",     solid = true,  hardness = 1,   color = {190, 150, 80},      drop = "planks",      light = 0 },
     [17] = { name = "brick",      solid = true,  hardness = 2,   color = {160, 70, 50},       drop = "brick",       light = 0 },
     [18] = { name = "glass",      solid = true,  hardness = 0.5, color = {200, 230, 255, 120},drop = "glass",       light = 0 },
-    [19] = { name = "leaves",     solid = false, hardness = 0.2, color = {30, 130, 30},       drop = nil,           light = 0 },
+    [19] = { name = "leaves",     solid = false, hardness = 0.2, color = {30, 130, 30},       drop = "wood",        light = 0 },
+    [20] = { name = "trunk",      solid = false, hardness = 1.0, color = {120, 80, 40},       drop = "wood",        light = 0 },
 }
 
 -- Item to tile mapping (for placing blocks)
@@ -82,6 +84,7 @@ Tiles.itemNames = {
     iron_bar = "Iron Bar", gold_bar = "Gold Bar", copper_bar = "Copper Bar",
     wooden_sword = "Wooden Sword", iron_sword = "Iron Sword", gold_sword = "Gold Sword",
     bow = "Bow", arrow = "Arrow", magic_staff = "Magic Staff",
+    gun = "Gun", bullet = "Bullet",
 }
 
 -- Item colors (for rendering in inventory)
@@ -112,6 +115,8 @@ Tiles.itemColors = {
     bow        = {140, 100, 40},
     arrow      = {180, 180, 180},
     magic_staff= {180, 100, 255},
+    gun        = {80, 80, 90},
+    bullet     = {220, 200, 50},
 }
 
 -- Weapon stats: { damage, knockback, speed, type, manaCost }
@@ -121,6 +126,7 @@ Tiles.weapons = {
     gold_sword   = { damage = 22, knockback = 6, speed = 0.3, type = "melee" },
     bow          = { damage = 10, knockback = 2, speed = 0.5, type = "ranged", ammo = "arrow" },
     magic_staff  = { damage = 18, knockback = 3, speed = 0.6, type = "magic", manaCost = 8 },
+    gun          = { damage = 12, knockback = 2, speed = 0.15, type = "ranged", ammo = "bullet" },
 }
 
 function Tiles.IsSolid(id)

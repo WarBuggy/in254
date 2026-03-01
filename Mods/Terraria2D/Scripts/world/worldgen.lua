@@ -46,7 +46,7 @@ local function placeTree(x, surfaceY)
     -- Trunk
     for ty = surfaceY - trunkH, surfaceY - 1 do
         if WorldData.InBounds(x, ty) then
-            WorldData.Set(x, ty, Tiles.WOOD)
+            WorldData.Set(x, ty, Tiles.TRUNK)
         end
     end
 

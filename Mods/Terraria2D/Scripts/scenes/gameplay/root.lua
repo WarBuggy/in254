@@ -63,6 +63,8 @@ local GameplayRoot = Node.new({
         shared.inventory = Inventory.New()
         Inventory.Add(shared.inventory, "wood", 10)
         Inventory.Add(shared.inventory, "torch", 50)
+        Inventory.Add(shared.inventory, "gun", 1)
+        Inventory.Add(shared.inventory, "bullet", 30)
         Inventory.Add(shared.inventory, "wooden_sword", 1)
         -- Default to slot 1 (wood) so player can mine/place immediately
 
