@@ -81,6 +81,10 @@ namespace in254.Engine.LuaBindings
             // InvalidateTileColors — lighter refresh (reuses cached tile IDs, only re-reads colors)
             drawTable["RefreshTileColors"] = (Action)(() => TileRendererManager.Instance.InvalidateTileColors());
 
+            // SetNativeOverlayBuffer — tell tile renderer to read overlay (e.g. light) from C# native buffer
+            drawTable["SetNativeOverlayBuffer"] = (Action<int>)(handle =>
+                TileRendererManager.Instance.SetNativeOverlayBuffer(handle));
+
             // DrawRectBatch — batch queue colored rects from a flat table (stride 8: x,y,w,h,r,g,b,a)
             drawTable["RectBatch"] = (Action<DynValue, DynValue, DynValue>)(
                 (pixelIdDyn, dataDyn, countDyn) =>

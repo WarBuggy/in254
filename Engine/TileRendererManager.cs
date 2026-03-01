@@ -49,6 +49,9 @@ public sealed class TileRendererManager : LoggerBaseCore
     private int _screenW, _screenH;
     private Table _lightMap;
 
+    // --- Native overlay buffer (replaces Lua table lightMap when set) ---
+    private int _nativeOverlayHandle;
+
     private TileRendererManager() { }
 
     // --- One-time config (called from Lua SetTileMap) ---
@@ -121,6 +124,12 @@ public sealed class TileRendererManager : LoggerBaseCore
     {
         _tileCacheDirty = true;
         _tileColorsDirty = true;
+    }
+
+    /// <summary>Set native overlay buffer handle. When > 0, reads overlay values from C# int[] instead of Lua table.</summary>
+    public void SetNativeOverlayBuffer(int handle)
+    {
+        _nativeOverlayHandle = handle;
     }
 
     /// <summary>
@@ -245,8 +254,30 @@ public sealed class TileRendererManager : LoggerBaseCore
         }
 
         // Phase 2: Read light levels
-        if (_lightMap != null && _tileColorsDirty)
+        if (_nativeOverlayHandle > 0 && _tileColorsDirty)
         {
+            // Fast path: read from C# native buffer (no Lua overhead)
+            var nativeLightBuf = NativeBufferManager.Instance.GetRaw(_nativeOverlayHandle);
+            if (nativeLightBuf != null)
+            {
+                int bufIdx = 0;
+                int nLen = nativeLightBuf.Length;
+                for (int y = startTY; y <= endTY; y++)
+                {
+                    int baseIdx = y * _worldW;
+                    for (int x = startTX; x <= endTX; x++)
+                    {
+                        if (_tileBuf[bufIdx] == 0) { _lightBuf[bufIdx] = 0; bufIdx++; continue; }
+                        int idx = baseIdx + x;
+                        _lightBuf[bufIdx] = (byte)(idx >= 0 && idx < nLen ? nativeLightBuf[idx] : 0);
+                        bufIdx++;
+                    }
+                }
+            }
+        }
+        else if (_lightMap != null && _tileColorsDirty)
+        {
+            // Fallback: read from Lua table
             int bufIdx = 0;
             for (int y = startTY; y <= endTY; y++)
             {

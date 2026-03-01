@@ -178,6 +178,7 @@ function Player.HandleMining(p, dt, shared)
         if shared.mineProgress >= 1.0 then
             -- Block mined!
             WorldData.Set(tx, ty, Tiles.AIR)
+            Lighting.NotifyTileChanged(tx, ty, Tiles.AIR)
             Lighting.UpdateAt(shared, tx, ty)
             Drawing.RefreshTileMap()
             HUD.RefreshMinimap()
@@ -236,6 +237,7 @@ function Player.HandlePlacing(p, shared)
     -- Place tile
     local tileId = Tiles.itemToTile[slot.id]
     WorldData.Set(tx, ty, tileId)
+    Lighting.NotifyTileChanged(tx, ty, tileId)
     Lighting.UpdateAt(shared, tx, ty)
     Drawing.RefreshTileMap()
     HUD.RefreshMinimap()
