@@ -76,8 +76,7 @@ function NPC.UpdateAll(shared, dt)
 
     for _, npc in ipairs(shared.npcs) do
         -- Physics
-        Physics.ApplyGravity(npc, dt)
-        Physics.MoveAndCollide(npc, dt)
+        Physics.Update(npc, dt)
 
         -- Simple wander AI
         npc.walkTimer = npc.walkTimer - dt

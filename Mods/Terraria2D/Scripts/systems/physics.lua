@@ -1,6 +1,6 @@
 -- ============================================
 -- Terraria2D — Physics
--- Gravity, AABB tile collision
+-- Fixed-timestep gravity, AABB tile collision
 -- ============================================
 
 local Config = require("core/config")
@@ -11,21 +11,23 @@ local floor = math.floor
 local max = math.max
 local min = math.min
 local sqrt = math.sqrt
+local abs = math.abs
+local ceil = math.ceil
 
 local Physics = {}
 
--- Apply gravity to an entity with { x, y, vx, vy, w, h }
-function Physics.ApplyGravity(ent, dt)
-    ent.vy = ent.vy + Config.GRAVITY * dt
-    if ent.vy > Config.TERMINAL_VEL then
-        ent.vy = Config.TERMINAL_VEL
-    end
-end
+local GRAVITY = Config.GRAVITY
+local TERMINAL_VEL = Config.TERMINAL_VEL
+local TS = Config.TILE_SIZE
+local WORLD_PX_W = Config.WORLD_PX_W
+local WORLD_PX_H = Config.WORLD_PX_H
 
--- Resolve AABB collision with tiles, per-axis
--- ent = { x, y, vx, vy, w, h, onGround }
-function Physics.MoveAndCollide(ent, dt)
-    local TS = Config.TILE_SIZE
+-- Single-step physics: gravity + move + collide
+-- Engine calls onFixedUpdate at 120Hz, so no accumulator needed.
+function Physics.Update(ent, dt)
+    -- Gravity
+    ent.vy = ent.vy + GRAVITY * dt
+    if ent.vy > TERMINAL_VEL then ent.vy = TERMINAL_VEL end
 
     -- Move X
     ent.x = ent.x + ent.vx * dt
@@ -37,25 +39,52 @@ function Physics.MoveAndCollide(ent, dt)
     Physics.ResolveY(ent, TS)
 
     -- Clamp to world bounds
-    ent.x = max(0, min(ent.x, Config.WORLD_PX_W - ent.w))
-    if ent.y > Config.WORLD_PX_H then
-        ent.y = Config.WORLD_PX_H - ent.h
+    ent.x = max(0, min(ent.x, WORLD_PX_W - ent.w))
+    if ent.y > WORLD_PX_H then
+        ent.y = WORLD_PX_H - ent.h
         ent.vy = 0
         ent.onGround = true
     end
 end
 
-function Physics.ResolveX(ent, TS)
-    local left = floor(ent.x / TS)
-    local right = floor((ent.x + ent.w - 1) / TS)
-    local top = floor(ent.y / TS)
-    local bottom = floor((ent.y + ent.h - 1) / TS)
+-- Legacy wrappers (kept for any edge callers)
+function Physics.ApplyGravity(ent, dt)
+    ent.vy = ent.vy + GRAVITY * dt
+    if ent.vy > TERMINAL_VEL then
+        ent.vy = TERMINAL_VEL
+    end
+end
+
+function Physics.MoveAndCollide(ent, dt)
+    -- Move X
+    ent.x = ent.x + ent.vx * dt
+    Physics.ResolveX(ent, TS)
+
+    -- Move Y
+    ent.y = ent.y + ent.vy * dt
+    ent.onGround = false
+    Physics.ResolveY(ent, TS)
+
+    -- Clamp to world bounds
+    ent.x = max(0, min(ent.x, WORLD_PX_W - ent.w))
+    if ent.y > WORLD_PX_H then
+        ent.y = WORLD_PX_H - ent.h
+        ent.vy = 0
+        ent.onGround = true
+    end
+end
+
+function Physics.ResolveX(ent, ts)
+    local left = floor(ent.x / ts)
+    local right = floor((ent.x + ent.w - 1) / ts)
+    local top = floor(ent.y / ts)
+    local bottom = floor((ent.y + ent.h - 1) / ts)
 
     for ty = top, bottom do
         for tx = left, right do
             if WorldData.IsSolid(tx, ty) then
-                local tileLeft = tx * TS
-                local tileRight = tileLeft + TS
+                local tileLeft = tx * ts
+                local tileRight = tileLeft + ts
                 if ent.vx > 0 then
                     ent.x = tileLeft - ent.w
                 elseif ent.vx < 0 then
@@ -68,17 +97,17 @@ function Physics.ResolveX(ent, TS)
     end
 end
 
-function Physics.ResolveY(ent, TS)
-    local left = floor(ent.x / TS)
-    local right = floor((ent.x + ent.w - 1) / TS)
-    local top = floor(ent.y / TS)
-    local bottom = floor((ent.y + ent.h - 1) / TS)
+function Physics.ResolveY(ent, ts)
+    local left = floor(ent.x / ts)
+    local right = floor((ent.x + ent.w - 1) / ts)
+    local top = floor(ent.y / ts)
+    local bottom = floor((ent.y + ent.h - 1) / ts)
 
     for tx = left, right do
         for ty = top, bottom do
             if WorldData.IsSolid(tx, ty) then
-                local tileTop = ty * TS
-                local tileBottom = tileTop + TS
+                local tileTop = ty * ts
+                local tileBottom = tileTop + ts
                 if ent.vy > 0 then
                     ent.y = tileTop - ent.h
                     ent.onGround = true

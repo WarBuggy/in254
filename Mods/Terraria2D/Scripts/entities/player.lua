@@ -82,17 +82,14 @@ function Player.Update(p, dt, shared)
         p.facingRight = true
     end
 
-    -- Jump
+    -- Jump (before physics so full velocity applies on first substep)
     if Input.IsKeyPressed("space") and p.onGround then
         p.vy = Config.JUMP_VEL
         p.onGround = false
     end
 
-    -- Gravity
-    Physics.ApplyGravity(p, dt)
-
-    -- Move and collide
-    Physics.MoveAndCollide(p, dt)
+    -- Fixed-timestep physics (gravity + move + collide)
+    Physics.Update(p, dt)
 
     -- Mining (left click hold)
     Player.HandleMining(p, dt, shared)

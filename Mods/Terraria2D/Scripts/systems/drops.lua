@@ -46,8 +46,7 @@ function Drops.UpdateAll(shared, dt)
         drop.lifetime = drop.lifetime + dt
 
         -- Gravity and movement
-        Physics.ApplyGravity(drop, dt)
-        Physics.MoveAndCollide(drop, dt)
+        Physics.Update(drop, dt)
 
         -- Friction when on ground
         if drop.onGround then

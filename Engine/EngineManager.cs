@@ -24,6 +24,11 @@ public class EngineManager : Game
     private readonly Dictionary<string, ActionInput> _actionInputBindings = [];
     private Texture2D _errorPixelTexture;
 
+    // Fixed-timestep accumulator (120Hz)
+    private const float FixedDt = 1f / 120f;
+    private float _fixedTimeAccumulator;
+    private DynValue? _fixedDtDynValue;
+
     private EngineManager()
     {
         _graphics = new GraphicsDeviceManager(this);
@@ -116,6 +121,16 @@ public class EngineManager : Game
         SoundManager.Instance.Update();
 
         ScriptManager.Instance.TickEngineCore(deltaTime, totalTime);
+
+        // Fixed-timestep updates (120Hz) — runs before variable-rate updates
+        _fixedTimeAccumulator += deltaTime;
+        if (_fixedTimeAccumulator > 0.1f) _fixedTimeAccumulator = 0.1f; // cap to prevent spiral of death
+        _fixedDtDynValue ??= DynValue.NewNumber(FixedDt);
+        while (_fixedTimeAccumulator >= FixedDt)
+        {
+            _fixedTimeAccumulator -= FixedDt;
+            SceneManager.Instance.FireSceneFixedUpdates(_fixedDtDynValue);
+        }
 
         ScriptManager.Instance.Fire(
             LuaGameEvents.OnUpdate,

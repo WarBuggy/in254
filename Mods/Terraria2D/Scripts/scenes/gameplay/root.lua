@@ -148,45 +148,8 @@ local GameplayRoot = Node.new({
             return
         end
 
-        -- Day/Night
+        -- Day/Night (visual timer, variable rate is fine)
         DayNight.Update(dt, shared)
-
-        -- Player dead? Handle respawn timer
-        local p = shared.player
-        if not p.alive then
-            shared.respawnTimer = shared.respawnTimer - dt
-            if shared.respawnTimer <= 0 then
-                Player.Respawn(p, shared)
-            end
-            Camera.Update(dt)
-            return
-        end
-
-        -- Player update
-        Player.Update(p, dt, shared)
-
-        -- Enemy updates
-        Enemy.UpdateAll(shared, dt)
-
-        -- Spawning
-        Spawning.Update(shared, dt)
-
-        -- Projectiles
-        Projectile.UpdateAll(shared, dt)
-
-        -- Particles
-        Particles.UpdateAll(shared, dt)
-
-        -- Drops
-        Drops.UpdateAll(shared, dt)
-
-        -- NPCs
-        NPC.UpdateAll(shared, dt)
-
-        -- Boss
-        if shared.boss then
-            Boss.Update(shared, dt)
-        end
 
         -- Recalc lighting when camera crosses a margin boundary or day/night changes
         local TS = Config.TILE_SIZE
@@ -201,6 +164,49 @@ local GameplayRoot = Node.new({
             shared._lightATX = aTX
             shared._lightATY = aTY
             Lighting.Calculate(shared)
+        end
+    end,
+
+    onFixedUpdate = function(self, fixedDt, shared)
+        if shared.showPause or shared.showInventory or shared.showCrafting then
+            return
+        end
+
+        -- Player dead? Handle respawn timer
+        local p = shared.player
+        if not p.alive then
+            shared.respawnTimer = shared.respawnTimer - fixedDt
+            if shared.respawnTimer <= 0 then
+                Player.Respawn(p, shared)
+            end
+            Camera.Update(fixedDt)
+            return
+        end
+
+        -- Player update (input + physics + camera)
+        Player.Update(p, fixedDt, shared)
+
+        -- Enemy updates (AI + physics + combat)
+        Enemy.UpdateAll(shared, fixedDt)
+
+        -- Spawning
+        Spawning.Update(shared, fixedDt)
+
+        -- Projectiles
+        Projectile.UpdateAll(shared, fixedDt)
+
+        -- Particles
+        Particles.UpdateAll(shared, fixedDt)
+
+        -- Drops
+        Drops.UpdateAll(shared, fixedDt)
+
+        -- NPCs
+        NPC.UpdateAll(shared, fixedDt)
+
+        -- Boss
+        if shared.boss then
+            Boss.Update(shared, fixedDt)
         end
     end,
 

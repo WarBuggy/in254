@@ -99,8 +99,7 @@ function Enemy.UpdateAll(shared, dt)
             end
 
             -- Physics
-            Physics.ApplyGravity(e, dt)
-            Physics.MoveAndCollide(e, dt)
+            Physics.Update(e, dt)
 
             -- Despawn if too far (avoid math.abs)
             local dx = e.x - p.x

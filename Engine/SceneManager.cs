@@ -269,6 +269,41 @@ public sealed class SceneManager
         }
     }
 
+    public void FireSceneFixedUpdates(DynValue fixedDt)
+    {
+        foreach (var kvp in _activeScenes)
+        {
+            string modId = kvp.Key;
+            if (ModErrorTracker.Instance.IsModErrored(modId)) continue;
+
+            string? sceneName = kvp.Value;
+            if (sceneName == null) continue;
+
+            try
+            {
+                // Tree scene?
+                if (_treeScenes.TryGetValue(modId, out var modTrees) &&
+                    modTrees.TryGetValue(sceneName, out var root))
+                {
+                    root.FixedUpdate(fixedDt);
+                    continue;
+                }
+
+                // Flat scene
+                if (_scenes.TryGetValue(modId, out var modScenes) &&
+                    modScenes.TryGetValue(sceneName, out var def) &&
+                    def.OnFixedUpdate != null)
+                {
+                    ScriptManager.Instance.CallWithModContext(modId, def.OnFixedUpdate, fixedDt);
+                }
+            }
+            catch (Exception ex)
+            {
+                ModErrorTracker.Instance.MarkModErrored(modId, ex.Message, $"scene fixedUpdate '{sceneName}'");
+            }
+        }
+    }
+
     // ========== Nested Types ==========
 
     /// <summary>Tree node with lifecycle propagation, input blocking, and sound tag cleanup.</summary>
@@ -285,6 +320,7 @@ public sealed class SceneManager
         public Closure? OnExit { get; set; }
         public Closure? OnUpdate { get; set; }
         public Closure? OnDraw { get; set; }
+        public Closure? OnFixedUpdate { get; set; }
 
         // Shared state (Lua table reference)
         public DynValue? Shared { get; set; }
@@ -413,6 +449,20 @@ public sealed class SceneManager
             }
         }
 
+        public void FixedUpdate(DynValue fixedDt)
+        {
+            if (!Live || !Active) return;
+            if (OnFixedUpdate != null)
+            {
+                var sh = GetShared() ?? DynValue.Nil;
+                ScriptManager.Instance.CallWithModContext(ModId, OnFixedUpdate, fixedDt, sh);
+            }
+            foreach (var child in _children)
+            {
+                if (child.Active && child.Live) child.FixedUpdate(fixedDt);
+            }
+        }
+
         public bool Draw()
         {
             if (!Live || !Active) return false;
@@ -450,5 +500,6 @@ public class SceneDefinition
     public Closure? OnEnter { get; set; }
     public Closure? OnExit { get; set; }
     public Closure? OnUpdate { get; set; }
+    public Closure? OnFixedUpdate { get; set; }
     public Closure? OnDraw { get; set; }
 }

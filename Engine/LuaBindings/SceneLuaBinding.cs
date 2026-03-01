@@ -28,6 +28,8 @@ public sealed class SceneLuaBinding : LuaBindingBase
                     ? options.Get("onExit").Function : null,
                 OnUpdate = options.Get("onUpdate").Type == DataType.Function
                     ? options.Get("onUpdate").Function : null,
+                OnFixedUpdate = options.Get("onFixedUpdate").Type == DataType.Function
+                    ? options.Get("onFixedUpdate").Function : null,
                 OnDraw = options.Get("onDraw").Type == DataType.Function
                     ? options.Get("onDraw").Function : null,
             };
@@ -174,6 +176,8 @@ public sealed class SceneLuaBinding : LuaBindingBase
                 ? opts.Get("onUpdate").Function : null,
             OnDraw = opts.Get("onDraw").Type == DataType.Function
                 ? opts.Get("onDraw").Function : null,
+            OnFixedUpdate = opts.Get("onFixedUpdate").Type == DataType.Function
+                ? opts.Get("onFixedUpdate").Function : null,
         };
 
         // Shared state (Lua table reference)
