@@ -69,21 +69,26 @@ end
 function Lighting.Calculate(shared)
     initNative()
 
+    local Camera = require("core/camera")
     local W = Config.WORLD_W
     local H = Config.WORLD_H
     local maxLight = Config.MAX_LIGHT
 
-    -- Viewport bounds — margin must cover tile renderer margin + light propagation radius
-    local camTX = floor((shared.camX or 0) / Config.TILE_SIZE)
-    local camTY = floor((shared.camY or 0) / Config.TILE_SIZE)
-    local viewW = (shared.W or 0) > 0 and ceil(shared.W / Config.TILE_SIZE) + 2 or W
-    local viewH = (shared.H or 0) > 0 and ceil(shared.H / Config.TILE_SIZE) + 2 or H
-    local margin = 20 + maxLight  -- tile cache margin (20) + light propagation radius
+    -- Mirror the tile renderer's alignment logic so lighting covers
+    -- every tile the renderer could display, plus maxLight propagation
+    local TS = Config.TILE_SIZE
+    local tileMargin = 20  -- must match TileRendererManager._tileMargin
+    local camTX = floor(Camera.GetX() / TS)
+    local camTY = floor(Camera.GetY() / TS)
+    local alignedTX = floor(camTX / tileMargin) * tileMargin
+    local alignedTY = floor(camTY / tileMargin) * tileMargin
+    local viewW = (shared.W or 0) > 0 and ceil(shared.W / TS) + 2 or W
+    local viewH = (shared.H or 0) > 0 and ceil(shared.H / TS) + 2 or H
 
-    local startX = max(0, camTX - margin)
-    local endX = min(W - 1, camTX + viewW + margin)
-    local startY = max(0, camTY - margin)
-    local endY = min(H - 1, camTY + viewH + margin)
+    local startX = max(0, alignedTX - tileMargin - maxLight)
+    local endX = min(W - 1, alignedTX + viewW + tileMargin + maxLight + 2)
+    local startY = max(0, alignedTY - tileMargin - maxLight)
+    local endY = min(H - 1, alignedTY + viewH + tileMargin + maxLight + 2)
 
     -- Clear previous viewport region
     local prevSX = shared._lightStartX or startX
@@ -110,11 +115,6 @@ function Lighting.Calculate(shared)
     -- 4-directional SIMD sweep relaxation
     -- Need maxLight passes for full propagation (each pass spreads light 1 tile per direction)
     NativeBuffer.SweepMax(_lightH, W, H, startX, endX, startY, endY, 1, maxLight)
-
-    -- Store camera position for next calculation
-    local Camera = require("core/camera")
-    shared.camX = Camera.GetX()
-    shared.camY = Camera.GetY()
 
     Drawing.RefreshTileColors()
 end

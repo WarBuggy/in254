@@ -188,11 +188,18 @@ local GameplayRoot = Node.new({
             Boss.Update(shared, dt)
         end
 
-        -- Full lighting recalc only for day/night transitions (every 5s)
-        -- Tile changes use incremental Lighting.UpdateAt instead
-        shared.lightTimer = (shared.lightTimer or 0) + dt
-        if shared.lightTimer >= 5.0 then
-            shared.lightTimer = 0
+        -- Recalc lighting when camera crosses a margin boundary or day/night changes
+        local TS = Config.TILE_SIZE
+        local camTX = math.floor(Camera.GetX() / TS)
+        local camTY = math.floor(Camera.GetY() / TS)
+        local tileMargin = 20
+        local aTX = math.floor(camTX / tileMargin) * tileMargin
+        local aTY = math.floor(camTY / tileMargin) * tileMargin
+        local nightChanged = (shared.isNight ~= shared._prevIsNight)
+        shared._prevIsNight = shared.isNight
+        if aTX ~= (shared._lightATX or -1) or aTY ~= (shared._lightATY or -1) or nightChanged then
+            shared._lightATX = aTX
+            shared._lightATY = aTY
             Lighting.Calculate(shared)
         end
     end,
