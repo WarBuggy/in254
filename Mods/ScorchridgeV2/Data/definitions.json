@@ -1,0 +1,34 @@
+{
+    "data": {
+        "definition": {
+            "moveLeft": {
+                "type": "action",
+                "payload": { "key": "a", "defaultKey": "a" }
+            },
+            "moveRight": {
+                "type": "action",
+                "payload": { "key": "d", "defaultKey": "d" }
+            },
+            "moveUp": {
+                "type": "action",
+                "payload": { "key": "w", "defaultKey": "w" }
+            },
+            "moveDown": {
+                "type": "action",
+                "payload": { "key": "s", "defaultKey": "s" }
+            },
+            "interact": {
+                "type": "action",
+                "payload": { "key": "e", "defaultKey": "e" }
+            },
+            "advancePhase": {
+                "type": "action",
+                "payload": { "key": "enter", "defaultKey": "enter" }
+            },
+            "controlPanel": {
+                "type": "action",
+                "payload": { "key": "c", "defaultKey": "c" }
+            }
+        }
+    }
+}

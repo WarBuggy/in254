@@ -49,6 +49,9 @@ public class EngineManager : Game
 
         FontManager.Instance.Initialize();
 
+        ConsoleManager.Instance.Initialize(GraphicsDevice);
+        Window.TextInput += (_, e) => InputManager.Instance.AccumulateTextInput(e.Character);
+
         var queue = ScriptManager.Instance.LoadAll(ModManager.Instance.FinalModList);
         ScriptManager.Instance.ExecuteQueue(queue);
 
@@ -71,15 +74,20 @@ public class EngineManager : Game
         // Snapshot input state for the frame — everything reads from InputManager after this
         InputManager.Instance.UpdateState();
 
-        if (InputManager.Instance.IsButtonDown(Buttons.Back) ||
-            InputManager.Instance.IsKeyDown(Keys.Escape))
-        {
-            Exit();
-            return;
-        }
-        DataManager.Instance.SetData("Core", "gowi.list", new LedgerMap(), "Core");
-        CreateActiveActionList();
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+        bool consoleConsumed = ConsoleManager.Instance.Update(deltaTime);
+
+        if (!consoleConsumed)
+        {
+            if (InputManager.Instance.IsButtonDown(Buttons.Back) ||
+                InputManager.Instance.IsKeyDown(Keys.Escape))
+            {
+                Exit();
+                return;
+            }
+            DataManager.Instance.SetData("Core", "gowi.list", new LedgerMap(), "Core");
+            CreateActiveActionList();
+        }
         float totalTime = (float)gameTime.TotalGameTime.TotalSeconds;
 
         SoundManager.Instance.Update();
@@ -115,6 +123,7 @@ public class EngineManager : Game
         ScriptManager.Instance.Fire(LuaGameEvents.OnDraw);
         SceneManager.Instance.FireSceneDraws();
         DrawManager.Instance.RenderQueue(_spriteBatch);
+        ConsoleManager.Instance.Draw(_spriteBatch, GraphicsDevice);
 
         _spriteBatch.End();
 

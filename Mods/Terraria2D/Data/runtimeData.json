@@ -1,0 +1,15 @@
+{
+    "data": {
+        "world": {
+            "tiles": null,
+            "width": null,
+            "height": null
+        },
+        "player": {
+            "state": null
+        },
+        "game": {
+            "state": null
+        }
+    }
+}

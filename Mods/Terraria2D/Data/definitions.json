@@ -1,0 +1,40 @@
+{
+    "data": {
+        "definition": {
+            "moveLeft": {
+                "type": "action",
+                "payload": { "key": "a", "defaultKey": "a" }
+            },
+            "moveRight": {
+                "type": "action",
+                "payload": { "key": "d", "defaultKey": "d" }
+            },
+            "jump": {
+                "type": "action",
+                "payload": { "key": "space", "defaultKey": "space" }
+            },
+            "inventory": {
+                "type": "action",
+                "payload": { "key": "e", "defaultKey": "e" }
+            },
+            "crafting": {
+                "type": "action",
+                "payload": { "key": "c", "defaultKey": "c" }
+            },
+            "pause": {
+                "type": "action",
+                "payload": { "key": "escape", "defaultKey": "escape" }
+            },
+            "hotbar1": { "type": "action", "payload": { "key": "1", "defaultKey": "1" } },
+            "hotbar2": { "type": "action", "payload": { "key": "2", "defaultKey": "2" } },
+            "hotbar3": { "type": "action", "payload": { "key": "3", "defaultKey": "3" } },
+            "hotbar4": { "type": "action", "payload": { "key": "4", "defaultKey": "4" } },
+            "hotbar5": { "type": "action", "payload": { "key": "5", "defaultKey": "5" } },
+            "hotbar6": { "type": "action", "payload": { "key": "6", "defaultKey": "6" } },
+            "hotbar7": { "type": "action", "payload": { "key": "7", "defaultKey": "7" } },
+            "hotbar8": { "type": "action", "payload": { "key": "8", "defaultKey": "8" } },
+            "hotbar9": { "type": "action", "payload": { "key": "9", "defaultKey": "9" } },
+            "hotbar0": { "type": "action", "payload": { "key": "0", "defaultKey": "0" } }
+        }
+    }
+}

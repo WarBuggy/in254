@@ -152,6 +152,23 @@ public sealed class InputManager
         return false;
     }
 
+    // ========== Console Text Input ==========
+
+    private readonly List<char> _textInputBuffer = [];
+
+    public bool ConsoleBlocksInput { get; set; }
+
+    public void AccumulateTextInput(char c) => _textInputBuffer.Add(c);
+
+    public List<char> GetAndClearTextInput()
+    {
+        var copy = new List<char>(_textInputBuffer);
+        _textInputBuffer.Clear();
+        return copy;
+    }
+
+    // ========== Mouse Button Resolution ==========
+
     private static bool TryResolveMouseButton(string name, out MouseButton button)
     {
         button = name.ToLowerInvariant() switch

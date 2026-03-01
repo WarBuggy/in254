@@ -1,0 +1,13 @@
+{
+  "name": "Terraria 2D",
+  "version": "1.0.0",
+  "author": "in254 Team",
+  "description": "A 2D sandbox adventure inspired by Terraria. Mine, build, craft, and fight in a procedurally generated world with day/night cycles, enemies, NPCs, and bosses.",
+  "tags": ["total-conversion", "sandbox", "adventure", "2d"],
+  "gameVersion": "1.0.*",
+  "preview": "preview.png",
+  "screenshots": [],
+  "workshopId": "",
+  "url": "",
+  "dependencies": ["Core"]
+}
