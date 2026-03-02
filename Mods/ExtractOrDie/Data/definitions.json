@@ -1,0 +1,38 @@
+{
+    "data": {
+        "definition": {
+            "moveUp": {
+                "type": "action",
+                "payload": { "key": "w", "defaultKey": "w" }
+            },
+            "moveDown": {
+                "type": "action",
+                "payload": { "key": "s", "defaultKey": "s" }
+            },
+            "moveLeft": {
+                "type": "action",
+                "payload": { "key": "a", "defaultKey": "a" }
+            },
+            "moveRight": {
+                "type": "action",
+                "payload": { "key": "d", "defaultKey": "d" }
+            },
+            "reload": {
+                "type": "action",
+                "payload": { "key": "r", "defaultKey": "r" }
+            },
+            "interact": {
+                "type": "action",
+                "payload": { "key": "f", "defaultKey": "f" }
+            },
+            "inventory": {
+                "type": "action",
+                "payload": { "key": "tab", "defaultKey": "tab" }
+            },
+            "pause": {
+                "type": "action",
+                "payload": { "key": "escape", "defaultKey": "escape" }
+            }
+        }
+    }
+}

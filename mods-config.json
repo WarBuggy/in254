@@ -2,7 +2,7 @@
   "version": 1,
   "modOrder": [
     "Core",
-    "Terraria2D"
+    "ExtractOrDie"
   ],
   "mods": {
     "Core": {
@@ -10,6 +10,9 @@
     },
     "CoolMod": {
       "enabled": false
+    },
+    "ExtractOrDie": {
+      "enabled": true
     },
     "FunMod": {
       "enabled": false
@@ -48,7 +51,7 @@
       "enabled": false
     },
     "Terraria2D": {
-      "enabled": true
+      "enabled": false
     }
   }
 }

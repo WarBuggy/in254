@@ -1,0 +1,23 @@
+{
+    "data": {
+        "animationData": {
+            "scrPixel": {
+                "baseComponent": "base",
+                "components": {
+                    "base": {
+                        "folder": "",
+                        "layer": "foreground",
+                        "defaultState": "idle",
+                        "width": 1,
+                        "height": 1,
+                        "states": {
+                            "idle": {
+                                "frames": { "0": { "file": "pixel.png" } }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

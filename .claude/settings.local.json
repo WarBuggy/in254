@@ -3,7 +3,8 @@
     "allow": [
       "Bash(python3:*)",
       "Bash(cp:*)",
-      "Bash(dotnet restore:*)"
+      "Bash(dotnet restore:*)",
+      "Bash(dotnet build:*)"
     ]
   }
 }

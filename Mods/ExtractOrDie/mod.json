@@ -1,0 +1,13 @@
+{
+  "name": "Extract Or Die",
+  "version": "1.0.0",
+  "author": "in254 Team",
+  "description": "Top-down extraction shooter. Raid procedural dungeons, fight enemies, collect loot, and extract alive — or lose everything.",
+  "tags": ["total-conversion", "shooter", "extraction", "top-down"],
+  "gameVersion": "1.0.*",
+  "preview": "",
+  "screenshots": [],
+  "workshopId": "",
+  "url": "",
+  "dependencies": ["Core"]
+}
