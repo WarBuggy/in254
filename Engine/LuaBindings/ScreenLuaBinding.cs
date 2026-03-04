@@ -12,8 +12,7 @@ namespace in254.Engine.LuaBindings
     {
         public override void Register(Script luaScript)
         {
-            if (luaScript == null)
-                throw new LocalizedErrorCore<ArgumentNullException>(""); // give me the localize key value pair 
+            ArgumentNullException.ThrowIfNull(luaScript);
 
             Table screenTable = new(luaScript);
 

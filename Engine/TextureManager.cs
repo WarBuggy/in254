@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using AxiomPlayground.Modding;
 using in254.Core;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -26,8 +27,9 @@ public sealed class TextureManager
     /// Registers a texture by modId + path. Returns textureId.
     /// If already loaded, returns existing ID.
     /// </summary>
-    public int RegisterTexture(string modId, string modFolderPath, string folder, string file)
+    public int RegisterTexture(string modId, string sourceModId, string folder, string file)
     {
+        var modFolderPath = ModManager.Instance.GetModFolderPath(sourceModId);
         string path = Path.Combine(modFolderPath, SPRITE_FOLDER, folder, file);
         // Ensure mod dictionaries exist
         if (!_textures.TryGetValue(modId, out var modTextures))

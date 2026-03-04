@@ -1,0 +1,27 @@
+{
+    "data": {
+        "definition": {
+            "animation": {
+                "elevator": {
+                    "payload": {
+                        "components": {
+                            "base": {
+                                "states": {
+                                    "idle": {
+                                        "frames": {
+                                            "0": {
+                                                "offsetX": 0
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "targetMod": "Core",
+    "samePathConflict": "overwrite"
+}

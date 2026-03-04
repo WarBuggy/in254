@@ -5,24 +5,24 @@ local FRAME_DURATION = 0.12
 local frameTimer = 0
 
 local function updateAnimationPlayer(deltaTime, totalTime)
-    local activeActionList, exists = GameData:TryGetFrom("Core", "actions.activeList")
+
+    local activeActionList, exists = GameData.TryGet("actions.activeList", "Core")
     if not exists or not activeActionList then return end
-    
+
     local animationName = "player"
-    local baseCompName = "base"
+    local baseCompName, _ = Animation.TryGetBaseComponent(animationName)
 
     -- Determine new state
-    local compBaseNewState = "idle"
-    local flipX = Animation.FlipX(animationName, baseCompName) or false
+    local compBaseNewState, _ = Animation.TryGetCompProperty(animationName, baseCompName, "defaultState")
+    local flipX = false
     if LedgerMap.TryGet(activeActionList, "moveLeft") then
         compBaseNewState = "moving"
         flipX = true
     elseif LedgerMap.TryGet(activeActionList, "moveRight") then
         compBaseNewState = "moving"
-        flipX = false
     end
 
-    local compBasePrevState = Animation.CurrentState(animationName, baseCompName)
+    local compBasePrevState = Animation.TryGetCompProperty(animationName, baseCompName, "currentState")
 
     -- Handle state change
     if compBaseNewState ~= compBasePrevState then
@@ -32,25 +32,23 @@ local function updateAnimationPlayer(deltaTime, totalTime)
     else
         -- Advance frame based on timer
         frameTimer = frameTimer + deltaTime
-        local frameCount = Animation.FrameCount(animationName, baseCompName, compBaseNewState)
-        if frameCount > 0 and frameTimer >= FRAME_DURATION then
-            local currentFrame = Animation.CurrentFrame(animationName, baseCompName, compBaseNewState)
-            local nextFrame = currentFrame % frameCount + 1
-            Animation.SetCurrentFrame(animationName, baseCompName, compBaseNewState, nextFrame)
-            frameTimer = frameTimer - FRAME_DURATION  -- subtract frame duration, keep leftover time
+        if frameTimer >= FRAME_DURATION then
+            frameTimer = frameTimer - FRAME_DURATION
+            AnimationUtils.GoToNextFrame(animationName, baseCompName, compBaseNewState)
         end
     end
 
+    local frameIndex, frameKey, frameExists = Animation.TryGetCurrentFrameInfo(animationName, baseCompName, compBaseNewState)
+
     -- Update flipX
-    Animation.SetFlipX(animationName, baseCompName, flipX)
+    Animation.SetFrameProperty(animationName, baseCompName, compBaseNewState, frameKey, "flipX", flipX)
     
     -- Center and position
-    local currentFrame = Animation.CurrentFrame(animationName, baseCompName, compBaseNewState)
-    AnimationUtils.CenterCurrentFrameOnScreen(animationName, baseCompName, compBaseNewState, currentFrame)
+    AnimationUtils.CenterFrameOnScreen(animationName, baseCompName, compBaseNewState, frameKey)
     AnimationUtils.PositionAnimationComponents(animationName)
 
     -- Update gowi ledger
-    local gowiLedger, exists = GameData:TryGetFrom("Core", "gowi.list")
+    local gowiLedger, exists = GameData.TryGet("gowi.list", "Core")
     LedgerMap.Set(gowiLedger, animationName, "Core")
 end
 

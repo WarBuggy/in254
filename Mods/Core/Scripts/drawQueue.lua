@@ -1,25 +1,24 @@
 -- Collect frames for a single animation
 local function collectFramesForAnimation(modId, animationName, layerIndexMap)
     local frames = {}
-    local components = Animation.ComponentsFrom(modId, animationName)
+    local components = Animation.TryGetComponentList(animationName, modId)
     if not components then return frames end
-
     for compName in LedgerArray.Iterator(components) do
         if type(compName) == "string" and compName ~= "" then
-            local state = Animation.CurrentStateFrom(modId, animationName, compName)
-            local frameIndex = Animation.CurrentFrameFrom(modId, animationName, compName, state)
+            local state, _ = Animation.TryGetCompProperty(animationName, compName, "currentState", modId)
+            local frameIndex, frameKey, _ = Animation.TryGetCurrentFrameInfo(animationName, compName, state, modId)
 
-            local textureId     = Animation.FrameTextureIdFrom(modId, animationName, compName, state, frameIndex)
-            local posX          = Animation.FramePosXFrom(modId, animationName, compName, state, frameIndex) or 0
-            local posY          = Animation.FramePosYFrom(modId, animationName, compName, state, frameIndex) or 0
-            local width         = Animation.FrameWidthFrom(modId, animationName, compName, state, frameIndex) or 0
-            local height        = Animation.FrameHeightFrom(modId, animationName, compName, state, frameIndex) or 0
-            local offsetX       = Animation.FrameOffsetXFrom(modId, animationName, compName, state, frameIndex) or 0
-            local offsetY       = Animation.FrameOffsetYFrom(modId, animationName, compName, state, frameIndex) or 0
-            local flipX         = Animation.FlipXFrom(modId, animationName, compName) or false
-            local flipY         = Animation.FlipYFrom(modId, animationName, compName) or false
+            local textureId, _  = Animation.TryGetFrameProperty(animationName, compName, state, frameKey, "textureId", modId)
+            local posX, _       = Animation.TryGetFrameProperty(animationName, compName, state, frameKey, "posX", modId) or 0
+            local posY, _       = Animation.TryGetFrameProperty(animationName, compName, state, frameKey, "posY", modId) or 0
+            local width, _      = Animation.TryGetFrameProperty(animationName, compName, state, frameKey, "width", modId) or 0
+            local height, _     = Animation.TryGetFrameProperty(animationName, compName, state, frameKey, "height", modId) or 0
+            local offsetX, _    = Animation.TryGetFrameProperty(animationName, compName, state, frameKey, "offsetX", modId) or 0
+            local offsetY, _    = Animation.TryGetFrameProperty(animationName, compName, state, frameKey, "offsetY", modId) or 0
+            local flipX, _      = Animation.TryGetFrameProperty(animationName, compName, state, frameKey, "flipX", modId) or false
+            local flipY, _      = Animation.TryGetFrameProperty(animationName, compName, state, frameKey, "flipY", modId) or false
 
-            local layerName     = Animation.FrameLayerFrom(modId, animationName, compName, state, frameIndex)
+            local layerName, _  = Animation.TryGetFrameProperty(animationName, compName, state, frameKey, "layer", modId) or ""
             local layerInfo = layerName and LedgerMap.TryGet(layerIndexMap, layerName)
             local layerOrder = layerInfo and layerInfo.position
 
@@ -49,13 +48,13 @@ end
 local function collectAllFrames()
     local drawQueue = {}
 
-    local gowiLedger, exists = GameData:TryGetFrom("Core", "gowi.list")
+    local gowiLedger, exists = GameData.TryGet("gowi.list", "Core")
     if not exists or not gowiLedger then
         print(Localize("drawQueue.lua.noGowiLedgerFound"))
         return drawQueue
     end
 
-    local layerIndexMap, layerIndexMapExists = GameData:TryGetFrom("Core", "drawLayers.layerIndexMap")
+    local layerIndexMap, layerIndexMapExists = GameData.TryGet("drawLayers.layerIndexMap", "Core")
     if not layerIndexMapExists then
         print(Localize("drawQueue.lua.drawLayersNotReady"))
         return drawQueue

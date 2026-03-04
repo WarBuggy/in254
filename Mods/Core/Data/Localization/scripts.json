@@ -2,6 +2,19 @@
     "data": {
         "localization": {
             "en-US": {
+                "animation.lua.animationMissingBaseComponent": "Mod '{0}', animation '{1}' is missing required baseComponent",
+                "animation.lua.animationInvalidBaseComponent": "Mod '{0}', animation '{1}', base component '{2}' is not a valid component",
+                "animation.lua.animationMissingComponentList": "Mod '{0}', animation '{1}' is missing required componentList",
+                "animation.lua.animationNoValidComponents": "Mod '{0}', animation '{1}' has no valid component",
+                "animation.lua.frameMissingRequiredProperty": "Mod '{0}', animation '{1}', component '{2}', state '{3}', frame '{4}' is missing property '{5}'",
+                "animation.lua.framePropertyWithInvalidValue": "Mod '{0}', animation '{1}', component '{2}', state '{3}', frame '{4}', property '{5}' has invalid value. Expect {6}, not {7}",
+                "animation.lua.stateMissingProperty": "Mod '{0}', animation '{1}', component '{2}, state '{3}' is missing property '{4}'",
+                "animation.lua.stateNoValidFrames": "Mod '{0}', animation '{1}', component '{2}', state '{3}' has no valid frames",
+                "animation.lua.compMissingProperty": "Mod '{0}', animation '{1}', component '{2}' is missing property '{3}'",
+                "animation.lua.compInvalidDefaultStateType": "Mod '{0}', animation '{1}', component '{2}', property 'defaultState' is not a string",
+                "animation.lua.compNoValidStates": "Mod '{0}', animation '{1}', component '{2}' has no valid state",
+                "animation.lua.compInvalidDefaultState": "Mod '{0}', animation '{1}', component '{2}', default state '{3}' is not a valid state",
+                "animation.lua.animationPassValidation": "Mod '{0}', animation '{1}' pass validation test with {2} component(s), {3} state(s) and {4} frame(s)",
                 "animationUtils.lua.baseComponentMissing": "Base component not found for animation '{0}'",
                 "animationUtils.lua.baseFrameMissing": "Base frame missing for component '{0}' in state '{1}'",
                 "animationUtils.lua.componentsMissing": "No components found for animation '{0}'",

@@ -1,23 +1,25 @@
 {
     "data": {
         "definition": {
-            "goblin": {
-                "type": "Creature",
-                "payload": {
-                    "health": 30,
-                    "maxHealth": 30,
-                    "limbs": {
-                        "hands": {
-                            "left": 1,
-                            "right": 1
+            "creature": {
+                "goblin": {
+                    "payload": {
+                        "health": 30,
+                        "maxHealth": 30,
+                        "limbs": {
+                            "hands": {
+                                "left": 1,
+                                "right": 1
+                            }
                         }
                     }
                 }
             },
-            "mod J layer": {
-                "type": "drawLayer",
-                "payload": {
-                    "index": 0.1
+            "drawLayer": {
+                "mod J layer": {
+                    "payload": {
+                        "index": 0.1
+                    }
                 }
             }
         }

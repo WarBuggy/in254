@@ -56,6 +56,7 @@ public class EngineManager : Game
                 var dynArgs = ScriptManager.Instance.BuildEventArgs(dispatch.Args);
                 ScriptManager.Instance.Fire(dispatch.EventName, dynArgs);
             }
+            manager.CleanupAfterLoadEvents();
         }
 
         BuildActionInputMap();
@@ -71,7 +72,7 @@ public class EngineManager : Game
             Exit();
             return;
         }
-        DataManager.Instance.SetData("Core", "gowi.list", new LedgerMap(), "Core");
+        DataManager.Instance.SetData(ModManager.CORE_MOD_ID, "gowi.list", ModManager.CORE_MOD_ID, new LedgerMap());
         CreateActiveActionList(Keyboard.GetState(), GamePad.GetState(0), Mouse.GetState());
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
         float totalTime = (float)gameTime.TotalGameTime.TotalSeconds;
@@ -153,18 +154,18 @@ public class EngineManager : Game
 
             if (isActive)
             {
-                // Set the ModId in the LedgerMap, actorId is "Core"
-                ledgerMap.Set(action, input.ModId, "Core");
+                // Set the ModId in the LedgerMap, actorId is ModManager.CORE_MOD_ID
+                ledgerMap.Set(action, input.ModId, ModManager.CORE_MOD_ID);
             }
         }
 
         // Save the LedgerMap instead of a Lua table
-        DataManager.Instance.SetData("Core", "actions.activeList", ledgerMap, "Core");
+        DataManager.Instance.SetData(ModManager.CORE_MOD_ID, "actions.activeList", ModManager.CORE_MOD_ID, ledgerMap);
     }
 
     private void BuildActionInputMap()
     {
-        if (!DataManager.Instance.TryGetData("Core", "actions.list", out var obj) || obj == null)
+        if (!DataManager.Instance.TryGetData(ModManager.CORE_MOD_ID, "actions.list", out var obj) || obj == null)
             throw new LocalizedErrorCore<InvalidOperationException>("system.actionManager.actionsListMissing");
 
         if (obj is not LedgerMap ledger)
@@ -180,7 +181,7 @@ public class EngineManager : Game
             string action = ledgerKey;
             string modId = ledgerValue.ToString();
 
-            if (!DefinitionManager.Instance.TryGetPayload(modId, action, "key", out var inputObj))
+            if (!DefinitionManager.Instance.TryGetPayload(modId, "action", action, ["key"], out var inputObj))
                 throw new LocalizedErrorCore<InvalidOperationException>(
                     "system.actionManager.missingKeyForAction", action, modId);
 

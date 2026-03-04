@@ -1,0 +1,627 @@
+{
+    "data": {
+        "definition": {
+            "animation": {
+                "elevator": {
+                    "payload": {
+                        "baseComponent": "base",
+                        "componentList": null,
+                        "components": {
+                            "base": {
+                                "defaultState": "idle",
+                                "currentState": null,
+                                "states": {
+                                    "idle": {
+                                        "currentFrame": null,
+                                        "frameList": null,
+                                        "frames": {
+                                            "0": {
+                                                "index": 0,
+                                                "file": "idle.png",
+                                                "folder": "elevator/",
+                                                "width": 256,
+                                                "height": 32,
+                                                "layer": "outside",
+                                                "spriteOffsetX": 0,
+                                                "spriteOffsetY": 0,
+                                                "offsetY": 0,
+                                                "flipX": false,
+                                                "flipY": false,
+                                                "posX": 0,
+                                                "posY": 0,
+                                                "textureId": null
+                                            }
+                                        }
+                                    },
+                                    "ready": {
+                                        "currentFrame": null,
+                                        "frameList": null,
+                                        "frames": {
+                                            "0": {
+                                                "index": 0,
+                                                "file": "ready.png",
+                                                "folder": "elevator/",
+                                                "width": 256,
+                                                "height": 32,
+                                                "layer": "outside",
+                                                "spriteOffsetX": 0,
+                                                "spriteOffsetY": 0,
+                                                "offsetX": 0,
+                                                "offsetY": 0,
+                                                "flipX": false,
+                                                "flipY": false,
+                                                "posX": 0,
+                                                "posY": 0,
+                                                "textureId": null
+                                            }
+                                        }
+                                    },
+                                    "up": {
+                                        "currentFrame": null,
+                                        "frameList": null,
+                                        "frames": {
+                                            "0": {
+                                                "index": 0,
+                                                "file": "up.png",
+                                                "folder": "elevator/",
+                                                "width": 256,
+                                                "height": 32,
+                                                "layer": "outside",
+                                                "spriteOffsetX": 0,
+                                                "spriteOffsetY": 0,
+                                                "offsetX": 0,
+                                                "offsetY": 0,
+                                                "flipX": false,
+                                                "flipY": false,
+                                                "posX": 0,
+                                                "posY": 0,
+                                                "textureId": null
+                                            }
+                                        }
+                                    },
+                                    "down": {
+                                        "currentFrame": null,
+                                        "frameList": null,
+                                        "frames": {
+                                            "0": {
+                                                "index": 0,
+                                                "file": "down.png",
+                                                "folder": "elevator/",
+                                                "width": 256,
+                                                "height": 32,
+                                                "layer": "outside",
+                                                "spriteOffsetX": 0,
+                                                "spriteOffsetY": 0,
+                                                "offsetX": 0,
+                                                "offsetY": 0,
+                                                "flipX": false,
+                                                "flipY": false,
+                                                "posX": 0,
+                                                "posY": 0,
+                                                "textureId": null
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "railGuard": {
+                                "defaultState": "idle",
+                                "currentState": null,
+                                "states": {
+                                    "idle": {
+                                        "currentFrame": null,
+                                        "frameList": null,
+                                        "frames": {
+                                            "0": {
+                                                "index": 0,
+                                                "file": "guard.png",
+                                                "folder": "elevator/",
+                                                "width": 256,
+                                                "height": 90,
+                                                "layer": "foreground",
+                                                "spriteOffsetX": 0,
+                                                "spriteOffsetY": 0,
+                                                "offsetX": 0,
+                                                "offsetY": -90,
+                                                "flipX": false,
+                                                "flipY": false,
+                                                "posX": 0,
+                                                "posY": 0,
+                                                "textureId": null
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "player": {
+                    "payload": {
+                        "baseComponent": "base",
+                        "componentList": null,
+                        "components": {
+                            "base": {
+                                "defaultState": "idle",
+                                "currentState": null,
+                                "states": {
+                                    "idle": {
+                                        "currentFrame": null,
+                                        "frameList": null,
+                                        "frames": {
+                                            "0": {
+                                                "index": 0,
+                                                "layer": "middleOutside",
+                                                "width": 165,
+                                                "height": 256,
+                                                "folder": "in254/",
+                                                "file": "idle.png",
+                                                "spriteOffsetX": 0,
+                                                "spriteOffsetY": 0,
+                                                "offsetX": 0,
+                                                "offsetY": 0,
+                                                "flipX": false,
+                                                "flipY": false,
+                                                "posX": 0,
+                                                "posY": 0,
+                                                "textureId": null
+                                            }
+                                        }
+                                    },
+                                    "moving": {
+                                        "currentFrame": null,
+                                        "frameList": null,
+                                        "frames": {
+                                            "0": {
+                                                "index": 0,
+                                                "folder": "in254/",
+                                                "layer": "middleOutside",
+                                                "width": 165,
+                                                "height": 256,
+                                                "file": "move_01.png",
+                                                "spriteOffsetX": 0,
+                                                "spriteOffsetY": 0,
+                                                "offsetX": 0,
+                                                "offsetY": 0,
+                                                "flipX": false,
+                                                "flipY": false,
+                                                "posX": 0,
+                                                "posY": 0,
+                                                "textureId": null
+                                            },
+                                            "1": {
+                                                "index": 1,
+                                                "folder": "in254/",
+                                                "layer": "middleOutside",
+                                                "width": 165,
+                                                "height": 256,
+                                                "file": "move_02.png",
+                                                "spriteOffsetX": 0,
+                                                "spriteOffsetY": 0,
+                                                "offsetX": 0,
+                                                "offsetY": 0,
+                                                "flipX": false,
+                                                "flipY": false,
+                                                "posX": 0,
+                                                "posY": 0,
+                                                "textureId": null
+                                            },
+                                            "2": {
+                                                "index": 2,
+                                                "folder": "in254/",
+                                                "layer": "middleOutside",
+                                                "width": 165,
+                                                "height": 256,
+                                                "file": "move_03.png",
+                                                "spriteOffsetX": 0,
+                                                "spriteOffsetY": 0,
+                                                "offsetX": 0,
+                                                "offsetY": 0,
+                                                "flipX": false,
+                                                "flipY": false,
+                                                "posX": 0,
+                                                "posY": 0,
+                                                "textureId": null
+                                            },
+                                            "3": {
+                                                "index": 3,
+                                                "folder": "in254/",
+                                                "layer": "middleOutside",
+                                                "width": 165,
+                                                "height": 256,
+                                                "file": "move_04.png",
+                                                "spriteOffsetX": 0,
+                                                "spriteOffsetY": 0,
+                                                "offsetX": 0,
+                                                "offsetY": 0,
+                                                "flipX": false,
+                                                "flipY": false,
+                                                "posX": 0,
+                                                "posY": 0,
+                                                "textureId": null
+                                            },
+                                            "4": {
+                                                "index": 4,
+                                                "folder": "in254/",
+                                                "layer": "middleOutside",
+                                                "width": 165,
+                                                "height": 256,
+                                                "file": "move_05.png",
+                                                "spriteOffsetX": 0,
+                                                "spriteOffsetY": 0,
+                                                "offsetX": 0,
+                                                "offsetY": 0,
+                                                "flipX": false,
+                                                "flipY": false,
+                                                "posX": 0,
+                                                "posY": 0,
+                                                "textureId": null
+                                            },
+                                            "5": {
+                                                "index": 5,
+                                                "folder": "in254/",
+                                                "layer": "middleOutside",
+                                                "width": 165,
+                                                "height": 256,
+                                                "file": "move_06.png",
+                                                "spriteOffsetX": 0,
+                                                "spriteOffsetY": 0,
+                                                "offsetX": 0,
+                                                "offsetY": 0,
+                                                "flipX": false,
+                                                "flipY": false,
+                                                "posX": 0,
+                                                "posY": 0,
+                                                "textureId": null
+                                            },
+                                            "6": {
+                                                "index": 6,
+                                                "folder": "in254/",
+                                                "layer": "middleOutside",
+                                                "width": 165,
+                                                "height": 256,
+                                                "file": "move_07.png",
+                                                "spriteOffsetX": 0,
+                                                "spriteOffsetY": 0,
+                                                "offsetX": 0,
+                                                "offsetY": 0,
+                                                "flipX": false,
+                                                "flipY": false,
+                                                "posX": 0,
+                                                "posY": 0,
+                                                "textureId": null
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "controlRoom": {
+                    "payload": {
+                        "baseComponent": "base",
+                        "componentList": null,
+                        "components": {
+                            "base": {
+                                "defaultState": "idle",
+                                "currentState": null,
+                                "states": {
+                                    "idle": {
+                                        "currentFrame": null,
+                                        "frameList": null,
+                                        "frames": {
+                                            "0": {
+                                                "index": 0,
+                                                "folder": "bunker/controlRoom/",
+                                                "layer": "wall",
+                                                "width": 800,
+                                                "height": 256,
+                                                "file": "base.png",
+                                                "spriteOffsetX": 0,
+                                                "spriteOffsetY": 0,
+                                                "offsetX": 0,
+                                                "offsetY": 0,
+                                                "flipX": false,
+                                                "flipY": false,
+                                                "posX": 0,
+                                                "posY": 0,
+                                                "textureId": null
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "cell": {
+                    "payload": {
+                        "baseComponent": "base",
+                        "componentList": null,
+                        "components": {
+                            "base": {
+                                "defaultState": "idle",
+                                "currentState": null,
+                                "states": {
+                                    "idle": {
+                                        "currentFrame": null,
+                                        "frameList": null,
+                                        "frames": {
+                                            "0": {
+                                                "index": 0,
+                                                "layer": "wall",
+                                                "width": 800,
+                                                "height": 256,
+                                                "folder": "bunker/cell/",
+                                                "file": "base.png",
+                                                "spriteOffsetX": 0,
+                                                "spriteOffsetY": 0,
+                                                "offsetX": 0,
+                                                "offsetY": 0,
+                                                "flipX": false,
+                                                "flipY": false,
+                                                "posX": 0,
+                                                "posY": 0,
+                                                "textureId": null
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "wallMountedLight": {
+                                "defaultState": "off",
+                                "currentState": null,
+                                "states": {
+                                    "off": {
+                                        "currentFrame": null,
+                                        "frameList": null,
+                                        "frames": {
+                                            "0": {
+                                                "index": 0,
+                                                "layer": "wall",
+                                                "width": 800,
+                                                "height": 256,
+                                                "folder": "bunker/cell/",
+                                                "file": "wallMountedLightOff.png",
+                                                "spriteOffsetX": 0,
+                                                "spriteOffsetY": 0,
+                                                "offsetX": 0,
+                                                "offsetY": 0,
+                                                "flipX": false,
+                                                "flipY": false,
+                                                "posX": 0,
+                                                "posY": 0,
+                                                "textureId": null
+                                            }
+                                        }
+                                    },
+                                    "on": {
+                                        "currentFrame": null,
+                                        "frameList": null,
+                                        "frames": {
+                                            "0": {
+                                                "index": 0,
+                                                "layer": "wall",
+                                                "width": 800,
+                                                "height": 256,
+                                                "folder": "bunker/cell/",
+                                                "file": "wallMountedLightOn.png",
+                                                "spriteOffsetX": 0,
+                                                "spriteOffsetY": 0,
+                                                "offsetX": 0,
+                                                "offsetY": 0,
+                                                "flipX": false,
+                                                "flipY": false,
+                                                "posX": 0,
+                                                "posY": 0,
+                                                "textureId": null
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "lighting": {
+                                "defaultState": "off",
+                                "currentState": null,
+                                "states": {
+                                    "off": {
+                                        "currentFrame": null,
+                                        "frameList": null,
+                                        "frames": {
+                                            "0": {
+                                                "index": 0,
+                                                "layer": "outside",
+                                                "width": 800,
+                                                "height": 256,
+                                                "folder": "bunker/cell/",
+                                                "file": "lightingOff.png",
+                                                "spriteOffsetX": 0,
+                                                "spriteOffsetY": 0,
+                                                "offsetX": 0,
+                                                "offsetY": 0,
+                                                "flipX": false,
+                                                "flipY": false,
+                                                "posX": 0,
+                                                "posY": 0,
+                                                "textureId": null
+                                            }
+                                        }
+                                    },
+                                    "on": {
+                                        "currentFrame": null,
+                                        "frameList": null,
+                                        "frames": {
+                                            "0": {
+                                                "index": 0,
+                                                "layer": "outside",
+                                                "width": 800,
+                                                "height": 256,
+                                                "folder": "bunker/cell/",
+                                                "file": "lightingOn.png",
+                                                "spriteOffsetX": 0,
+                                                "spriteOffsetY": 0,
+                                                "offsetX": 0,
+                                                "offsetY": 0,
+                                                "flipX": false,
+                                                "flipY": false,
+                                                "posX": 0,
+                                                "posY": 0,
+                                                "textureId": null
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "toilet": {
+                                "defaultState": "idle",
+                                "currentState": null,
+                                "states": {
+                                    "idle": {
+                                        "currentFrame": null,
+                                        "frameList": null,
+                                        "frames": {
+                                            "0": {
+                                                "index": 0,
+                                                "layer": "nearWall",
+                                                "width": 50,
+                                                "height": 50,
+                                                "offsetY": 206,
+                                                "folder": "bunker/cell/",
+                                                "file": "toilet.png",
+                                                "spriteOffsetX": 0,
+                                                "spriteOffsetY": 0,
+                                                "offsetX": 0,
+                                                "flipX": false,
+                                                "flipY": false,
+                                                "posX": 0,
+                                                "posY": 0,
+                                                "textureId": null
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "chair": {
+                                "defaultState": "idle",
+                                "currentState": null,
+                                "states": {
+                                    "idle": {
+                                        "currentFrame": null,
+                                        "frameList": null,
+                                        "frames": {
+                                            "0": {
+                                                "index": 0,
+                                                "layer": "bunkerMiddle",
+                                                "offsetX": 405,
+                                                "offsetY": 202,
+                                                "width": 67,
+                                                "height": 54,
+                                                "folder": "bunker/cell/",
+                                                "file": "chair.png",
+                                                "spriteOffsetX": 0,
+                                                "spriteOffsetY": 0,
+                                                "flipX": false,
+                                                "flipY": false,
+                                                "posX": 0,
+                                                "posY": 0,
+                                                "textureId": null
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "bed": {
+                                "defaultState": "idle",
+                                "currentState": null,
+                                "states": {
+                                    "idle": {
+                                        "currentFrame": null,
+                                        "frameList": null,
+                                        "frames": {
+                                            "0": {
+                                                "index": 0,
+                                                "offsetX": 520,
+                                                "offsetY": 181,
+                                                "layer": "nearWall",
+                                                "width": 270,
+                                                "height": 27,
+                                                "folder": "bunker/cell/",
+                                                "file": "bed.png",
+                                                "spriteOffsetX": 0,
+                                                "spriteOffsetY": 0,
+                                                "flipX": false,
+                                                "flipY": false,
+                                                "posX": 0,
+                                                "posY": 0,
+                                                "textureId": null
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "workStation": {
+                                "defaultState": "idle",
+                                "currentState": null,
+                                "states": {
+                                    "idle": {
+                                        "currentFrame": null,
+                                        "frameList": null,
+                                        "frames": {
+                                            "0": {
+                                                "index": 0,
+                                                "width": 216,
+                                                "height": 124,
+                                                "offsetX": 151,
+                                                "offsetY": 132,
+                                                "layer": "bunkerMiddle",
+                                                "folder": "bunker/cell/",
+                                                "file": "workStation.png",
+                                                "spriteOffsetX": 0,
+                                                "spriteOffsetY": 0,
+                                                "flipX": false,
+                                                "flipY": false,
+                                                "posX": 0,
+                                                "posY": 0,
+                                                "textureId": null
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "controlPanel": {
+                                "defaultState": "idle",
+                                "currentState": null,
+                                "states": {
+                                    "idle": {
+                                        "currentFrame": null,
+                                        "frameList": null,
+                                        "frames": {
+                                            "0": {
+                                                "index": 0,
+                                                "width": 64,
+                                                "height": 64,
+                                                "offsetX": 612,
+                                                "offsetY": 72,
+                                                "layer": "outside",
+                                                "folder": "bunker/cell/",
+                                                "file": "controlPanel.png",
+                                                "spriteOffsetX": 0,
+                                                "spriteOffsetY": 0,
+                                                "flipX": false,
+                                                "flipY": false,
+                                                "posX": 0,
+                                                "posY": 0,
+                                                "textureId": null
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

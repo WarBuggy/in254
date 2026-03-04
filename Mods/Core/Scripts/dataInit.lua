@@ -1,6 +1,6 @@
 local function onDataInit()
-    GameData:SetTo("Core", "actions.list", LedgerMap.Create());
-    GameData:SetTo("Core", "drawLayers.layerIndexMap", LedgerMap.Create());
+    GameData.Set("actions.list", LedgerMap.Create(), "Core");
+    GameData.Set("drawLayers.layerIndexMap", LedgerMap.Create(), "Core");
 end
 
 

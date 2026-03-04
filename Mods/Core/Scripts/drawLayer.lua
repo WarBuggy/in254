@@ -1,18 +1,20 @@
-local function onDrawLayerCreated(modId, defName, defType)
-    if defType ~= "drawLayer" then
+local function onDrawLayerCreated(modId, defType, defName, _) -- _ because defPaths is not used here
+    local targetDefType = "drawLayer"
+    
+    if defType ~= targetDefType then
         return
     end
 
     -- Get declared index from Definition
-    local index, exists = Definition:TryGetPayloadFrom(modId, defName, "index")
+    local index, exists = Definition.TryGetPayload(targetDefType, defName, {"index"}, modId)
     if not exists or index == nil then
         error(Localize("drawLayer.lua.missingIndex", defName))
     end
 
     -- Get current layerIndexMap
-    local layerIndexMap, mapExists = GameData:TryGetFrom("Core", "drawLayers.layerIndexMap")
+    local layerIndexMap, mapExists = GameData.TryGet("drawLayers.layerIndexMap", "Core")
     if not mapExists or not layerIndexMap then
-        error(LocalizeWithEnding("", "drawLayer.lua.notInitialized"))
+        error(Localize("drawLayer.lua.notInitialized"))
     end
 
     -- Remove old entry if redefining
@@ -24,7 +26,7 @@ local function onDrawLayerCreated(modId, defName, defType)
         if type(pair) == "table" then
             local name = pair.Key
             local info = pair.Value
-            local declared, _ = Definition:TryGetPayloadFrom(info.modId, name, "index")
+            local declared, _ = Definition.TryGetPayload(targetDefType, name, {"index"}, info.modId)
             table.insert(tempList, { name = name, index = declared or 0, modId = info.modId })
         end
     end
@@ -42,7 +44,7 @@ local function onDrawLayerCreated(modId, defName, defType)
     end
 
     -- Save back to GameData
-    GameData:SetTo("Core", "drawLayers.layerIndexMap", newMap)
+    GameData.Set("drawLayers.layerIndexMap", newMap, "Core")
 end
 
 Events.OnDefinitionCreated.Add(onDrawLayerCreated)
@@ -52,7 +54,7 @@ Events.OnDefinitionCreated.Add(onDrawLayerCreated)
 DrawLayers = DrawLayers or {}
 
 function DrawLayers.PrintAllWithIndex()
-    local layerIndexMap, exists = GameData:TryGetFrom("Core", "drawLayers.layerIndexMap")
+    local layerIndexMap, exists = GameData.TryGetFrom("drawLayers.layerIndexMap", "Core")
     if not exists or not layerIndexMap then
         print("[DrawLayers] layerIndexMap not ready")
         return
@@ -65,7 +67,7 @@ function DrawLayers.PrintAllWithIndex()
             local layerName = pair.Key
             local info      = pair.Value
             local position  = info.position
-            local declaredIndex, idxExists = Definition:TryGetPayloadFrom(info.modId, layerName, "index")
+            local declaredIndex, idxExists = Definition.TryGetPayload("drawLayer", layerName, {"index"}, info.modId)
             declaredIndex = idxExists and declaredIndex or "nil"
             table.insert(entries, {
                 layerName = layerName,
