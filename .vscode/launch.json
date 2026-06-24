@@ -6,7 +6,7 @@
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "Build Dev",
-      "program": "${workspaceFolder}/bin/Dev/net10.0/in254.dll",
+      "program": "${workspaceFolder}/bin/Dev/Launcher/Launcher.dll",
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "args": [
@@ -18,7 +18,7 @@
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "Build Release",
-      "program": "${workspaceFolder}/bin/Release/net10.0/in254.dll",
+      "program": "${workspaceFolder}/bin/Release/Launcher/Launcher.dll",
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "args": [

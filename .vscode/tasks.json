@@ -2,19 +2,6 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Build AxiomPlayground Dev",
-            "type": "shell",
-            "command": "dotnet build \"${workspaceFolder}/../AxiomPlayground/AxiomPlayground.sln\" -c Dev",
-            "group": "build",
-            "problemMatcher": "$msCompile"
-        },
-        {
-            "label": "Build AxiomPlayground Release",
-            "type": "shell",
-            "command": "dotnet build \"${workspaceFolder}/../AxiomPlayground/AxiomPlayground.sln\" -c Release",
-            "problemMatcher": "$msCompile"
-        },
-        {
             "label": "Build Dev",
             "type": "shell",
             "command": "dotnet build in254.csproj -c Dev",
@@ -22,34 +9,13 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "dependsOn": [
-                "Build AxiomPlayground Dev"
-            ],
             "problemMatcher": "$msCompile"
         },
         {
             "label": "Build Release",
             "type": "shell",
             "command": "dotnet build in254.csproj -c Release",
-            "group": "build",
-            "dependsOn": [
-                "Build AxiomPlayground Release"
-            ],
             "problemMatcher": "$msCompile"
-        },
-        {
-            "label": "Run Dev",
-            "type": "shell",
-            "command": "dotnet run in254.csproj -c Dev",
-            "group": "none",
-            "dependsOn": "Build Dev"
-        },
-        {
-            "label": "Run Release",
-            "type": "shell",
-            "command": "dotnet run in254.csproj -c Release",
-            "group": "none",
-            "dependsOn": "Build Release"
         }
     ]
 }

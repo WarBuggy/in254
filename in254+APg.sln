@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Data", "..\AxiomPlayground\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameFlag", "..\AxiomPlayground\src\GameFlag\GameFlag.csproj", "{381F06A0-01A3-4061-BFF8-75BC093CE164}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Launcher", "..\AxiomPlayground\src\Launcher\Launcher.csproj", "{F38F2FB2-ABEC-4DA5-82C4-4F7B7007AFEC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Dev|Any CPU = Dev|Any CPU
@@ -136,6 +138,24 @@ Global
 		{381F06A0-01A3-4061-BFF8-75BC093CE164}.Debug|x64.Build.0 = Debug|Any CPU
 		{381F06A0-01A3-4061-BFF8-75BC093CE164}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{381F06A0-01A3-4061-BFF8-75BC093CE164}.Debug|x86.Build.0 = Debug|Any CPU
+		{F38F2FB2-ABEC-4DA5-82C4-4F7B7007AFEC}.Dev|Any CPU.ActiveCfg = Debug|Any CPU
+		{F38F2FB2-ABEC-4DA5-82C4-4F7B7007AFEC}.Dev|Any CPU.Build.0 = Debug|Any CPU
+		{F38F2FB2-ABEC-4DA5-82C4-4F7B7007AFEC}.Dev|x64.ActiveCfg = Debug|Any CPU
+		{F38F2FB2-ABEC-4DA5-82C4-4F7B7007AFEC}.Dev|x64.Build.0 = Debug|Any CPU
+		{F38F2FB2-ABEC-4DA5-82C4-4F7B7007AFEC}.Dev|x86.ActiveCfg = Debug|Any CPU
+		{F38F2FB2-ABEC-4DA5-82C4-4F7B7007AFEC}.Dev|x86.Build.0 = Debug|Any CPU
+		{F38F2FB2-ABEC-4DA5-82C4-4F7B7007AFEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F38F2FB2-ABEC-4DA5-82C4-4F7B7007AFEC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F38F2FB2-ABEC-4DA5-82C4-4F7B7007AFEC}.Release|x64.ActiveCfg = Release|Any CPU
+		{F38F2FB2-ABEC-4DA5-82C4-4F7B7007AFEC}.Release|x64.Build.0 = Release|Any CPU
+		{F38F2FB2-ABEC-4DA5-82C4-4F7B7007AFEC}.Release|x86.ActiveCfg = Release|Any CPU
+		{F38F2FB2-ABEC-4DA5-82C4-4F7B7007AFEC}.Release|x86.Build.0 = Release|Any CPU
+		{F38F2FB2-ABEC-4DA5-82C4-4F7B7007AFEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F38F2FB2-ABEC-4DA5-82C4-4F7B7007AFEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F38F2FB2-ABEC-4DA5-82C4-4F7B7007AFEC}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F38F2FB2-ABEC-4DA5-82C4-4F7B7007AFEC}.Debug|x64.Build.0 = Debug|Any CPU
+		{F38F2FB2-ABEC-4DA5-82C4-4F7B7007AFEC}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F38F2FB2-ABEC-4DA5-82C4-4F7B7007AFEC}.Debug|x86.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
