@@ -2,34 +2,73 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Clean Launcher Dev",
-            "type": "shell",
-            "command": "Remove-Item -Recurse -Force \"${workspaceFolder}/bin/Dev\" -ErrorAction SilentlyContinue; Remove-Item -Recurse -Force \"${workspaceFolder}/../AxiomPlayground/lib/Dev\" -ErrorAction SilentlyContinue"
+            "label": "Clean Launcher Dev Bin",
+            "type": "process",
+            "command": "powershell",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-Command",
+                "if (Test-Path \"${workspaceFolder}/bin/Dev/Launcher\") { Remove-Item -Recurse -Force \"${workspaceFolder}/bin/Dev/Launcher\" }"
+            ]
         },
         {
-            "label": "Clean Launcher Release",
-            "type": "shell",
-            "command": "Remove-Item -Recurse -Force \"${workspaceFolder}/bin/Release\" -ErrorAction SilentlyContinue; Remove-Item -Recurse -Force \"${workspaceFolder}/../AxiomPlayground/lib\" -ErrorAction SilentlyContinue"
+            "label": "Clean Launcher Release Bin",
+            "type": "process",
+            "command": "powershell",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-Command",
+                "if (Test-Path \"${workspaceFolder}/bin/Release/Launcher\") { Remove-Item -Recurse -Force \"${workspaceFolder}/bin/Release/Launcher\" }"
+            ]
+        },
+        {
+            "label": "Clean Launcher Dev Lib",
+            "type": "process",
+            "command": "powershell",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-Command",
+                "if (Test-Path \"${workspaceFolder}/../AxiomPlayground/lib/Dev\") { Remove-Item -Recurse -Force \"${workspaceFolder}/../AxiomPlayground/lib/Dev\" }"
+            ]
+        },
+        {
+            "label": "Clean Launcher Release Lib",
+            "type": "process",
+            "command": "powershell",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-Command",
+                "if (Test-Path \"${workspaceFolder}/../AxiomPlayground/lib/Release\") { Remove-Item -Recurse -Force \"${workspaceFolder}/../AxiomPlayground/lib/Release\" }"
+            ]
         },
         {
             "label": "Clean Dev",
-            "type": "shell",
-            "command": "dotnet clean in254+APg.sln -c Dev",
-            "problemMatcher": "$msCompile"
+            "dependsOn": [
+                "Clean Launcher Dev Bin",
+                "Clean Launcher Dev Lib"
+            ]
         },
         {
             "label": "Clean Release",
-            "type": "shell",
-            "command": "dotnet clean in254+APg.sln -c Release",
-            "problemMatcher": "$msCompile"
+            "dependsOn": [
+                "Clean Launcher Release Bin",
+                "Clean Launcher Release Lib"
+            ]
         },
         {
             "label": "Build Dev",
             "type": "shell",
             "command": "dotnet build in254+APg.sln -c Dev",
             "dependsOn": [
-                "Clean Dev",
-                "Clean Launcher Dev",
+                "Clean Dev"
             ],
             "problemMatcher": "$msCompile"
         },
@@ -38,8 +77,7 @@
             "type": "shell",
             "command": "dotnet build in254+APg.sln -c Release",
             "dependsOn": [
-                "Clean Release",
-                "Clean Launcher Release",
+                "Clean Release"
             ],
             "problemMatcher": "$msCompile"
         }
