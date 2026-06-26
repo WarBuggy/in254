@@ -2,19 +2,45 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "Clean Launcher Dev",
+            "type": "shell",
+            "command": "Remove-Item -Recurse -Force \"${workspaceFolder}/bin/Dev\" -ErrorAction SilentlyContinue; Remove-Item -Recurse -Force \"${workspaceFolder}/../AxiomPlayground/lib/Dev\" -ErrorAction SilentlyContinue"
+        },
+        {
+            "label": "Clean Launcher Release",
+            "type": "shell",
+            "command": "Remove-Item -Recurse -Force \"${workspaceFolder}/bin/Release\" -ErrorAction SilentlyContinue; Remove-Item -Recurse -Force \"${workspaceFolder}/../AxiomPlayground/lib\" -ErrorAction SilentlyContinue"
+        },
+        {
+            "label": "Clean Dev",
+            "type": "shell",
+            "command": "dotnet clean in254+APg.sln -c Dev",
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "Clean Release",
+            "type": "shell",
+            "command": "dotnet clean in254+APg.sln -c Release",
+            "problemMatcher": "$msCompile"
+        },
+        {
             "label": "Build Dev",
             "type": "shell",
-            "command": "dotnet build in254.csproj -c Dev",
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
+            "command": "dotnet build in254+APg.sln -c Dev",
+            "dependsOn": [
+                "Clean Dev",
+                "Clean Launcher Dev",
+            ],
             "problemMatcher": "$msCompile"
         },
         {
             "label": "Build Release",
             "type": "shell",
-            "command": "dotnet build in254.csproj -c Release",
+            "command": "dotnet build in254+APg.sln -c Release",
+            "dependsOn": [
+                "Clean Release",
+                "Clean Launcher Release",
+            ],
             "problemMatcher": "$msCompile"
         }
     ]
