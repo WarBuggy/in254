@@ -5,8 +5,8 @@
       "name": ".NET Core Launch (Console) Dev",
       "type": "coreclr",
       "request": "launch",
-      "preLaunchTask": "Build Dev",
-      "program": "${workspaceFolder}/bin/Dev/Launcher/Launcher.dll",
+      "preLaunchTask": "Build Launcher Dev",
+      "program": "${workspaceFolder}/bin/Dev/Launcher.dll",
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "args": [
@@ -18,7 +18,7 @@
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "Build Release",
-      "program": "${workspaceFolder}/bin/Release/Launcher/Launcher.dll",
+      "program": "${workspaceFolder}/bin/Release/Launcher.dll",
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "args": [

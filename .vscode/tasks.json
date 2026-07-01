@@ -2,28 +2,16 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Clean Launcher Dev Bin",
-            "type": "process",
-            "command": "powershell",
-            "args": [
-                "-NoProfile",
-                "-ExecutionPolicy",
-                "Bypass",
-                "-Command",
-                "if (Test-Path \"${workspaceFolder}/bin/Dev/Launcher\") { Remove-Item -Recurse -Force \"${workspaceFolder}/bin/Dev/Launcher\" }"
-            ]
+            "label": "Clean Launcher Dev",
+            "type": "shell",
+            "command": "dotnet clean ../AxiomPlayground/src/Launcher -c Dev",
+            "problemMatcher": "$msCompile"
         },
         {
-            "label": "Clean Launcher Release Bin",
-            "type": "process",
-            "command": "powershell",
-            "args": [
-                "-NoProfile",
-                "-ExecutionPolicy",
-                "Bypass",
-                "-Command",
-                "if (Test-Path \"${workspaceFolder}/bin/Release/Launcher\") { Remove-Item -Recurse -Force \"${workspaceFolder}/bin/Release/Launcher\" }"
-            ]
+            "label": "Clean Launcher Release",
+            "type": "shell",
+            "command": "dotnet clean ../AxiomPlayground/src/Launcher -c Release",
+            "problemMatcher": "$msCompile"
         },
         {
             "label": "Clean Launcher Dev Lib",
@@ -52,14 +40,14 @@
         {
             "label": "Clean Dev",
             "dependsOn": [
-                "Clean Launcher Dev Bin",
+                "Clean Launcher Dev",
                 "Clean Launcher Dev Lib"
             ]
         },
         {
             "label": "Clean Release",
             "dependsOn": [
-                "Clean Launcher Release Bin",
+                "Clean Launcher Release",
                 "Clean Launcher Release Lib"
             ]
         },
@@ -80,6 +68,15 @@
                 "Clean Release"
             ],
             "problemMatcher": "$msCompile"
-        }
+        },
+        {
+            "label": "Build Launcher Dev",
+            "type": "shell",
+            "command": "dotnet build ../AxiomPlayground/src/Launcher -c Dev",
+            "dependsOn": [
+                "Clean Launcher Dev"
+            ],
+            "problemMatcher": "$msCompile"
+        },
     ]
 }

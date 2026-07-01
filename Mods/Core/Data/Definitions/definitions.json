@@ -53,10 +53,8 @@
                             "levelCeilingPaddingTop": 64,
                             "levelFloorPaddingBottom": 0,
                             "floorThickness": 64,
-                            "bunkerMarginLeft": 32,
-                            "bunkerMarginRight": 32,
-                            "bunkerWidth": 800,
-                            "bunkerHeight": 256,
+                            "cellMarginLeft": 32,
+                            "cellMarginRight": 32,
                             "cellStartingNum": 1,
                             "cellPaddingTargetLength": 3,
                             "cellPaddingCharacter": "0",
@@ -119,6 +117,12 @@
                                 "index": 5
                             }
                         }
+                    }
+                },
+                "cell": {
+                    "payload": {
+                        "width": 800,
+                        "height": 256
                     }
                 }
             },
