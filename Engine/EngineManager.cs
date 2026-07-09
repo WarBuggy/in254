@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using in254.Core;
 using System;
 using MoonSharp.Interpreter;
+using AxiomPlayground.Shared;
 
 namespace in254.Engine;
 
@@ -42,9 +43,9 @@ public class EngineManager : Game
 
         var managers = BaseManager.DiscoverManagers();
 
-        DataManager.Instance.LoadAll(ModManager.Instance.FinalModList, managers);
+        DataManager.Instance.LoadAll(ModManager.Instance.LoadedMods, managers);
 
-        var queue = ScriptManager.Instance.LoadAll(ModManager.Instance.FinalModList);
+        var queue = ScriptManager.Instance.LoadAll(ModManager.Instance.LoadedMods);
         ScriptManager.Instance.ExecuteQueue(queue);
 
         ScriptManager.Instance.Fire(LuaGameEvents.OnDataInit, DynValue.Nil);
@@ -72,7 +73,7 @@ public class EngineManager : Game
             Exit();
             return;
         }
-        DataManager.Instance.SetData(ModManager.CORE_MOD_ID, "gowi.list", ModManager.CORE_MOD_ID, new LedgerMap());
+        DataManager.Instance.SetData(ModSystemPolicy.CORE_MOD_ID, "gowi.list", ModSystemPolicy.CORE_MOD_ID, new LedgerMap());
         CreateActiveActionList(Keyboard.GetState(), GamePad.GetState(0), Mouse.GetState());
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
         float totalTime = (float)gameTime.TotalGameTime.TotalSeconds;
@@ -155,17 +156,17 @@ public class EngineManager : Game
             if (isActive)
             {
                 // Set the ModId in the LedgerMap, actorId is ModManager.CORE_MOD_ID
-                ledgerMap.Set(action, input.ModId, ModManager.CORE_MOD_ID);
+                ledgerMap.Set(action, input.ModId, ModSystemPolicy.CORE_MOD_ID);
             }
         }
 
         // Save the LedgerMap instead of a Lua table
-        DataManager.Instance.SetData(ModManager.CORE_MOD_ID, "actions.activeList", ModManager.CORE_MOD_ID, ledgerMap);
+        DataManager.Instance.SetData(ModSystemPolicy.CORE_MOD_ID, "actions.activeList", ModSystemPolicy.CORE_MOD_ID, ledgerMap);
     }
 
     private void BuildActionInputMap()
     {
-        if (!DataManager.Instance.TryGetData(ModManager.CORE_MOD_ID, "actions.list", out var obj) || obj == null)
+        if (!DataManager.Instance.TryGetData(ModSystemPolicy.CORE_MOD_ID, "actions.list", out var obj) || obj == null)
             throw new LocalizedErrorCore<InvalidOperationException>("system.actionManager.actionsListMissing");
 
         if (obj is not LedgerMap ledger)

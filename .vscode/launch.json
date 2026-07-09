@@ -5,13 +5,13 @@
       "name": ".NET Core Launch (Console) Dev",
       "type": "coreclr",
       "request": "launch",
-      "preLaunchTask": "Build Launcher Dev",
-      "program": "${workspaceFolder}/bin/Dev/Launcher.dll",
+      "preLaunchTask": "Build Dev",
+      "program": "${workspaceFolder}/bin/Dev/in254.dll",
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "args": [
-        "-debug",
-      ],
+        "-debug"
+      ]
     },
     {
       "name": ".NET Core Launch (Console) Release",
@@ -22,8 +22,20 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "args": [
-        "-debug",
-      ],
-    }
+        "-debug"
+      ]
+    },
+    {
+      "name": ".NET Core Launch (Console) Launcher Dev",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "Build Dev",
+      "program": "${workspaceFolder}/bin/Dev/Launcher.dll",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "args": [
+        "-debug"
+      ]
+    },
   ]
 }

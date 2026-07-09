@@ -9,19 +9,12 @@ class Program
     {
         GameFlagManager.GetFlagsFromArgs(args);
 
-        ModManager.Instance.DiscoverMods();
-        var allMods = ModManager.Instance.GetAllModsSortedByDisplayName();
-        Console.WriteLine("Discovered Mods:");
-        foreach (var mod in allMods)
-        {
-            Console.WriteLine($"  {mod.DisplayName} (modId={mod.ModId}, path={ModManager.Instance.GetModFolderPath(mod)})");
-        }
+        ModManager.Instance.LoadModsFromSelection();
 
-        ModManager.Instance.PopulateFinalLoadableMods(allMods);
         Console.WriteLine("Final Mods:");
-        foreach (var mod in ModManager.Instance.FinalModList)
+        foreach (var mod in ModManager.Instance.LoadedMods)
         {
-            Console.WriteLine($"  {mod.DisplayName} (modId={mod.ModId}, path={ModManager.Instance.GetModFolderPath(mod)})");
+            Console.WriteLine($"  {mod.Info.Name} (modId={mod.Info.Id}, path={ModManager.Instance.GetModFolderPath(mod)})");
         }
 
         EngineManager.Instance.Run();
